@@ -135,30 +135,6 @@
     "permissions": [
         {
             "collection": "cars",
-            "action": "delete",
-            "permissions": {
-                "_and": [
-                    {
-                        "dealership_id": {
-                            "_eq": "$CURRENT_USER.dealership_id"
-                        }
-                    },
-                    {
-                        "status": {
-                            "_eq": "registered"
-                        }
-                    }
-                ]
-            },
-            "validation": null,
-            "presets": null,
-            "fields": [
-                "*"
-            ],
-            "policy": "b77df49f-8ee0-4eb7-b63c-fe39d0db596b"
-        },
-        {
-            "collection": "cars",
             "action": "share",
             "permissions": null,
             "validation": null,
