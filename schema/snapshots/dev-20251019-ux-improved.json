@@ -1,0 +1,6323 @@
+version: 1
+directus: 11.12.0
+vendor: postgres
+collections:
+  - collection: cars
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: status
+      archive_value: archived
+      collapse: open
+      collection: cars
+      color: null
+      display_template: '{{brand}} {{model}} ({{vin}})'
+      group: null
+      hidden: false
+      icon: directions_car
+      item_duplication_fields: null
+      note: Biler (ny og brukt)
+      preview_url: null
+      singleton: false
+      sort: 1
+      sort_field: sort
+      translations:
+        - language: no-NO
+          plural: Biler
+          singular: Bil
+          translation: Biler
+      unarchive_value: draft
+      versioning: false
+    schema:
+      name: cars
+  - collection: dealership
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: status
+      archive_value: archived
+      collapse: open
+      collection: dealership
+      color: null
+      display_template: '{{dealership_number}} - {{dealership_name}}'
+      group: null
+      hidden: false
+      icon: store
+      item_duplication_fields: null
+      note: Bilforhandlere i Gumpen-nettverket
+      preview_url: null
+      singleton: false
+      sort: 2
+      sort_field: sort
+      translations:
+        - language: no-NO
+          plural: Forhandlere
+          singular: Forhandler
+          translation: Forhandlere
+      unarchive_value: draft
+      versioning: false
+    schema:
+      name: dealership
+  - collection: mcp
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: mcp
+      color: null
+      display_template: null
+      group: null
+      hidden: true
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 8
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: mcp
+  - collection: notifications
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: notifications
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 3
+      sort_field: null
+      translations:
+        - language: no-NO
+          plural: Varsler
+          singular: Varsel
+          translation: Varsler
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: notifications
+  - collection: resource_bookings
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: resource_bookings
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 4
+      sort_field: null
+      translations:
+        - language: no-NO
+          plural: Ressursbookinger
+          singular: Resursbooking
+          translation: Ressursbookinger
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: resource_bookings
+  - collection: resource_capacities
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: resource_capacities
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 5
+      sort_field: null
+      translations:
+        - language: no-NO
+          plural: Kapasiteter
+          singular: Kapasitet
+          translation: Ressurskapasitet
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: resource_capacities
+  - collection: resource_sharing
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: resource_sharing
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 6
+      sort_field: null
+      translations:
+        - language: no-NO
+          plural: Ressursdelinger
+          singular: Ressursdeling
+          translation: Ressursdeling
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: resource_sharing
+  - collection: resource_types
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: resource_types
+      color: null
+      display_template: '{{code}} - {{name}}'
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 7
+      sort_field: null
+      translations:
+        - language: no-NO
+          plural: Ressurstyper
+          singular: Ressurstype
+          translation: Ressurstyper
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: resource_types
+fields:
+  - collection: cars
+    field: dealership_id
+    type: uuid
+    meta:
+      collection: cars
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      field: dealership_id
+      group: tab_info
+      hidden: false
+      interface: select-dropdown-m2o
+      note: Auto-fylles fra din forhandler
+      options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      readonly: true
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations:
+        - language: no-NO
+          translation: Forhandler
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: dealership_id
+      table: cars
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: cars
+    field: prep_center_id
+    type: uuid
+    meta:
+      collection: cars
+      conditions:
+        - hidden: false
+          name: Skjul for nybilselger
+          rule:
+            _and:
+              - $CURRENT_USER.role.name:
+                  _neq: Nybilselger
+      display: related-values
+      display_options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      field: prep_center_id
+      group: tab_prep
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations:
+        - language: no-NO
+          translation: Klargjøringssenter
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: prep_center_id
+      table: cars
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: cars
+    field: vin
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: vin
+      group: tab_info
+      hidden: false
+      interface: input
+      note: 17 tegn, kun bokstaver og tall
+      options:
+        iconLeft: tag
+        placeholder: 17-tegn VIN
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: VIN (Chassisnummer)
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: vin
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 17
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: license_plate
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: license_plate
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        iconLeft: local_shipping
+        placeholder: AB12345
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Reg.nr
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: license_plate
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 20
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: brand
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: brand
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: 'F.eks: Toyota'
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Merke
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: brand
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: model
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: model
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: 'F.eks: Corolla'
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Modell
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: model
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: seller_id
+    type: uuid
+    meta:
+      collection: cars
+      conditions: null
+      display: related-values
+      display_options: null
+      field: seller_id
+      group: tab_info
+      hidden: false
+      interface: select-dropdown-m2o
+      note: Auto-fylles med deg
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: true
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations:
+        - language: no-NO
+          translation: Selger
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: seller_id
+      table: cars
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: cars
+    field: assigned_mechanic_id
+    type: uuid
+    meta:
+      collection: cars
+      conditions:
+        - hidden: false
+          name: Kun for booking og admin
+          rule:
+            _or:
+              - $CURRENT_USER.role.name:
+                  _eq: Booking
+              - $CURRENT_USER.role.name:
+                  _eq: Admin
+      display: related-values
+      display_options: null
+      field: assigned_mechanic_id
+      group: tab_prep
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations:
+        - language: no-NO
+          translation: Tildelt mekaniker
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: assigned_mechanic_id
+      table: cars
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: cars
+    field: assigned_detailer_id
+    type: uuid
+    meta:
+      collection: cars
+      conditions:
+        - hidden: false
+          name: Kun for booking og admin
+          rule:
+            _or:
+              - $CURRENT_USER.role.name:
+                  _eq: Booking
+              - $CURRENT_USER.role.name:
+                  _eq: Admin
+      display: related-values
+      display_options: null
+      field: assigned_detailer_id
+      group: tab_prep
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations:
+        - language: no-NO
+          translation: Tildelt bilpleier
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: assigned_detailer_id
+      table: cars
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: cars
+    field: car_type
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: labels
+      display_options: null
+      field: car_type
+      group: tab_info
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Nybil
+            value: nybil
+          - text: Bruktbil
+            value: bruktbil
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Biltype
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: car_type
+      table: cars
+      data_type: character varying
+      default_value: nybil
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: status
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: labels
+      display_options: null
+      field: status
+      group: tab_workflow
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        allowOther: false
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Status
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: cars
+      data_type: character varying
+      default_value: draft
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: order_number
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: order_number
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        iconLeft: receipt
+        placeholder: Ordrenummer
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Ordrenummer
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: order_number
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: true
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: id
+    type: uuid
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: cars
+      data_type: uuid
+      default_value: gen_random_uuid()
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: sort
+    type: integer
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: cars
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: user_created
+    type: uuid
+    meta:
+      collection: cars
+      conditions: null
+      display: user
+      display_options: null
+      field: user_created
+      group: null
+      hidden: true
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: true
+      required: false
+      sort: null
+      special:
+        - user-created
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: user_created
+      table: cars
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: cars
+    field: date_created
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_created
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: null
+      special:
+        - date-created
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: cars
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: user_updated
+    type: uuid
+    meta:
+      collection: cars
+      conditions: null
+      display: user
+      display_options: null
+      field: user_updated
+      group: null
+      hidden: true
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: true
+      required: false
+      sort: null
+      special:
+        - user-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: user_updated
+      table: cars
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: cars
+    field: date_updated
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: null
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: cars
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: model_year
+    type: integer
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: model_year
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        max: 2030
+        min: 1990
+        placeholder: '2024'
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Årsmodell
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: model_year
+      table: cars
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: color
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: color
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: 'F.eks: Hvit'
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Farge
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: color
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: customer_name
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: customer_name
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        iconLeft: person
+        placeholder: Kundens fulle navn
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Kundenavn
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: customer_name
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: customer_phone
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: customer_phone
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        iconLeft: phone
+        placeholder: +47 xxx xx xxx
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Telefon
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: customer_phone
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: customer_email
+    type: string
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: customer_email
+      group: tab_info
+      hidden: false
+      interface: input
+      note: null
+      options:
+        iconLeft: email
+        placeholder: kunde@example.com
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: E-post
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: customer_email
+      table: cars
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: created_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: created_at
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: created_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: updated_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: updated_at
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: updated_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: registered_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: registered_at
+      group: tab_workflow
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Registrert
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: registered_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: parts_ordered_seller_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: parts_ordered_seller_at
+      group: tab_parts
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Deler bestilt (selger)
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: parts_ordered_seller_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: parts_arrived_seller_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: parts_arrived_seller_at
+      group: tab_parts
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Deler ankommet (selger)
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: parts_arrived_seller_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: parts_ordered_prep_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: parts_ordered_prep_at
+      group: tab_parts
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Deler bestilt (klargjøring)
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: parts_ordered_prep_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: parts_arrived_prep_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: parts_arrived_prep_at
+      group: tab_parts
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Deler ankommet (klargjøring)
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: parts_arrived_prep_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: arrived_prep_center_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: arrived_prep_center_at
+      group: tab_workflow
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Ankommet klargjøring
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: arrived_prep_center_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: inspection_completed_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: inspection_completed_at
+      group: tab_workflow
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Mottakskontroll fullført
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: inspection_completed_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: inspection_approved
+    type: boolean
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: inspection_approved
+      group: tab_workflow
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - cast-boolean
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: inspection_approved
+      table: cars
+      data_type: boolean
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: inspection_notes
+    type: text
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: inspection_notes
+      group: tab_workflow
+      hidden: false
+      interface: input-multiline
+      note: null
+      options:
+        placeholder: Notater fra mottakskontroll...
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Mottaksnotater
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: inspection_notes
+      table: cars
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: scheduled_technical_date
+    type: date
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: scheduled_technical_date
+      group: tab_prep
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: scheduled_technical_date
+      table: cars
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: scheduled_technical_time
+    type: time
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: scheduled_technical_time
+      group: tab_prep
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: scheduled_technical_time
+      table: cars
+      data_type: time without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: technical_started_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: technical_started_at
+      group: tab_prep
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Teknisk startet
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: technical_started_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: technical_completed_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: technical_completed_at
+      group: tab_prep
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Teknisk fullført
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: technical_completed_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: scheduled_cosmetic_date
+    type: date
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: scheduled_cosmetic_date
+      group: tab_prep
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: scheduled_cosmetic_date
+      table: cars
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: scheduled_cosmetic_time
+    type: time
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: scheduled_cosmetic_time
+      group: tab_prep
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: scheduled_cosmetic_time
+      table: cars
+      data_type: time without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: cosmetic_started_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: cosmetic_started_at
+      group: tab_prep
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Kosmetisk startet
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: cosmetic_started_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: cosmetic_completed_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: cosmetic_completed_at
+      group: tab_prep
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Kosmetisk fullført
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: cosmetic_completed_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: ready_for_delivery_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: ready_for_delivery_at
+      group: tab_workflow
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Klar for levering
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: ready_for_delivery_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: delivered_to_dealership_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: delivered_to_dealership_at
+      group: tab_workflow
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Levert til forhandler
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: delivered_to_dealership_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: sold_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: sold_at
+      group: tab_sales
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Solgt
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sold_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: delivered_to_customer_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: delivered_to_customer_at
+      group: tab_workflow
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Levert til kunde
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: delivered_to_customer_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: archived_at
+    type: dateTime
+    meta:
+      collection: cars
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: archived_at
+      group: tab_workflow
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: nb-NO
+          translation: Arkivert
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: archived_at
+      table: cars
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: accessories
+    type: json
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: accessories
+      group: tab_parts
+      hidden: false
+      interface: list
+      note: Liste over tilbehør som skal monteres
+      options:
+        fields:
+          - field: name
+            meta:
+              interface: input
+              width: half
+            name: Tilbehør
+            type: string
+          - field: ordered
+            meta:
+              interface: boolean
+              width: half
+            name: Bestilt
+            type: boolean
+          - field: received
+            meta:
+              interface: boolean
+              width: half
+            name: Mottatt
+            type: boolean
+          - field: cost
+            meta:
+              interface: input
+              width: half
+            name: Kostnad
+            type: decimal
+        template: '{{name}} (Bestilt: {{ordered}}, Mottatt: {{received}})'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - cast-json
+      translations:
+        - language: en-US
+          translation: Accessories
+        - language: nb-NO
+          translation: Tilbehør
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: accessories
+      table: cars
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: estimated_technical_hours
+    type: decimal
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: estimated_technical_hours
+      group: tab_prep
+      hidden: false
+      interface: input
+      note: null
+      options:
+        max: 40
+        min: 0
+        placeholder: '2.5'
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Estimert teknisk (timer)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: estimated_technical_hours
+      table: cars
+      data_type: numeric
+      default_value: 2.5
+      max_length: null
+      numeric_precision: 4
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: estimated_cosmetic_hours
+    type: decimal
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: estimated_cosmetic_hours
+      group: tab_prep
+      hidden: false
+      interface: input
+      note: null
+      options:
+        max: 40
+        min: 0
+        placeholder: '2.5'
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Estimert kosmetisk (timer)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: estimated_cosmetic_hours
+      table: cars
+      data_type: numeric
+      default_value: 2.5
+      max_length: null
+      numeric_precision: 4
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: purchase_price
+    type: decimal
+    meta:
+      collection: cars
+      conditions:
+        - hidden: false
+          name: Kun for admin
+          rule:
+            $CURRENT_USER.role.name:
+              _eq: Admin
+      display: null
+      display_options: null
+      field: purchase_price
+      group: tab_sales
+      hidden: false
+      interface: input
+      note: null
+      options:
+        iconLeft: attach_money
+        placeholder: Innkjøpspris
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Innkjøpspris
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: purchase_price
+      table: cars
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 12
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: sale_price
+    type: decimal
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: sale_price
+      group: tab_sales
+      hidden: false
+      interface: input
+      note: null
+      options:
+        iconLeft: sell
+        placeholder: Salgspris
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Salgspris
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: sale_price
+      table: cars
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 12
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: prep_cost
+    type: decimal
+    meta:
+      collection: cars
+      conditions:
+        - hidden: false
+          name: Kun for admin
+          rule:
+            $CURRENT_USER.role.name:
+              _eq: Admin
+      display: null
+      display_options: null
+      field: prep_cost
+      group: tab_prep
+      hidden: false
+      interface: input
+      note: null
+      options:
+        iconLeft: build
+        placeholder: Klargjøringskostnad
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Klargjøringskost
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: prep_cost
+      table: cars
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 12
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: seller_notes
+    type: text
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: seller_notes
+      group: tab_sales
+      hidden: false
+      interface: input-multiline
+      note: null
+      options:
+        placeholder: Notater fra selger...
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Selgers notater
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: seller_notes
+      table: cars
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: parts_notes
+    type: text
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: parts_notes
+      group: tab_parts
+      hidden: false
+      interface: input-multiline
+      note: null
+      options:
+        placeholder: Notater om deler...
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Notater om deler
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: parts_notes
+      table: cars
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: technical_notes
+    type: text
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: technical_notes
+      group: tab_prep
+      hidden: false
+      interface: input-multiline
+      note: null
+      options:
+        placeholder: Notater fra mekaniker...
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Tekniske notater
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: technical_notes
+      table: cars
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: cosmetic_notes
+    type: text
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: cosmetic_notes
+      group: tab_prep
+      hidden: false
+      interface: input-multiline
+      note: null
+      options:
+        placeholder: Notater fra bilpleier...
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Kosmetiske notater
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: cosmetic_notes
+      table: cars
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cars
+    field: tab_info
+    type: alias
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: tab_info
+      group: null
+      hidden: true
+      interface: group-detail
+      note: null
+      options:
+        headerColor: '#2563eb'
+        headerIcon: info
+        start: open
+      readonly: false
+      required: false
+      sort: 1
+      special:
+        - alias
+        - group
+      translations:
+        - language: nb-NO
+          translation: Bilinfo
+      validation: null
+      validation_message: null
+      width: full
+  - collection: cars
+    field: tab_workflow
+    type: alias
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: tab_workflow
+      group: null
+      hidden: true
+      interface: group-detail
+      note: null
+      options:
+        headerColor: '#7c3aed'
+        headerIcon: alt_route
+        start: closed
+      readonly: false
+      required: false
+      sort: 2
+      special:
+        - alias
+        - group
+      translations:
+        - language: nb-NO
+          translation: Arbeidsflyt
+      validation: null
+      validation_message: null
+      width: full
+  - collection: cars
+    field: tab_parts
+    type: alias
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: tab_parts
+      group: null
+      hidden: true
+      interface: group-detail
+      note: null
+      options:
+        headerColor: '#ea580c'
+        headerIcon: category
+        start: closed
+      readonly: false
+      required: false
+      sort: 3
+      special:
+        - alias
+        - group
+      translations:
+        - language: nb-NO
+          translation: Deler
+      validation: null
+      validation_message: null
+      width: full
+  - collection: cars
+    field: tab_prep
+    type: alias
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: tab_prep
+      group: null
+      hidden: true
+      interface: group-detail
+      note: null
+      options:
+        headerColor: '#16a34a'
+        headerIcon: build
+        start: closed
+      readonly: false
+      required: false
+      sort: 4
+      special:
+        - alias
+        - group
+      translations:
+        - language: nb-NO
+          translation: Klargjøring
+      validation: null
+      validation_message: null
+      width: full
+  - collection: cars
+    field: tab_sales
+    type: alias
+    meta:
+      collection: cars
+      conditions: null
+      display: null
+      display_options: null
+      field: tab_sales
+      group: null
+      hidden: true
+      interface: group-detail
+      note: null
+      options:
+        headerColor: '#dc2626'
+        headerIcon: attach_money
+        start: closed
+      readonly: false
+      required: false
+      sort: 5
+      special:
+        - alias
+        - group
+      translations:
+        - language: nb-NO
+          translation: Salg
+      validation: null
+      validation_message: null
+      width: full
+  - collection: dealership
+    field: parent_dealership_id
+    type: uuid
+    meta:
+      collection: dealership
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      field: parent_dealership_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations:
+        - language: no-NO
+          translation: Hovedforhandler
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: parent_dealership_id
+      table: dealership
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: dealership
+    field: prep_center_id
+    type: uuid
+    meta:
+      collection: dealership
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      field: prep_center_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations:
+        - language: no-NO
+          translation: Klargjøringssenter
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: prep_center_id
+      table: dealership
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: dealership
+    field: dealership_number
+    type: integer
+    meta:
+      collection: dealership
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: dealership_number
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: FNR (f.eks. 490)
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Forhandlernummer (FNR)
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dealership_number
+      table: dealership
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: dealership_name
+    type: string
+    meta:
+      collection: dealership
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: dealership_name
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: Forhandlernavn
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Forhandlernavn
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dealership_name
+      table: dealership
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: dealership_type
+    type: string
+    meta:
+      collection: dealership
+      conditions: null
+      display: labels
+      display_options: null
+      field: dealership_type
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Fullskala forhandler
+            value: fullskala
+          - text: Klargjøringssenter
+            value: klargjøringssenter
+          - text: Verksted
+            value: verksted
+          - text: Outlet
+            value: outlet
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Forhandlertype
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dealership_type
+      table: dealership
+      data_type: character varying
+      default_value: fullskala
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: brand
+    type: string
+    meta:
+      collection: dealership
+      conditions: null
+      display: labels
+      display_options: null
+      field: brand
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: VW
+            value: VW
+          - text: Audi
+            value: Audi
+          - text: Skoda
+            value: Skoda
+          - text: Nissan
+            value: Nissan
+          - text: MG
+            value: MG
+          - text: Seres
+            value: Seres
+          - text: Subaru
+            value: Subaru
+          - text: Multi
+            value: Multi
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Merke
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: brand
+      table: dealership
+      data_type: character varying
+      default_value: null
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: does_own_prep
+    type: boolean
+    meta:
+      collection: dealership
+      conditions: null
+      display: boolean
+      display_options: null
+      field: does_own_prep
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Gjør egen klargjøring
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Gjør egen klargjøring
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: does_own_prep
+      table: dealership
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: brand_colors
+    type: json
+    meta:
+      collection: dealership
+      conditions: null
+      display: raw
+      display_options: null
+      field: brand_colors
+      group: null
+      hidden: false
+      interface: input-code
+      note: null
+      options:
+        language: json
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - cast-json
+      translations:
+        - language: no-NO
+          translation: Merkefarger
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: brand_colors
+      table: dealership
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: logo
+    type: uuid
+    meta:
+      collection: dealership
+      conditions: null
+      display: image
+      display_options: null
+      field: logo
+      group: null
+      hidden: false
+      interface: file-image
+      note: null
+      options: {}
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - file
+      translations:
+        - language: no-NO
+          translation: Logo
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: logo
+      table: dealership
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: dealership
+    field: location
+    type: string
+    meta:
+      collection: dealership
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: location
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: By/lokasjon
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Lokasjon
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: location
+      table: dealership
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: active
+    type: boolean
+    meta:
+      collection: dealership
+      conditions: null
+      display: boolean
+      display_options: null
+      field: active
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options: {}
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Aktiv
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: active
+      table: dealership
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: status
+    type: string
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: status
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Status
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: status
+      table: dealership
+      data_type: character varying
+      default_value: draft
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: user_updated
+    type: uuid
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: user_updated
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: user_updated
+      table: dealership
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: dealership
+    field: id
+    type: uuid
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: dealership
+      data_type: uuid
+      default_value: gen_random_uuid()
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: sort
+    type: integer
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: dealership
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: user_created
+    type: uuid
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: user_created
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: user_created
+      table: dealership
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: dealership
+    field: date_created
+    type: dateTime
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: date_created
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: date_created
+      table: dealership
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: date_updated
+    type: dateTime
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: date_updated
+      table: dealership
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: created_at
+    type: dateTime
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: created_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: created_at
+      table: dealership
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: dealership
+    field: updated_at
+    type: dateTime
+    meta:
+      collection: dealership
+      conditions: null
+      display: null
+      display_options: null
+      field: updated_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: updated_at
+      table: dealership
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: dealership_id
+    type: uuid
+    meta:
+      collection: directus_users
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      field: dealership_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations:
+        - language: no-NO
+          translation: Forhandler
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dealership_id
+      table: directus_users
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: directus_users
+    field: job_role
+    type: string
+    meta:
+      collection: directus_users
+      conditions: null
+      display: labels
+      display_options: null
+      field: job_role
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Daglig leder
+            value: daglig_leder
+          - text: Salgsjef
+            value: salgsjef
+          - text: Nybilselger
+            value: nybilselger
+          - text: Bruktbilselger
+            value: bruktbilselger
+          - text: Kundemottaker/Booking
+            value: kundemottaker
+          - text: Garantimedarbeider
+            value: garantimedarbeider
+          - text: Mottakskontrollør
+            value: mottakskontrollør
+          - text: Delelager
+            value: delelager
+          - text: Mekaniker
+            value: mekaniker
+          - text: Bilpleiespesialist
+            value: bilpleiespesialist
+          - text: Admin
+            value: admin
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Jobbrolle
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: job_role
+      table: directus_users
+      data_type: character varying
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: is_productive
+    type: boolean
+    meta:
+      collection: directus_users
+      conditions: null
+      display: boolean
+      display_options: null
+      field: is_productive
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Produktiv rolle
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Produktiv rolle
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: is_productive
+      table: directus_users
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: hours_per_day
+    type: decimal
+    meta:
+      collection: directus_users
+      conditions:
+        - hidden: false
+          name: Vis kun når produktiv
+          rule:
+            is_productive:
+              _eq: true
+      display: formatted-value
+      display_options: null
+      field: hours_per_day
+      group: null
+      hidden: false
+      interface: input
+      note: Antall timer tilgjengelig per dag for produktive roller
+      options:
+        placeholder: Timer per dag
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Timer per dag
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hours_per_day
+      table: directus_users
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 4
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mcp
+    field: id
+    type: uuid
+    meta:
+      collection: mcp
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 1
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: mcp
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mcp
+    field: name
+    type: string
+    meta:
+      collection: mcp
+      conditions: null
+      display: formatted-value
+      display_options:
+        font: monospace
+      field: name
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        slug: true
+        trim: true
+      readonly: false
+      required: true
+      sort: 8
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: name
+      table: mcp
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: true
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mcp
+    field: description
+    type: text
+    meta:
+      collection: mcp
+      conditions: null
+      display: null
+      display_options: null
+      field: description
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 10
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: description
+      table: mcp
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mcp
+    field: system_prompt
+    type: text
+    meta:
+      collection: mcp
+      conditions: null
+      display: null
+      display_options: null
+      field: system_prompt
+      group: null
+      hidden: false
+      interface: input-rich-text-md
+      note: $t:mcp_prompts_collection_schema.system_prompt_note
+      options: null
+      readonly: false
+      required: false
+      sort: 11
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: system_prompt
+      table: mcp
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mcp
+    field: messages
+    type: json
+    meta:
+      collection: mcp
+      conditions: null
+      display: formatted-json-value
+      display_options:
+        format: '{{ role }} • {{ text }}'
+      field: messages
+      group: null
+      hidden: false
+      interface: list
+      note: $t:mcp_prompts_collection_schema.messages_note
+      options:
+        addLabel: New Message
+        fields:
+          - field: role
+            meta:
+              display: labels
+              display_options:
+                choices:
+                  - icon: person
+                    text: $t:mcp_prompts_collection_schema.messages_role_user
+                    value: user
+                  - icon: smart_toy
+                    text: $t:mcp_prompts_collection_schema.messages_role_assistant
+                    value: assistant
+              field: role
+              interface: select-dropdown
+              note: $t:mcp_prompts_collection_schema.messages_role_note
+              options:
+                choices:
+                  - icon: person
+                    text: $t:mcp_prompts_collection_schema.messages_role_user
+                    value: user
+                  - icon: smart_toy
+                    text: $t:mcp_prompts_collection_schema.messages_role_assistant
+                    value: assistant
+              required: true
+              type: string
+              width: full
+            name: role
+            type: string
+          - field: text
+            meta:
+              display: formatted-value
+              display_options:
+                format: true
+              field: text
+              interface: input-rich-text-md
+              note: >-
+                The actual content of the message. You can use {{ curly_braces
+                }} for placeholders that will be replaced with real data.
+              required: true
+              type: text
+              width: full
+            name: text
+            type: text
+        showConfirmDiscard: true
+        template: '{{ role }} • {{ text }}'
+      readonly: false
+      required: false
+      sort: 12
+      special:
+        - cast-json
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: messages
+      table: mcp
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notifications
+    field: user_id
+    type: uuid
+    meta:
+      collection: notifications
+      conditions: null
+      display: related-values
+      display_options: null
+      field: user_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: user_id
+      table: notifications
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: notifications
+    field: car_id
+    type: uuid
+    meta:
+      collection: notifications
+      conditions: null
+      display: related-values
+      display_options: null
+      field: car_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{brand}} {{model}} ({{vin}})'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: car_id
+      table: notifications
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: cars
+      foreign_key_column: id
+  - collection: notifications
+    field: type
+    type: string
+    meta:
+      collection: notifications
+      conditions: null
+      display: labels
+      display_options: null
+      field: type
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        allowOther: false
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: type
+      table: notifications
+      data_type: character varying
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notifications
+    field: read
+    type: boolean
+    meta:
+      collection: notifications
+      conditions: null
+      display: boolean
+      display_options: null
+      field: read
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Lest
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: read
+      table: notifications
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notifications
+    field: message
+    type: text
+    meta:
+      collection: notifications
+      conditions: null
+      display: null
+      display_options: null
+      field: message
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: message
+      table: notifications
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notifications
+    field: id
+    type: uuid
+    meta:
+      collection: notifications
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: notifications
+      data_type: uuid
+      default_value: gen_random_uuid()
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notifications
+    field: created_at
+    type: dateTime
+    meta:
+      collection: notifications
+      conditions: null
+      display: null
+      display_options: null
+      field: created_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: created_at
+      table: notifications
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: car_id
+    type: uuid
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: related-values
+      display_options: null
+      field: car_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{brand}} {{model}} ({{vin}})'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: car_id
+      table: resource_bookings
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: cars
+      foreign_key_column: id
+  - collection: resource_bookings
+    field: resource_type_id
+    type: uuid
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: related-values
+      display_options: null
+      field: resource_type_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: resource_type_id
+      table: resource_bookings
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: resource_types
+      foreign_key_column: id
+  - collection: resource_bookings
+    field: status
+    type: string
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: labels
+      display_options: null
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Planlagt
+            value: planned
+          - text: Pågår
+            value: in_progress
+          - text: Fullført
+            value: completed
+          - text: Kansellert
+            value: cancelled
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: status
+      table: resource_bookings
+      data_type: character varying
+      default_value: scheduled
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: id
+    type: uuid
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: resource_bookings
+      data_type: uuid
+      default_value: gen_random_uuid()
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: provider_dealership_id
+    type: uuid
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: provider_dealership_id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: provider_dealership_id
+      table: resource_bookings
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: resource_bookings
+    field: consumer_dealership_id
+    type: uuid
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: consumer_dealership_id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: consumer_dealership_id
+      table: resource_bookings
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: resource_bookings
+    field: user_id
+    type: uuid
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: user_id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: user_id
+      table: resource_bookings
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: resource_bookings
+    field: date
+    type: date
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: date
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: date
+      table: resource_bookings
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: start_time
+    type: time
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: start_time
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: start_time
+      table: resource_bookings
+      data_type: time without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: estimated_hours
+    type: decimal
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: estimated_hours
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: estimated_hours
+      table: resource_bookings
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 6
+      numeric_scale: 2
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: actual_hours
+    type: decimal
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: actual_hours
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: actual_hours
+      table: resource_bookings
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 6
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: notes
+    type: text
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: notes
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: notes
+      table: resource_bookings
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: updated_at
+    type: dateTime
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: updated_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: updated_at
+      table: resource_bookings
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: completed_at
+    type: dateTime
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: completed_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: completed_at
+      table: resource_bookings
+      data_type: timestamp without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_bookings
+    field: created_at
+    type: dateTime
+    meta:
+      collection: resource_bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: created_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: created_at
+      table: resource_bookings
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_capacities
+    field: dealership_id
+    type: uuid
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: related-values
+      display_options: null
+      field: dealership_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dealership_id
+      table: resource_capacities
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: resource_capacities
+    field: resource_type_id
+    type: uuid
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: related-values
+      display_options: null
+      field: resource_type_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: resource_type_id
+      table: resource_capacities
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: resource_types
+      foreign_key_column: id
+  - collection: resource_capacities
+    field: user_id
+    type: uuid
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: related-values
+      display_options: null
+      field: user_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: user_id
+      table: resource_capacities
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: resource_capacities
+    field: date
+    type: date
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: datetime
+      display_options: null
+      field: date
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: {}
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - date
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: date
+      table: resource_capacities
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_capacities
+    field: id
+    type: uuid
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: resource_capacities
+      data_type: uuid
+      default_value: gen_random_uuid()
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_capacities
+    field: allocated_hours
+    type: decimal
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: null
+      display_options: null
+      field: allocated_hours
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: allocated_hours
+      table: resource_capacities
+      data_type: numeric
+      default_value: 8
+      max_length: null
+      numeric_precision: 6
+      numeric_scale: 2
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_capacities
+    field: used_hours
+    type: decimal
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: null
+      display_options: null
+      field: used_hours
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: used_hours
+      table: resource_capacities
+      data_type: numeric
+      default_value: 0
+      max_length: null
+      numeric_precision: 6
+      numeric_scale: 2
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_capacities
+    field: created_at
+    type: dateTime
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: null
+      display_options: null
+      field: created_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: created_at
+      table: resource_capacities
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_capacities
+    field: updated_at
+    type: dateTime
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: null
+      display_options: null
+      field: updated_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: updated_at
+      table: resource_capacities
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_capacities
+    field: available_hours
+    type: decimal
+    meta:
+      collection: resource_capacities
+      conditions: null
+      display: null
+      display_options: null
+      field: available_hours
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: available_hours
+      table: resource_capacities
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 6
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: true
+      generation_expression: (allocated_hours - used_hours)
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_sharing
+    field: provider_dealership_id
+    type: uuid
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      field: provider_dealership_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: provider_dealership_id
+      table: resource_sharing
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: resource_sharing
+    field: consumer_dealership_id
+    type: uuid
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      field: consumer_dealership_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{dealership_number}} - {{dealership_name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: consumer_dealership_id
+      table: resource_sharing
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: dealership
+      foreign_key_column: id
+  - collection: resource_sharing
+    field: resource_type_id
+    type: uuid
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{name}}'
+      field: resource_type_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{name}}'
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: resource_type_id
+      table: resource_sharing
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: resource_types
+      foreign_key_column: id
+  - collection: resource_sharing
+    field: enabled
+    type: boolean
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: boolean
+      display_options: null
+      field: enabled
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Aktivert
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: enabled
+      table: resource_sharing
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_sharing
+    field: priority
+    type: integer
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: priority
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: 1=høyest
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: priority
+      table: resource_sharing
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_sharing
+    field: max_hours_per_week
+    type: decimal
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: max_hours_per_week
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: Timer per uke
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: max_hours_per_week
+      table: resource_sharing
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 6
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_sharing
+    field: id
+    type: uuid
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: resource_sharing
+      data_type: uuid
+      default_value: gen_random_uuid()
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_sharing
+    field: notes
+    type: text
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: null
+      display_options: null
+      field: notes
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: notes
+      table: resource_sharing
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_sharing
+    field: created_at
+    type: dateTime
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: null
+      display_options: null
+      field: created_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: created_at
+      table: resource_sharing
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_sharing
+    field: updated_at
+    type: dateTime
+    meta:
+      collection: resource_sharing
+      conditions: null
+      display: null
+      display_options: null
+      field: updated_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: updated_at
+      table: resource_sharing
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: code
+    type: string
+    meta:
+      collection: resource_types
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: code
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: Unik kode
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Kode
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: code
+      table: resource_types
+      data_type: character varying
+      default_value: null
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: name
+    type: string
+    meta:
+      collection: resource_types
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: name
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: Visningsnavn
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Navn
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: name
+      table: resource_types
+      data_type: character varying
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: icon
+    type: string
+    meta:
+      collection: resource_types
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: icon
+      group: null
+      hidden: false
+      interface: select-icon
+      note: null
+      options: {}
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Ikon
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: icon
+      table: resource_types
+      data_type: character varying
+      default_value: null
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: color
+    type: string
+    meta:
+      collection: resource_types
+      conditions: null
+      display: color
+      display_options: null
+      field: color
+      group: null
+      hidden: false
+      interface: select-color
+      note: null
+      options: {}
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Farge
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: color
+      table: resource_types
+      data_type: character varying
+      default_value: null
+      max_length: 7
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: is_productive
+    type: boolean
+    meta:
+      collection: resource_types
+      conditions: null
+      display: boolean
+      display_options: null
+      field: is_productive
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Produktiv ressurs
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Produktiv ressurs
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: is_productive
+      table: resource_types
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: bookable
+    type: boolean
+    meta:
+      collection: resource_types
+      conditions: null
+      display: boolean
+      display_options: null
+      field: bookable
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Kan bookes
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Kan bookes
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: bookable
+      table: resource_types
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: requires_assignment
+    type: boolean
+    meta:
+      collection: resource_types
+      conditions: null
+      display: boolean
+      display_options: null
+      field: requires_assignment
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Krever tildeling
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations:
+        - language: no-NO
+          translation: Krever tildeling
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: requires_assignment
+      table: resource_types
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: id
+    type: uuid
+    meta:
+      collection: resource_types
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: resource_types
+      data_type: uuid
+      default_value: gen_random_uuid()
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: description
+    type: text
+    meta:
+      collection: resource_types
+      conditions: null
+      display: null
+      display_options: null
+      field: description
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: description
+      table: resource_types
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: default_duration_hours
+    type: decimal
+    meta:
+      collection: resource_types
+      conditions: null
+      display: null
+      display_options: null
+      field: default_duration_hours
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: default_duration_hours
+      table: resource_types
+      data_type: numeric
+      default_value: null
+      max_length: null
+      numeric_precision: 4
+      numeric_scale: 2
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: active
+    type: boolean
+    meta:
+      collection: resource_types
+      conditions: null
+      display: null
+      display_options: null
+      field: active
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special:
+        - cast-boolean
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: active
+      table: resource_types
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: created_at
+    type: dateTime
+    meta:
+      collection: resource_types
+      conditions: null
+      display: null
+      display_options: null
+      field: created_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: created_at
+      table: resource_types
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: resource_types
+    field: updated_at
+    type: dateTime
+    meta:
+      collection: resource_types
+      conditions: null
+      display: null
+      display_options: null
+      field: updated_at
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: updated_at
+      table: resource_types
+      data_type: timestamp without time zone
+      default_value: CURRENT_TIMESTAMP
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+relations: []
