@@ -41,7 +41,7 @@ services:
       # ========================================
       # ADMIN ACCOUNT
       # ========================================
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@dev.local}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-DevPassword123!}
 
       # ========================================
