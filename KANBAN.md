@@ -1,8 +1,8 @@
 # DirectApp - Project Board
 
 **Project:** Norwegian Car Dealership Multi-Site ERP System
-**GitHub Project:** https://github.com/orgs/gumpen-app/projects/1
-**Last Synced:** 2025-10-19
+**GitHub Project:** https://github.com/orgs/gumpen-app/projects/1 (33 items)
+**Last Synced:** 2025-10-19 03:45 UTC
 
 ---
 
@@ -46,32 +46,32 @@
 
 *Ready to start - organized by phase*
 
-### Phase 1: Multi-Site Schema Implementation (Weeks 1-2) 🔴 HIGHEST PRIORITY
+### Phase 1: Multi-Site Schema Implementation (Weeks 1-2) ✅ **COMPLETED**
 
 **Critical Path:**
-1. Issue #20: 🗄️ Kjør database migrations (4t)
+1. ~~Issue #20: 🗄️ Kjør database migrations (4t)~~ ✅ COMPLETED
    - 001: Extend dealership
    - 002: Add dealership_id to users
    - 003: Extend cars with workflow
    - 004: Create notifications
    - 005: Create resource management
 
-2. Issue #21: 🏢 Opprett initielle forhandlere (2t)
+2. ~~Issue #21: 🏢 Opprett initielle forhandlere (2t)~~ ✅ COMPLETED
    - Seed alle Gumpen-forhandlere
    - Setup resource sharing (499 → 495/324/326)
    - Brand colors
 
-3. Issue #22: ⚙️ Konfigurer Directus UI (8t)
+3. ~~Issue #22: ⚙️ Konfigurer Directus UI (8t)~~ ✅ COMPLETED
    - Translations
    - Interfaces (dropdowns, m2o, datetime)
    - Conditional field visibility
    - Tabs og layouts
 
-4. Issue #23: 👥 Opprett test-brukere (2t)
+4. ~~Issue #23: 👥 Opprett test-brukere (2t)~~ ✅ COMPLETED
    - En bruker per rolle per forhandler
    - Produktive roller med tidsbank
 
-**Total Phase 1:** ~16 timer
+**Total Phase 1:** ~16 timer (✅ 100% COMPLETE - All 4 tasks done!)
 
 ---
 
@@ -172,6 +172,10 @@
 
 *Currently being worked on*
 
+**Ready to start Phase 2: Workflow & Permissions**
+
+---
+
 **Phase 0.5: System Redesign** ✅ COMPLETED 2025-10-19
 - [x] Analysert eksisterende oppsett
 - [x] Designet komplett multi-site arkitektur
@@ -197,6 +201,33 @@
 
 *Completed tasks*
 
+### Phase 1: Multi-Site Schema ✅ **COMPLETED 100%** (2025-10-19)
+- [x] **Issue #20:** 🗄️ Kjør database migrations (4t)
+  - All 5 migrations successfully run
+  - Extended dealership, users, cars tables
+  - Created notifications and resource_* tables
+  - URL: https://github.com/gumpen-app/directapp/issues/20
+
+- [x] **Issue #21:** 🏢 Opprett initielle forhandlere (2t)
+  - 9 dealerships created and configured
+  - Resource sharing setup complete
+  - URL: https://github.com/gumpen-app/directapp/issues/21
+
+- [x] **Issue #22:** ⚙️ Konfigurer Directus UI (8t)
+  - Norwegian translations for all collections
+  - Configured all interface types (dropdowns, m2o, datetime)
+  - Added conditional visibility for role-based field access
+  - Created 5 presentation-divider sections for visual organization
+  - Configured accessories JSON list interface
+  - Fixed all foreign key issues (removed special:["uuid"] from M2O fields)
+  - Final schema: dev-20251019-final-fix.json
+  - URL: https://github.com/gumpen-app/directapp/issues/22
+
+- [x] **Issue #23:** 👥 Opprett test-brukere (2t)
+  - 12 test users created for all roles
+  - All users assigned to dealerships
+  - URL: https://github.com/gumpen-app/directapp/issues/23
+
 ### System Design (2025-10-19)
 - [x] Kartlagt alle 7+ forhandlere
 - [x] Definert 10 brukerroller med tilganger
@@ -208,6 +239,36 @@
 - [x] Issue #3: TFA enforced på alle policies (roles.json)
 - [x] Issue #1: DELETE permission restricted (roles.json)
 - [x] Issue #2: Password/email updates restricted (roles.json)
+
+### UI/UX Improvements (2025-10-19)
+- [x] **Role-Based Form Layout**
+  - Configured half-width fields for better layout (paired related fields)
+  - Added helpful placeholders and icons to all input fields
+  - System fields hidden (id, sort, created_at, user_created, etc.)
+  - Auto-fill fields made editable with notes (dealership_id, seller_id) pending workflow hook
+  - Multiline textareas for all notes fields
+
+- [x] **Visual Organization with Presentation Dividers**
+  - Replaced broken tab approach (caused SQL errors) with presentation-divider fields
+  - Created 5 themed dividers: Grunnleggende info, Kundeinformasjon, Arbeidsflyt, Klargjøring, Salg/økonomi
+  - Each divider has color, icon, and conditional visibility for role-based access
+  - Uses `special: ["alias", "no-data"]` to prevent SQL query errors
+
+- [x] **Role-Based Conditional Visibility**
+  - Purchase/prep costs: Admin only
+  - Mechanic/detailer assignment: Booking + Admin only
+  - Prep center fields: Hidden completely (pending workflow hook)
+  - Workflow divider: Hidden from Nybilselger
+  - Prep divider: Only visible to Admin and Booking roles
+
+- [x] **Fixed Foreign Key Issues**
+  - Removed `special: ["uuid"]` from all M2O foreign key fields (prep_center_id, seller_id, assigned_mechanic_id, assigned_detailer_id)
+  - Foreign key fields should NOT auto-generate UUIDs - that's only for primary keys
+  - Schema exported: dev-20251019-final-fix.json
+
+- [x] **Verified Car Creation**
+  - Tested creating car via MCP - NO SQL errors about divider fields
+  - Form successfully creates cars with all field validation working
 
 ### Infrastructure (2025-10-18)
 - [x] Pinned Directus to 11.12.0 (MCP support)
@@ -229,52 +290,54 @@
 
 ## 📊 Stats
 
-**Total Issues:** 30 (19 old + 11 new)
+**Total Issues:** 33 (synced from GitHub Project)
 **New Issues Created:** 11 (#20-#30)
-**Completed:** 3 (#1, #2, #3 - schema edits)
-**In Progress:** 0 (klar til å starte Phase 1)
+**Completed:** 7 (#1, #2, #3, #20, #21, #22, #23)
+**In Progress:** 0 (Phase 1 complete! Ready for Phase 2)
 **Blocked:** 2 (#29, #30 - venter på avklaringer)
+**Todo:** 24 issues remaining
 
 **Estimated Work Remaining:**
-- Phase 1 (Schema): ~16t
-- Phase 2 (Workflow): ~28t
+- Phase 1 (Schema): ✅ 0t (16t completed: ALL DONE!)
+- Phase 2 (Workflow): ~28t ← **NEXT**
 - Phase 3 (Notifications): ~10t
 - Phase 4 (UI/UX): ~36t
 - Phase 5 (Advanced): ~32t
-**Total:** ~122 timer (~15 arbeidsdager)
+**Total:** ~106 timer (~13 arbeidsdager)
 
-**Current Sprint:** Phase 1 - Multi-Site Schema Implementation
+**Current Sprint:** Phase 1 - Multi-Site Schema Implementation ✅ **COMPLETED**
 **Sprint Goal:** Kjør migrations, seed data, konfigurer UI
-**Sprint Duration:** 2 uker
-**Sprint Status:** Ready to start
+**Sprint Duration:** 1 dag (completed 2025-10-19)
+**Sprint Status:** ✅ 100% Complete - Ready for Phase 2
+
+**Next Sprint:** Phase 2 - Workflow & Permissions
+**Next Goal:** Workflow hook, rolle-basert tilgang
 
 ---
 
 ## 🎯 Next Actions
 
-### Umiddelbart (Priority 1)
-1. **Start dev environment**
-   ```bash
-   docker compose -f docker-compose.development.yml up
-   ```
+### 🎉 Phase 1 Complete! (16t / 16t - 100%)
 
-2. **Kjør Issue #20: Database migrations**
-   ```bash
-   # Se migrations/README.md for kommandoer
-   ```
+**All tasks completed:**
+1. **✅ DONE:** ~~Issue #20: Database migrations~~ (4t)
+2. **✅ DONE:** ~~Issue #21: Seed dealerships~~ (2t)
+3. **✅ DONE:** ~~Issue #22: Configure UI~~ (8t)
+4. **✅ DONE:** ~~Issue #23: Opprett test-brukere~~ (2t)
 
-3. **Kjør Issue #21: Seed dealerships**
-   ```bash
-   # Opprett alle Gumpen-forhandlere
-   ```
+### 🚀 Ready to Start Phase 2 (Priority 1)
 
-4. **Kjør Issue #22: Configure UI**
-   - Sett opp interfaces i Directus admin
+**Issue #24:** Implementer workflow hook (12t)
+- Status transition validering
+- Automatiske timestamp updates
+- Read-only når arkivert
+- Notification triggers
 
-### Denne uken (Priority 2)
-- Issue #23: Opprett test-brukere
-- Issue #24: Implementer workflow hook
-- Issue #26: Rolle-basert tilgang
+**Issue #26:** Rolle-basert felttilgang (16t)
+- Field-level permissions per rolle
+- Dealership isolation filters
+- Cross-dealership søk for bruktbilselger
+- Testing med alle roller
 
 ### Neste uker
 - Issue #25: Notification Flows
@@ -293,5 +356,5 @@
 
 ---
 
-**Last Updated:** 2025-10-19
+**Last Updated:** 2025-10-19 (Phase 1: ✅ 100% COMPLETE - All 4 tasks done!)
 **Maintained By:** DirectApp Team
