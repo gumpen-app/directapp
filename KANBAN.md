@@ -189,7 +189,8 @@
 - ✅ Issue #1: Remove unscoped DELETE permission
   - **Deliverable:** `docs/PERMISSION_MODEL.md` - Complete RBAC design with NO DELETE permissions
   - **Implementation:** `schema/scripts/setup-permissions.sh` - Automated setup script
-  - **Status:** Ready for review and Phase 0 integration
+  - **Pull Request:** https://github.com/gumpen-app/directapp/pull/61
+  - **Status:** In review - awaiting approval for Phase 0 integration
   - **Key change:** Entire permission model redesigned from scratch (not based on archived prototype)
 
 - ✅ Issue #2: Restrict password/email updates
