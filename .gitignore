@@ -62,3 +62,6 @@ backups/
 .env.production
 .env.local
 docker-compose.override.yml
+
+# MCP configuration (contains tokens)
+.mcp.json

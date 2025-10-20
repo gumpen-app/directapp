@@ -89,9 +89,8 @@
    - Cross-dealership søk for bruktbilselger
    - Testing med alle roller
 
-7. Issue #1: 🔴 CRITICAL - Remove unscoped DELETE (DONE i schema-exported/roles.json)
-8. Issue #2: 🔴 CRITICAL - Restrict password/email (DONE i schema-exported/roles.json)
-9. Issue #3: ⚠️ HIGH - Enable TFA (DONE i schema-exported/roles.json)
+**Issues Moved to Review:**
+- See "Review" section below for Issues #1-3 (permission model redesign)
 10. Issue #5: 🔴 CRITICAL - Dealership isolation (dekkes av #26)
 
 **Total Phase 2:** ~28 timer
@@ -186,6 +185,20 @@
 
 *Awaiting review or testing*
 
+**Permission Model Redesign (2025-10-19):**
+- ✅ Issue #1: Remove unscoped DELETE permission
+  - **Deliverable:** `docs/PERMISSION_MODEL.md` - Complete RBAC design with NO DELETE permissions
+  - **Implementation:** `schema/scripts/setup-permissions.sh` - Automated setup script
+  - **Pull Request:** https://github.com/gumpen-app/directapp/pull/61
+  - **Status:** In review - awaiting approval for Phase 0 integration
+  - **Key change:** Entire permission model redesigned from scratch (not based on archived prototype)
+
+- ✅ Issue #2: Restrict password/email updates
+  - **Fixed in:** Permission model design (admin-only access)
+
+- ✅ Issue #3: Enable TFA on admin
+  - **Fixed in:** Permission model design + setup script updates admin policy
+
 **Schema Design Documents:**
 - `GUMPEN_SYSTEM_DESIGN.md` - Komplett system design (venter på godkjenning)
 - `migrations/` - 5 SQL-filer (venter på kjøring)
@@ -204,10 +217,15 @@
 - [x] Planlagt 7 varslingsregler
 - [x] Designet generisk ressursstyring med cross-dealership support
 
-### Critical Permission Fixes (2025-10-19)
-- [x] Issue #3: TFA enforced på alle policies (roles.json)
-- [x] Issue #1: DELETE permission restricted (roles.json)
-- [x] Issue #2: Password/email updates restricted (roles.json)
+### Permission Model Design (2025-10-19)
+- [x] Issue #1: Designed complete RBAC model with NO DELETE permissions
+- [x] Issue #2: Restricted password/email updates to admin only
+- [x] Issue #3: TFA enforcement on admin policy
+- [x] Created 6 policies: Sales, Reception, Mechanics, Workshop Planner, Manager, Admin
+- [x] Designed 6 roles: Nybilselger, Bruktbilselger, Mottakskontroll, Klargjoring, Booking, Daglig leder
+- [x] All permissions use dealership_id isolation
+- [x] Implemented soft delete pattern (status="archived")
+- [x] Created automated setup script for Phase 0
 
 ### Infrastructure (2025-10-18)
 - [x] Pinned Directus to 11.12.0 (MCP support)
@@ -231,9 +249,10 @@
 
 **Total Issues:** 30 (19 old + 11 new)
 **New Issues Created:** 11 (#20-#30)
-**Completed:** 3 (#1, #2, #3 - schema edits)
-**In Progress:** 0 (klar til å starte Phase 1)
-**Blocked:** 2 (#29, #30 - venter på avklaringer)
+**Completed:** 3 (#1, #2, #3 - permission model design)
+**In Review:** 3 (#1, #2, #3 - awaiting approval)
+**In Progress:** 0 (ready for Phase 1)
+**Blocked:** 2 (#29, #30 - awaiting decisions)
 
 **Estimated Work Remaining:**
 - Phase 1 (Schema): ~16t
