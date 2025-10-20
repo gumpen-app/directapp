@@ -1,32 +1,3 @@
-<template>
-  <div class="analytics-panel">
-    <!-- Header -->
-    <div class="panel-header">
-      <h3>{{ title }}</h3>
-      <v-button @click="refresh" icon small>
-        <v-icon name="refresh" />
-      </v-button>
-    </div>
-
-    <!-- Metrics Grid -->
-    <div class="metrics-grid">
-      <div v-for="metric in metrics" :key="metric.id" class="metric-card">
-        <div class="metric-value">{{ metric.value }}</div>
-        <div class="metric-label">{{ metric.label }}</div>
-        <div class="metric-trend" :class="metric.trend">
-          <v-icon :name="metric.trend === 'up' ? 'trending_up' : 'trending_down'" small />
-          {{ metric.change }}%
-        </div>
-      </div>
-    </div>
-
-    <!-- Chart -->
-    <div class="chart-container">
-      <canvas ref="chartCanvas"></canvas>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useApi } from '@directus/extensions-sdk';
@@ -46,6 +17,7 @@ const chartCanvas = ref(null);
 const chart = ref(null);
 
 const title = ref('Analytics Dashboard');
+
 const metrics = ref([
   { id: 1, label: 'Total Sales', value: '$12,543', change: 12, trend: 'up' },
   { id: 2, label: 'New Users', value: '234', change: -5, trend: 'down' },
@@ -111,6 +83,35 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<template>
+  <div class="analytics-panel">
+    <!-- Header -->
+    <div class="panel-header">
+      <h3>{{ title }}</h3>
+      <v-button icon small @click="refresh">
+        <v-icon name="refresh" />
+      </v-button>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+      <div v-for="metric in metrics" :key="metric.id" class="metric-card">
+        <div class="metric-value">{{ metric.value }}</div>
+        <div class="metric-label">{{ metric.label }}</div>
+        <div class="metric-trend" :class="metric.trend">
+          <v-icon :name="metric.trend === 'up' ? 'trending_up' : 'trending_down'" small />
+          {{ metric.change }}%
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-container">
+      <canvas ref="chartCanvas"></canvas>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .analytics-panel {

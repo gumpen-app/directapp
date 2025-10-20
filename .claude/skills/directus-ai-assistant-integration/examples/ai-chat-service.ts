@@ -46,6 +46,7 @@ export class AIChatService extends BaseService {
 
     // Count tokens to ensure we don't exceed limits
     const totalTokens = this.countTokens(messages);
+
     if (totalTokens > 8000) {
       // Summarize older messages if needed
       const optimizedMessages = await this.optimizeMessages(messages);
@@ -272,6 +273,7 @@ export class AIChatService extends BaseService {
 
     // Summarize older messages
     const olderMessages = messages.slice(1, -5);
+
     if (olderMessages.length > 0) {
       const summary = await this.generateContent(
         'summary',
@@ -348,6 +350,7 @@ export class AIChatService extends BaseService {
     });
 
     const result = moderation.results[0];
+
     const flaggedCategories = Object.entries(result.categories)
       .filter(([_, flagged]) => flagged)
       .map(([category]) => category);

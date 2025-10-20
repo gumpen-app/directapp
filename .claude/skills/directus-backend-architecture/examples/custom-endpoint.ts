@@ -46,6 +46,7 @@ export default defineEndpoint((router, context) => {
       res.json(health);
     } catch (error) {
       logger.error('Health check failed:', error);
+
       res.status(500).json({
         status: 'error',
         message: 'Health check failed',
@@ -73,6 +74,7 @@ export default defineEndpoint((router, context) => {
       }
 
       const schema = await getSchema();
+
       const itemsService = new ItemsService(collection, {
         schema,
         accountability: req.accountability,
@@ -96,6 +98,7 @@ export default defineEndpoint((router, context) => {
 
       // Process items in batches
       const batchSize = 10;
+
       for (let i = 0; i < items.length; i += batchSize) {
         const batch = items.slice(i, i + batchSize);
 
@@ -108,6 +111,7 @@ export default defineEndpoint((router, context) => {
                     status: 'archived',
                     archived_at: new Date(),
                   });
+
                   break;
 
                 case 'publish':
@@ -115,14 +119,17 @@ export default defineEndpoint((router, context) => {
                     status: 'published',
                     published_at: new Date(),
                   });
+
                   break;
 
                 case 'duplicate':
                   const { id, ...itemData } = item;
+
                   await itemsService.createOne({
                     ...itemData,
                     title: `${itemData.title} (Copy)`,
                   });
+
                   break;
 
                 default:
@@ -134,6 +141,7 @@ export default defineEndpoint((router, context) => {
             } catch (error) {
               results.processed++;
               results.failed++;
+
               results.errors.push({
                 item_id: item.id,
                 error: error.message,
@@ -161,6 +169,7 @@ export default defineEndpoint((router, context) => {
       });
     } catch (error) {
       logger.error('Batch processing error:', error);
+
       res.status(500).json({
         error: 'Batch processing failed',
         message: error.message,
@@ -200,6 +209,7 @@ export default defineEndpoint((router, context) => {
       // Calculate trends
       const trends = results.map((row, index) => {
         const previousRow = results[index + 1];
+
         const trend = previousRow
           ? ((row.count - previousRow.count) / previousRow.count) * 100
           : 0;
@@ -225,6 +235,7 @@ export default defineEndpoint((router, context) => {
       });
     } catch (error) {
       logger.error('Analytics error:', error);
+
       res.status(500).json({
         error: 'Failed to generate analytics',
         message: error.message,
@@ -284,6 +295,7 @@ export default defineEndpoint((router, context) => {
       });
     } catch (error) {
       logger.error('Notification error:', error);
+
       res.status(500).json({
         error: 'Failed to send notification',
         message: error.message,
