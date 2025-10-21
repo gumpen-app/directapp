@@ -72,10 +72,25 @@
       "id": "session_1761060009107",
       "number": 8,
       "started_at": "2025-10-21T15:20:09.108Z",
-      "ended_at": null,
-      "duration_hours": null,
+      "ended_at": "2025-10-21T15:50:04.274Z",
+      "duration_hours": 0.5,
       "commands_run": 0,
       "tasks_completed": 0
+    },
+    {
+      "id": "session_1761061977856",
+      "number": 9,
+      "started_at": "2025-10-21T15:52:57.856Z",
+      "ended_at": null,
+      "duration_hours": null,
+      "commands_run": 1,
+      "tasks_completed": 0,
+      "active_task": {
+        "issue_number": 66,
+        "title": "Phase 1.2: Deployment Pipeline Validation",
+        "branch": "feature/issue-66-phase-1-2-deployment-pipeline-validation",
+        "pr_number": 73
+      }
     }
   ]
 }
