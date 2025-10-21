@@ -1,8 +1,22 @@
 {
-  "sessions": [],
-  "metadata": {
-    "project": "directapp",
-    "created": "2025-10-18",
-    "version": "1.0.0"
-  }
+  "sessions": [
+    {
+      "id": "session_1761036469633",
+      "number": 1,
+      "started_at": "2025-10-21T08:47:49.633Z",
+      "ended_at": "2025-10-21T08:48:01.838Z",
+      "duration_hours": 0.1,
+      "commands_run": 0,
+      "tasks_completed": 0
+    },
+    {
+      "id": "session_1761036710156",
+      "number": 2,
+      "started_at": "2025-10-21T08:51:50.156Z",
+      "ended_at": "2025-10-21T08:52:24.581Z",
+      "duration_hours": 0.1,
+      "commands_run": 0,
+      "tasks_completed": 0
+    }
+  ]
 }
