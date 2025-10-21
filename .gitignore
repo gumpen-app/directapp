@@ -66,3 +66,5 @@ docker-compose.override.yml
 # MCP configuration (contains tokens)
 .mcp.json
 .claude/archives/*
+docs/ENVIRONMENT_SETUP.md
+docs/ENVIRONMENT_CONFIG_SUMMARY.md
