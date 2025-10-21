@@ -404,8 +404,9 @@ function formatOutput(task, branch, sessionInfo, asJson = false) {
  * Main function
  */
 async function main() {
+  const args = parseArgs();
+
   try {
-    const args = parseArgs();
 
     // Step 1: Start session
     console.error('═══════════════════════════════════════════════════════════════\n');
