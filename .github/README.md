@@ -39,9 +39,21 @@ This creates a new GitHub Project with:
 - Labels (priority, type, component, status)
 - Proper configuration
 
-### 2. Configure Project Views (Manual in UI)
+### 2. Add Project README (Manual in UI)
 
-After running the script, open the project in GitHub and create these views:
+**IMPORTANT**: Add the project README to provide context and documentation.
+
+1. Open project: `gh project view 2 --owner gumpen-app --web`
+2. Click the `...` menu (top right) → **Settings**
+3. Under **README**, click **Add README**
+4. Copy content from `.github/PROJECT_README.md` and paste
+5. Click **Save**
+
+This provides project overview, sprint info, workflow integration, and quick links.
+
+### 3. Configure Project Views (Manual in UI)
+
+After adding the README, create these views in the project:
 
 **Board View** (Default)
 - Group by: Status
@@ -66,9 +78,9 @@ After running the script, open the project in GitHub and create these views:
 - Filter: Status = Blocked
 - Sort by: Priority
 
-### 3. Set Up Automation Rules (Manual in UI)
+### 4. Set Up Automation Rules (Manual in UI)
 
-Configure these automations:
+Configure these automations in Project Settings → Workflows:
 
 ```yaml
 # When PR is created → Move to Review
@@ -88,7 +100,7 @@ trigger: issue.labeled (blocked)
 action: set Status = 🚫 Blocked
 ```
 
-### 4. Create Initial Infrastructure Issues
+### 5. Create Initial Infrastructure Issues
 
 ```bash
 # Make script executable
