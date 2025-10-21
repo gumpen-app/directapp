@@ -17,6 +17,35 @@
       "duration_hours": 0.1,
       "commands_run": 0,
       "tasks_completed": 0
+    },
+    {
+      "id": "session_1761046664553",
+      "number": 3,
+      "started_at": "2025-10-21T11:37:44.553Z",
+      "ended_at": "2025-10-21T11:45:02.936Z",
+      "duration_hours": 0,
+      "commands_run": 0,
+      "tasks_completed": 0,
+      "orphaned": true
+    },
+    {
+      "id": "session_1761047102937",
+      "number": 4,
+      "started_at": "2025-10-21T11:45:02.937Z",
+      "ended_at": "2025-10-21T11:45:22.910Z",
+      "duration_hours": 0,
+      "commands_run": 0,
+      "tasks_completed": 0,
+      "orphaned": true
+    },
+    {
+      "id": "session_1761047122910",
+      "number": 5,
+      "started_at": "2025-10-21T11:45:22.910Z",
+      "ended_at": null,
+      "duration_hours": null,
+      "commands_run": 0,
+      "tasks_completed": 0
     }
   ]
 }

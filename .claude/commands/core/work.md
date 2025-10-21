@@ -2,10 +2,11 @@
 description: Start working - session + task + branch in one command
 argument-hint: [optional: task-id or "next"]
 model: claude-sonnet-4-5-20250929
-allowed-tools: Read, Edit, Bash, Grep, mcp__github__*
+allowed-tools: Bash
+execute: node .claude/scripts/commands/work.mjs
 ---
 
-# /work - Start Working
+# /core:work - Start Working
 
 **Combines:** session-start + pick-task + branch creation
 
