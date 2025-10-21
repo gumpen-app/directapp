@@ -31,47 +31,68 @@ DirectApp is a production-ready Directus fork designed specifically for Norwegia
 
 ## 🚀 Quick Start
 
-### Deploy with Dokploy (Recommended)
-
-**Prerequisites:** Dokploy instance running
+### Local Development (Fastest)
 
 ```bash
 # 1. Clone repository
 git clone https://github.com/gumpen-app/directapp.git
 cd directapp
 
-# 2. Configure environment
-cp .env.dokploy.example .env
-# Edit .env with your values
+# 2. Start development environment
+pnpm dev
 
-# 3. Deploy via Dokploy UI
-# - Create new service (Docker Compose)
-# - Upload docker-compose.dokploy.yml
-# - Add environment variables
-# - Deploy!
+# 3. Access Directus admin
+open http://localhost:8055/admin
 
-# 4. Access admin panel
-https://your-domain.com/admin
+# 4. Login (default credentials)
+# Email: admin@dev.local
+# Password: DevPassword123!
 ```
 
-**Detailed guide:** [DOKPLOY_DEPLOYMENT_GUIDE.md](./DOKPLOY_DEPLOYMENT_GUIDE.md)
+**Complete guide:** [Development Workflow](./docs/DEVELOPMENT_WORKFLOW.md)
+
+### Deploy to Dokploy (Production)
+
+```bash
+# 1. Configure environments
+# See: docs/ENVIRONMENT_SETUP.md
+
+# 2. Deploy to staging
+pnpm deploy:staging
+
+# 3. Deploy to production
+pnpm deploy:production
+```
+
+**Complete guide:** [Dokploy Integration Summary](./docs/DOKPLOY_INTEGRATION_SUMMARY.md)
 
 ---
 
 ## 📋 Documentation
 
-### For Deployment
-- **[Dokploy Deployment Guide](./DOKPLOY_DEPLOYMENT_GUIDE.md)** - Complete deployment instructions
-- **[Environment Variables](./.env.dokploy.example)** - Configuration options
+> **📚 [Complete Documentation Index](./docs/README.md)** - Start here for all docs
 
-### For Development
-- **[Production Roadmap](./.claude/PRODUCTION_ROADMAP.md)** - 8-phase development plan (12 weeks)
-- **[Schema Analysis](./.claude/SCHEMA_ANALYSIS.md)** - Current system architecture & issues
-- **[GitHub Issues Template](./.claude/GITHUB_ISSUES_TEMPLATE.md)** - Ready-to-use issues for fixes
+### Quick Links (Updated 2025-10-21)
 
-### For Project Management
-- **[Workflow System Setup](./.claude/PROJECT_SETUP.md)** - Using the .claude/ workflow
-- **GitHub Project:** https://github.com/orgs/gumpen-app/projects/1
+**Getting Started:**
+- **[Environment Setup](./docs/ENVIRONMENT_SETUP.md)** ⭐ Configure dev/staging/prod
+- **[Development Workflow](./docs/DEVELOPMENT_WORKFLOW.md)** ⭐ Day-to-day development guide
+- **[GitHub Secrets Setup](./docs/GITHUB_SECRETS_SETUP.md)** - CI/CD configuration
+
+**Deployment:**
+- **[Dokploy Integration Summary](./docs/DOKPLOY_INTEGRATION_SUMMARY.md)** ⭐ Complete integration
+- **[Environment Config Summary](./docs/ENVIRONMENT_CONFIG_SUMMARY.md)** - Current status
+- **[DNS Setup Guide](./docs/DNS_SETUP.md)** - Cloudflare configuration
+
+**Project:**
+- **[Production Roadmap](./.claude/PRODUCTION_ROADMAP.md)** - 8-phase development plan
+- **[Schema Analysis](./.claude/SCHEMA_ANALYSIS.md)** - Database architecture
+- **[System Design](./GUMPEN_SYSTEM_DESIGN.md)** - System architecture
+- **[GitHub Project](https://github.com/orgs/gumpen-app/projects/1)** - Task tracking
+
+**Workflow:**
+- **[Workflow Commands](./.claude/commands/README.md)** - Available commands
+- **[Workflow Setup](./.claude/PROJECT_SETUP.md)** - Using the .claude/ system
 
 ---
 
@@ -213,27 +234,25 @@ This repo includes a complete workflow system in `.claude/`:
 
 ### Local Development
 
+> **New:** Simplified workflow with Docker Compose
+
 ```bash
 # Clone repo
 git clone https://github.com/gumpen-app/directapp.git
 cd directapp
 
-# Install Directus
-cd directus
-pnpm install
+# Start development environment (Docker Compose)
+pnpm dev
 
-# Set up environment
-cp .env.example .env
-# Edit .env
+# Access Directus admin
+open http://localhost:8055/admin
 
-# Run database migrations
-pnpm run directus bootstrap
-
-# Start dev server
-pnpm run dev
-
-# Access at http://localhost:8055
+# Database access (if needed)
+# PostgreSQL: localhost:5433 (avoids conflict with local postgres)
+# Redis: localhost:6379
 ```
+
+**Complete guide:** [Development Workflow](./docs/DEVELOPMENT_WORKFLOW.md)
 
 ### Creating Issues
 

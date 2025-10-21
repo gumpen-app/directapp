@@ -136,6 +136,7 @@ catalog:
   axios: 1.11.0
   axios-cache-interceptor: 1.8.0
   base-64: 1.0.0
+  better-sqlite3: 12.4.1
   boxen: 8.0.1
   busboy: 1.6.0
   bytes: 3.1.2

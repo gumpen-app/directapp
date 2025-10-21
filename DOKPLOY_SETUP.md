@@ -1,7 +1,18 @@
 # Dokploy Setup - DirectApp
 
-**Platform:** https://deploy.onecom.ai/  
-**Main Domain:** `gapp.coms.no`  
+> ⚠️ **LEGACY DOCUMENTATION**
+>
+> This document has been superseded by the new comprehensive documentation:
+> - **Environment Setup:** [`docs/ENVIRONMENT_SETUP.md`](docs/ENVIRONMENT_SETUP.md)
+> - **Deployment:** [`docs/DOKPLOY_INTEGRATION_SUMMARY.md`](docs/DOKPLOY_INTEGRATION_SUMMARY.md)
+> - **All Docs:** [`docs/README.md`](docs/README.md)
+>
+> This file is kept for reference only. Use the new docs above.
+
+---
+
+**Platform:** https://deploy.onecom.ai/
+**Main Domain:** `gapp.coms.no`
 **Project:** gapp
 
 ---

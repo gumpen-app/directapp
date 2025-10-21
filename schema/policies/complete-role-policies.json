@@ -1,0 +1,849 @@
+{
+  "policies": [
+    {
+      "id": "pol-nybilselger",
+      "name": "Nybilselger",
+      "icon": "badge",
+      "description": "Nybilselger - Can create and manage nybil for own dealership",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    },
+    {
+      "id": "pol-bruktbilselger",
+      "name": "Bruktbilselger",
+      "icon": "badge",
+      "description": "Bruktbilselger - Can create bruktbil and search across dealerships",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    },
+    {
+      "id": "pol-delelager",
+      "name": "Delelager",
+      "icon": "badge",
+      "description": "Delelager - Manages parts ordering and tracking",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    },
+    {
+      "id": "pol-mottakskontroll",
+      "name": "Mottakskontrollør",
+      "icon": "badge",
+      "description": "Mottakskontrollør - Performs vehicle inspections",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    },
+    {
+      "id": "pol-booking",
+      "name": "Booking",
+      "icon": "badge",
+      "description": "Booking - Workshop scheduling and assignment",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    },
+    {
+      "id": "pol-mekaniker",
+      "name": "Mekaniker",
+      "icon": "badge",
+      "description": "Mekaniker - Technical prep work with time banking",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    },
+    {
+      "id": "pol-bilpleier",
+      "name": "Bilpleiespesialist",
+      "icon": "badge",
+      "description": "Bilpleiespesialist - Cosmetic prep work with time banking",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    },
+    {
+      "id": "pol-daglig-leder",
+      "name": "Daglig leder",
+      "icon": "badge",
+      "description": "Daglig leder - Read-only access to all dealership data",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    },
+    {
+      "id": "pol-okonomi",
+      "name": "Økonomiansvarlig",
+      "icon": "badge",
+      "description": "Økonomiansvarlig - Financial data access and pricing",
+      "ip_access": null,
+      "enforce_tfa": true,
+      "admin_access": false,
+      "app_access": true
+    }
+  ],
+  "permissions": [
+    {
+      "comment": "=== NYBILSELGER POLICY ===",
+      "collection": "cars",
+      "action": "create",
+      "policy": "pol-nybilselger",
+      "permissions": null,
+      "validation": null,
+      "presets": {
+        "car_type": "nybil"
+      },
+      "fields": [
+        "vin", "license_plate", "brand", "model", "model_year", "color", "order_number",
+        "customer_name", "customer_phone", "customer_email",
+        "car_type", "status", "accessories", "estimated_technical_hours", "estimated_cosmetic_hours",
+        "sale_price", "seller_notes",
+        "dealership_id", "seller_id", "registered_at"
+      ]
+    },
+    {
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-nybilselger",
+      "permissions": {
+        "_and": [
+          {"car_type": {"_eq": "nybil"}},
+          {"dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "cars",
+      "action": "update",
+      "policy": "pol-nybilselger",
+      "permissions": {
+        "_and": [
+          {"car_type": {"_eq": "nybil"}},
+          {"dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"status": {"_neq": "arkivert"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": [
+        "vin", "license_plate", "brand", "model", "model_year", "color", "order_number",
+        "customer_name", "customer_phone", "customer_email",
+        "status", "accessories",
+        "sale_price", "sold_at", "delivered_to_customer_at",
+        "seller_notes"
+      ]
+    },
+    {
+      "collection": "cars",
+      "action": "delete",
+      "policy": "pol-nybilselger",
+      "permissions": {
+        "_and": [
+          {"car_type": {"_eq": "nybil"}},
+          {"dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"status": {"_eq": "ny_ordre"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-nybilselger",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-nybilselger",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["id", "first_name", "last_name", "email", "avatar", "dealership_id"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-nybilselger",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "create",
+      "policy": "pol-nybilselger",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-nybilselger",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "comment": "=== BRUKTBILSELGER POLICY ===",
+      "collection": "cars",
+      "action": "create",
+      "policy": "pol-bruktbilselger",
+      "permissions": null,
+      "validation": null,
+      "presets": {
+        "car_type": "bruktbil"
+      },
+      "fields": [
+        "vin", "license_plate", "brand", "model", "model_year", "color",
+        "car_type", "status", "estimated_technical_hours", "estimated_cosmetic_hours",
+        "sale_price", "seller_notes",
+        "dealership_id", "seller_id", "registered_at"
+      ]
+    },
+    {
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-bruktbilselger",
+      "permissions": {
+        "car_type": {"_eq": "bruktbil"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "cars",
+      "action": "update",
+      "policy": "pol-bruktbilselger",
+      "permissions": {
+        "_and": [
+          {"car_type": {"_eq": "bruktbil"}},
+          {"dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"status": {"_neq": "arkivert"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": [
+        "vin", "license_plate", "brand", "model", "model_year", "color",
+        "status",
+        "sale_price", "sold_at", "delivered_to_customer_at",
+        "seller_notes"
+      ]
+    },
+    {
+      "collection": "cars",
+      "action": "delete",
+      "policy": "pol-bruktbilselger",
+      "permissions": {
+        "_and": [
+          {"car_type": {"_eq": "bruktbil"}},
+          {"dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"status": {"_eq": "innbytte_registrert"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-bruktbilselger",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-bruktbilselger",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["id", "first_name", "last_name", "email", "avatar", "dealership_id"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-bruktbilselger",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "create",
+      "policy": "pol-bruktbilselger",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-bruktbilselger",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "comment": "=== DELELAGER POLICY ===",
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-delelager",
+      "permissions": {
+        "_or": [
+          {"dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "cars",
+      "action": "update",
+      "policy": "pol-delelager",
+      "permissions": {
+        "_and": [
+          {
+            "_or": [
+              {"dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+              {"prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}}
+            ]
+          },
+          {"status": {"_neq": "arkivert"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": [
+        "status",
+        "accessories",
+        "parts_ordered_seller_at", "parts_arrived_seller_at",
+        "parts_ordered_prep_at", "parts_arrived_prep_at",
+        "parts_notes"
+      ]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-delelager",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-delelager",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["id", "first_name", "last_name", "email", "avatar", "dealership_id"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-delelager",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "create",
+      "policy": "pol-delelager",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-delelager",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "comment": "=== MOTTAKSKONTROLLØR POLICY ===",
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-mottakskontroll",
+      "permissions": {
+        "prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "cars",
+      "action": "update",
+      "policy": "pol-mottakskontroll",
+      "permissions": {
+        "_and": [
+          {"prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {
+            "_or": [
+              {"status": {"_eq": "ankommet_klargjoring"}},
+              {"status": {"_eq": "mottakskontroll_pågår"}},
+              {"status": {"_eq": "mottakskontroll_avvik"}}
+            ]
+          }
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": [
+        "status",
+        "arrived_prep_center_at",
+        "inspection_completed_at", "inspection_approved", "inspection_notes"
+      ]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-mottakskontroll",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-mottakskontroll",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["id", "first_name", "last_name", "email", "avatar", "dealership_id"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-mottakskontroll",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "create",
+      "policy": "pol-mottakskontroll",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-mottakskontroll",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "comment": "=== BOOKING POLICY ===",
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-booking",
+      "permissions": {
+        "prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "cars",
+      "action": "update",
+      "policy": "pol-booking",
+      "permissions": {
+        "_and": [
+          {"prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"status": {"_neq": "arkivert"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": [
+        "status",
+        "scheduled_technical_date", "scheduled_technical_time", "assigned_mechanic_id", "estimated_technical_hours",
+        "scheduled_cosmetic_date", "scheduled_cosmetic_time", "assigned_detailer_id", "estimated_cosmetic_hours",
+        "ready_for_delivery_at", "delivered_to_dealership_at"
+      ]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-booking",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-booking",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-booking",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "create",
+      "policy": "pol-booking",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-booking",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "comment": "=== MEKANIKER POLICY ===",
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-mekaniker",
+      "permissions": {
+        "prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "cars",
+      "action": "update",
+      "policy": "pol-mekaniker",
+      "permissions": {
+        "_and": [
+          {"prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"assigned_mechanic_id": {"_eq": "$CURRENT_USER"}},
+          {
+            "_or": [
+              {"status": {"_eq": "planlagt_teknisk"}},
+              {"status": {"_eq": "teknisk_pågår"}}
+            ]
+          }
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": [
+        "status",
+        "technical_started_at", "technical_completed_at", "technical_notes"
+      ]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-mekaniker",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-mekaniker",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["id", "first_name", "last_name", "email", "avatar", "dealership_id"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-mekaniker",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "create",
+      "policy": "pol-mekaniker",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-mekaniker",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "comment": "=== BILPLEIESPESIALIST POLICY ===",
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-bilpleier",
+      "permissions": {
+        "prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "cars",
+      "action": "update",
+      "policy": "pol-bilpleier",
+      "permissions": {
+        "_and": [
+          {"prep_center_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"assigned_detailer_id": {"_eq": "$CURRENT_USER"}},
+          {
+            "_or": [
+              {"status": {"_eq": "planlagt_kosmetisk"}},
+              {"status": {"_eq": "kosmetisk_pågår"}}
+            ]
+          }
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": [
+        "status",
+        "cosmetic_started_at", "cosmetic_completed_at", "cosmetic_notes"
+      ]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-bilpleier",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-bilpleier",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["id", "first_name", "last_name", "email", "avatar", "dealership_id"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-bilpleier",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "create",
+      "policy": "pol-bilpleier",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-bilpleier",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "comment": "=== DAGLIG LEDER POLICY ===",
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-daglig-leder",
+      "permissions": {
+        "dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-daglig-leder",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-daglig-leder",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-daglig-leder",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-daglig-leder",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "comment": "=== ØKONOMIANSVARLIG POLICY ===",
+      "collection": "cars",
+      "action": "read",
+      "policy": "pol-okonomi",
+      "permissions": {
+        "dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "cars",
+      "action": "update",
+      "policy": "pol-okonomi",
+      "permissions": {
+        "_and": [
+          {"dealership_id": {"_eq": "$CURRENT_USER.dealership_id"}},
+          {"status": {"_neq": "arkivert"}}
+        ]
+      },
+      "validation": null,
+      "presets": null,
+      "fields": [
+        "purchase_price", "sale_price", "prep_cost"
+      ]
+    },
+    {
+      "collection": "dealership",
+      "action": "read",
+      "policy": "pol-okonomi",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "read",
+      "policy": "pol-okonomi",
+      "permissions": null,
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    },
+    {
+      "collection": "directus_users",
+      "action": "update",
+      "policy": "pol-okonomi",
+      "permissions": {
+        "id": {"_eq": "$CURRENT_USER"}
+      },
+      "validation": null,
+      "presets": null,
+      "fields": ["first_name", "last_name", "avatar", "email", "password"]
+    },
+    {
+      "collection": "directus_files",
+      "action": "read",
+      "policy": "pol-okonomi",
+      "permissions": {},
+      "validation": null,
+      "presets": null,
+      "fields": ["*"]
+    }
+  ]
+}

@@ -1,8 +1,20 @@
 # DirectApp - Dokploy Deployment Guide
 
+> ⚠️ **LEGACY DOCUMENTATION**
+>
+> This document has been superseded by the new comprehensive documentation:
+> - **Quick Start:** [`docs/ENVIRONMENT_SETUP.md`](docs/ENVIRONMENT_SETUP.md)
+> - **Complete Integration:** [`docs/DOKPLOY_INTEGRATION_SUMMARY.md`](docs/DOKPLOY_INTEGRATION_SUMMARY.md)
+> - **Development Workflow:** [`docs/DEVELOPMENT_WORKFLOW.md`](docs/DEVELOPMENT_WORKFLOW.md)
+> - **All Docs:** [`docs/README.md`](docs/README.md)
+>
+> This file is kept for reference only. Use the new docs above.
+
+---
+
 Complete guide to deploy DirectApp (Directus fork) on Dokploy.
 
-**Last Updated:** 2025-10-18
+**Last Updated:** 2025-10-18 (Superseded: 2025-10-21)
 **Dokploy Version:** Latest
 **DirectApp Version:** Based on Directus 11
 

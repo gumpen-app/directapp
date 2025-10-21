@@ -278,77 +278,113 @@ jobs:
           head: HEAD
 
   # ========================================
-  # Build Docker Image (on main branch)
+  # Deploy Extensions to Staging (auto on main)
   # ========================================
-  build-image:
-    name: Build Docker Image
+  deploy-staging:
+    name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [build-extensions, validate-schema, integration-test]
     if: github.ref == 'refs/heads/main'
+    environment: staging
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+      - name: Download extension artifacts
+        uses: actions/download-artifact@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          name: extensions-dist
+          path: extensions/
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=sha
-            type=ref,event=branch
-            type=semver,pattern={{version}}
+      - name: Install Dokploy CLI
+        run: |
+          curl -sSL https://dokploy.com/install.sh | sh
+          dokploy --version
 
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Authenticate Dokploy
+        run: |
+          echo "${{ secrets.DOKPLOY_API_KEY }}" > ~/.dokploy-token
+          dokploy verify
+
+      - name: Deploy extensions to staging
+        run: |
+          # Upload built extensions to Dokploy staging
+          rsync -avz --include='**/dist/**' --exclude='node_modules' \
+            extensions/ /tmp/staging-extensions/
+
+          # Trigger Dokploy staging deployment
+          curl -X POST "${{ secrets.DOKPLOY_URL }}/api/compose.deploy" \
+            -H "x-api-key: ${{ secrets.DOKPLOY_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"composeId": "${{ secrets.DOKPLOY_STAGING_ID }}"}'
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for staging deployment..."
+          sleep 30
+
+      - name: Health check staging
+        run: |
+          curl -sf "https://staging-gapp.coms.no/server/health" || exit 1
+          echo "✅ Staging deployment successful"
 
   # ========================================
-  # Deploy to Dokploy (manual trigger only)
+  # Deploy to Production (manual trigger only)
   # ========================================
-  deploy-dokploy:
-    name: Deploy to Dokploy
+  deploy-production:
+    name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [build-image]
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: [build-extensions, validate-schema, integration-test]
+    if: github.event_name == 'workflow_dispatch'
     environment: production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy via Dokploy webhook
+      - name: Download extension artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: extensions-dist
+          path: extensions/
+
+      - name: Install Dokploy CLI
         run: |
-          curl -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
+          curl -sSL https://dokploy.com/install.sh | sh
+          dokploy --version
+
+      - name: Authenticate Dokploy
+        run: |
+          echo "${{ secrets.DOKPLOY_API_KEY }}" > ~/.dokploy-token
+          dokploy verify
+
+      - name: Deploy to production
+        run: |
+          # Upload built extensions
+          rsync -avz --include='**/dist/**' --exclude='node_modules' \
+            extensions/ /tmp/production-extensions/
+
+          # Trigger Dokploy production deployment
+          curl -X POST "${{ secrets.DOKPLOY_URL }}/api/compose.deploy" \
+            -H "x-api-key: ${{ secrets.DOKPLOY_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{"ref": "refs/heads/main"}'
+            -d '{"composeId": "${{ secrets.DOKPLOY_PRODUCTION_ID }}"}'
 
       - name: Wait for deployment
         run: |
-          echo "Waiting 60 seconds for deployment..."
-          sleep 60
+          echo "Waiting for production deployment..."
+          sleep 45
 
-      - name: Health check
+      - name: Health check production
         run: |
-          curl -sf "${{ secrets.DIRECTUS_URL }}/server/health" || exit 1
-          echo "✅ Deployment successful"
+          curl -sf "https://gapp.coms.no/server/health" || exit 1
+          echo "✅ Production deployment successful"
+
+      - name: Notify deployment
+        if: always()
+        run: |
+          echo "🚀 Production deployment completed at $(date)"
 
   # ========================================
   # Summary Report
@@ -374,3 +410,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "- Staging: Auto-deploy on main branch" >> $GITHUB_STEP_SUMMARY
+          echo "- Production: Manual trigger via workflow_dispatch" >> $GITHUB_STEP_SUMMARY

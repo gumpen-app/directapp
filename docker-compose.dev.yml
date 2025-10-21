@@ -1,0 +1,200 @@
+# DirectApp - Local Development Docker Compose
+# Fast iteration with hot reload for extensions
+#
+# Usage:
+#   cp .env.development.example .env
+#   docker compose -f docker-compose.dev.yml up
+#
+# Features:
+# - Hot reload for extensions (mounted directly)
+# - Exposed ports for easy access
+# - Local PostgreSQL and Redis
+# - Dev-friendly logging
+
+version: '3.8'
+
+services:
+  # Main Directus application
+  directus:
+    image: directus/directus:11.12.0
+    container_name: directapp-dev
+    restart: unless-stopped
+
+    networks:
+      - directapp-dev
+
+    # Expose port for local access
+    ports:
+      - "8055:8055"
+
+    # Mount extensions for hot reload
+    volumes:
+      - ./extensions:/directus/extensions:cached
+
+    environment:
+      # ========================================
+      # SECURITY KEYS (Dev values - auto-generated)
+      # ========================================
+      KEY: ${DIRECTUS_KEY:-dev-key-replace-in-prod}
+      SECRET: ${DIRECTUS_SECRET:-dev-secret-replace-in-prod}
+
+      # ========================================
+      # ADMIN ACCOUNT (Dev defaults)
+      # ========================================
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@dev.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+
+      # ========================================
+      # DATABASE
+      # ========================================
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-directapp_dev}
+      DB_USER: ${DB_USER:-directus}
+      DB_PASSWORD: ${DB_PASSWORD:-directus}
+
+      # ========================================
+      # PUBLIC URL
+      # ========================================
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8055}
+
+      # ========================================
+      # CACHE (Redis)
+      # ========================================
+      CACHE_ENABLED: "true"
+      CACHE_STORE: redis
+      CACHE_TTL: 10m
+      REDIS: redis://redis:6379
+
+      # ========================================
+      # EXTENSIONS (Hot reload for dev)
+      # ========================================
+      EXTENSIONS_PATH: /directus/extensions
+      EXTENSIONS_AUTO_RELOAD: "true"  # Auto-reload on changes
+
+      # ========================================
+      # STORAGE (Local for dev)
+      # ========================================
+      STORAGE_LOCATIONS: local
+      STORAGE_LOCAL_ROOT: /directus/uploads
+
+      # ========================================
+      # EMAIL (Console output for dev)
+      # ========================================
+      EMAIL_TRANSPORT: sendmail
+      EMAIL_FROM: DirectApp Dev <dev@localhost>
+
+      # ========================================
+      # SECURITY (Relaxed for dev)
+      # ========================================
+      RATE_LIMITER_ENABLED: "false"
+      ACCESS_TOKEN_TTL: 1h
+      REFRESH_TOKEN_TTL: 30d
+
+      # ========================================
+      # CORS (Allow all for dev)
+      # ========================================
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "true"
+      CORS_CREDENTIALS: "true"
+
+      # ========================================
+      # LOGGING (Verbose for dev)
+      # ========================================
+      LOG_LEVEL: debug
+      LOG_STYLE: pretty
+
+      # ========================================
+      # WEBSOCKETS
+      # ========================================
+      WEBSOCKETS_ENABLED: "true"
+
+      # ========================================
+      # MISC
+      # ========================================
+      TELEMETRY: "false"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8055/server/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15.6
+    container_name: directapp-dev-postgres
+    restart: unless-stopped
+
+    networks:
+      - directapp-dev
+
+    # Expose for direct access (e.g., TablePlus, pgAdmin)
+    ports:
+      - "5433:5432"  # Use 5433 to avoid conflict with local postgres
+
+    volumes:
+      - dev-postgres-data:/var/lib/postgresql/data
+
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-directapp_dev}
+      POSTGRES_USER: ${DB_USER:-directus}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-directus}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-directus} -d ${DB_DATABASE:-directapp_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7.2.4-alpine
+    container_name: directapp-dev-redis
+    restart: unless-stopped
+
+    networks:
+      - directapp-dev
+
+    # Expose for direct access (e.g., Redis Commander)
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - dev-redis-data:/data
+
+    command: redis-server --appendonly yes
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Networks
+networks:
+  directapp-dev:
+    driver: bridge
+
+# Volumes
+volumes:
+  dev-postgres-data:
+    driver: local
+  dev-redis-data:
+    driver: local
+
+# Development notes:
+# - Extensions are mounted from ./extensions/ for hot reload
+# - Database is persisted in named volume (survives container restart)
+# - Ports exposed: 8055 (Directus), 5432 (PostgreSQL), 6379 (Redis)
+# - Logging is verbose (debug level)
+# - CORS and rate limiting disabled for easier testing
