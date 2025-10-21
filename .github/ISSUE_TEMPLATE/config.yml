@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/gumpen-app/directapp/discussions
+    about: Ask questions or discuss ideas
+  - name: 📚 Documentation
+    url: https://github.com/gumpen-app/directapp/blob/main/README.md
+    about: Read the documentation

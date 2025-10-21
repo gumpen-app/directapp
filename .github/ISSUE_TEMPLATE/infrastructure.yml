@@ -1,0 +1,125 @@
+name: Infrastructure Task
+description: Infrastructure setup, configuration, or deployment task
+title: "[Infra]: "
+labels: ["type: chore", "component: deployment"]
+projects: ["gumpen-app/1"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Infrastructure Task
+        For deployment, configuration, or infrastructure setup
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: What needs to be set up or configured?
+      placeholder: Describe the infrastructure task
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Which environment does this affect?
+      options:
+        - Local
+        - Staging
+        - Production
+        - All
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: What type of infrastructure?
+      options:
+        - Workflow
+        - Deployment
+        - Schema
+        - API
+        - Extensions
+        - Docs
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration Details
+      description: Specific settings, secrets, environment variables, etc.
+      placeholder: |
+        - Environment variables needed
+        - Configuration files to update
+        - Secrets to set
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification Steps
+      description: How to verify it works
+      placeholder: |
+        - [ ] Step 1 to verify
+        - [ ] Step 2 to verify
+        - [ ] Step 3 to verify
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback Plan
+      description: How to undo if something goes wrong
+      placeholder: Describe rollback procedure
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this?
+      options:
+        - 🔴 Critical
+        - 🟠 High
+        - 🟡 Medium
+        - 🟢 Low
+      default: 1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Estimated Size
+      description: How much effort do you estimate?
+      options:
+        - XS (1 hour)
+        - S (2-4 hours)
+        - M (1 day)
+        - L (2-3 days)
+        - XL (1 week)
+      default: 1
+    validations:
+      required: false
+
+  - type: textarea
+    id: documentation
+    attributes:
+      label: Documentation
+      description: Link to docs or add details that should be documented
+      placeholder: |
+        - Link to relevant docs
+        - New documentation needed
+    validations:
+      required: false

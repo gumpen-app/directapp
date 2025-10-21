@@ -1,0 +1,122 @@
+name: Bug Report
+description: Report a bug or issue
+title: "[Bug]: "
+labels: ["type: bug"]
+projects: ["gumpen-app/1"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug Report
+        Thanks for reporting this issue!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What's broken?
+      placeholder: A clear description of what the bug is
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen?
+      placeholder: Describe what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happens?
+      placeholder: Describe what actually happens
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Where does this occur?
+      options:
+        - Local
+        - Staging
+        - Production
+        - All
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of the system is affected?
+      options:
+        - Workflow
+        - Deployment
+        - Schema
+        - API
+        - UI
+        - Extensions
+        - Docs
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How severe is this bug?
+      options:
+        - 🔴 Critical (Production down, data loss)
+        - 🟠 High (Major functionality broken)
+        - 🟡 Medium (Minor functionality affected)
+        - 🟢 Low (Cosmetic issue)
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Add screenshots if applicable
+      placeholder: Drag and drop images here
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Paste any relevant error messages or logs
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that might help
+      placeholder: Browser version, user role, etc.
+    validations:
+      required: false
