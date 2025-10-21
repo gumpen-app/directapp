@@ -65,3 +65,4 @@ docker-compose.override.yml
 
 # MCP configuration (contains tokens)
 .mcp.json
+.claude/archives/*
