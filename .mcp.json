@@ -35,6 +35,15 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
       "description": "Local filesystem access"
+    },
+    "dokploy": {
+      "command": "/home/claudecode/dev_projects/tools/dokploy-mcp-python/.venv/bin/python",
+      "args": ["/home/claudecode/dev_projects/tools/dokploy-mcp-python/server_full.py"],
+      "env": {
+        "DOKPLOY_URL": "https://deploy.onecom.ai/api",
+        "DOKPLOY_API_KEY": "dd_dSDAITWuPCTmjuHKbLzfAFfItqiqjxBzYZqqjenhxWeSWGJrXeieeGMHojydXOex"
+      },
+      "description": "Dokploy DevOps - Comprehensive MCP: project, compose, domain, deployment, application tools"
     }
   },
   "globalSettings": {

@@ -15,9 +15,9 @@ set -e
 DOKPLOY_URL="https://deploy.onecom.ai"
 DOKPLOY_API_KEY="${DOKPLOY_API_KEY:-g_appBRUNDztIKIeJvKztXhjQFkUGbsySYCrjpMlHVWUryjEJvsLmaDwbmKigsYLDUJqG}"
 
-# Compose IDs
-STAGING_COMPOSE_ID="25M8QUdsDQ97nW5YqPYLZ"
-PRODUCTION_COMPOSE_ID="YKhjz62y5ikBunLd6G2BS"
+# Compose IDs - dynamically fetched or fallback to cached values
+STAGING_COMPOSE_ID="${STAGING_COMPOSE_ID:-USdQOoYpD-sCfneo9kQbs}"
+PRODUCTION_COMPOSE_ID="${PRODUCTION_COMPOSE_ID:-YKhjz62y5ikBunLd6G2BS}"
 
 # Domains
 STAGING_DOMAIN="staging-gapp.coms.no"
@@ -56,6 +56,37 @@ print_warning() {
 
 print_info() {
     echo -e "${BLUE}ℹ $1${NC}"
+}
+
+# Get compose ID dynamically from Dokploy API
+get_compose_id() {
+    local ENV=$1
+    local COMPOSE_NAME=$(echo "$ENV" | tr '[:upper:]' '[:lower:]')
+
+    print_info "Fetching $ENV compose ID from Dokploy..."
+
+    # Get project ID for G-app
+    local PROJECT_ID=$(curl -s "$DOKPLOY_URL/api/project.all" \
+        -H "x-api-key: $DOKPLOY_API_KEY" | \
+        jq -r '.[] | select(.name == "G-app") | .projectId')
+
+    if [ -z "$PROJECT_ID" ]; then
+        print_warning "Could not fetch project ID, using cached compose ID"
+        return 1
+    fi
+
+    # Get compose ID from project
+    local COMPOSE_ID=$(curl -s "$DOKPLOY_URL/api/project.one?projectId=$PROJECT_ID" \
+        -H "x-api-key: $DOKPLOY_API_KEY" | \
+        jq -r ".environments[0].compose[] | select(.name == \"$COMPOSE_NAME\") | .composeId")
+
+    if [ -z "$COMPOSE_ID" ]; then
+        print_warning "Could not fetch compose ID for $ENV, using cached value"
+        return 1
+    fi
+
+    echo "$COMPOSE_ID"
+    return 0
 }
 
 # Check prerequisites
@@ -187,6 +218,16 @@ deploy_staging() {
     print_header "DirectApp - Deploy to Staging"
 
     check_prerequisites
+
+    # Dynamically fetch staging compose ID
+    DYNAMIC_ID=$(get_compose_id "STAGING")
+    if [ $? -eq 0 ] && [ -n "$DYNAMIC_ID" ]; then
+        STAGING_COMPOSE_ID="$DYNAMIC_ID"
+        print_success "Using compose ID: $STAGING_COMPOSE_ID"
+    else
+        print_info "Using cached compose ID: $STAGING_COMPOSE_ID"
+    fi
+
     validate_env "staging"
     build_extensions
     deploy_to_dokploy "STAGING" "$STAGING_COMPOSE_ID" "$STAGING_DOMAIN"
@@ -211,6 +252,16 @@ deploy_production() {
     fi
 
     check_prerequisites
+
+    # Dynamically fetch production compose ID
+    DYNAMIC_ID=$(get_compose_id "PRODUCTION")
+    if [ $? -eq 0 ] && [ -n "$DYNAMIC_ID" ]; then
+        PRODUCTION_COMPOSE_ID="$DYNAMIC_ID"
+        print_success "Using compose ID: $PRODUCTION_COMPOSE_ID"
+    else
+        print_info "Using cached compose ID: $PRODUCTION_COMPOSE_ID"
+    fi
+
     validate_env "production"
     build_extensions
     deploy_to_dokploy "PRODUCTION" "$PRODUCTION_COMPOSE_ID" "$PRODUCTION_DOMAIN"
