@@ -1,0 +1,14 @@
+{
+  "sprint": {
+    "number": 1,
+    "name": "Phase 0: Critical Foundation",
+    "start_date": "2025-10-18",
+    "end_date": "2025-11-01",
+    "total_tasks": 0,
+    "completed_tasks": 0,
+    "in_progress_tasks": 0,
+    "todo_tasks": 0
+  },
+  "tasks": [],
+  "last_updated": "2025-10-19T18:00:00Z"
+}

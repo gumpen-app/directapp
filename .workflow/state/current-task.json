@@ -1,0 +1,12 @@
+{
+  "issue_number": 23,
+  "title": "👥 Opprett test-brukere for alle roller",
+  "branch": "feature/issue-23-create-test-users",
+  "started_at": "2025-10-19T18:00:00Z",
+  "completed_at": "2025-10-19T18:30:00Z",
+  "estimated_hours": 2,
+  "actual_hours": 0.5,
+  "state": "completed",
+  "pr_number": 62,
+  "pr_url": "https://github.com/gumpen-app/directapp/pull/62"
+}
