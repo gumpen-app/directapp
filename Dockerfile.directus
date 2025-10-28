@@ -1,0 +1,67 @@
+# Custom Directus Image with Extensions
+# Builds on official Directus 11.12.0 with custom extensions
+
+FROM directus/directus:11.12.0 AS base
+
+# Set working directory
+WORKDIR /directus
+
+# Copy extension source files and base tsconfig
+COPY --chown=node:node extensions /directus/extensions-build
+COPY --chown=node:node tsconfig.base.json /directus/tsconfig.base.json
+
+# Install dependencies and build all extensions
+# CRITICAL: Directus base image has npm configured to omit dev dependencies
+# We must explicitly include them to get @directus/extensions-sdk
+RUN cd /directus/extensions-build && \
+    # Build each extension individually with dev dependencies included
+    # Skip .disabled directories
+    for ext_dir in directus-extension-*/ operations/*/; do \
+        # Skip if directory name contains .disabled
+        if echo "$ext_dir" | grep -q '\.disabled'; then \
+            echo "Skipping disabled: $ext_dir"; \
+            continue; \
+        fi; \
+        if [ -f "$ext_dir/package.json" ]; then \
+            echo "Building $ext_dir"; \
+            (cd "$ext_dir" && \
+                npm install --include=dev --legacy-peer-deps && \
+                npm run build \
+            ); \
+        fi; \
+    done && \
+    # Create final extensions directory
+    mkdir -p /directus/extensions && \
+    # Copy built extensions (dist directories only)
+    find /directus/extensions-build -maxdepth 2 -name "dist" -type d | while read dist; do \
+        ext_dir=$(dirname "$dist"); \
+        ext_name=$(basename "$ext_dir"); \
+        if [ ! "$ext_name" = "extensions-build" ]; then \
+            mkdir -p "/directus/extensions/$ext_name"; \
+            cp -r "$dist" "/directus/extensions/$ext_name/"; \
+            # Copy package.json for metadata
+            if [ -f "$ext_dir/package.json" ]; then \
+                cp "$ext_dir/package.json" "/directus/extensions/$ext_name/"; \
+            fi; \
+        fi; \
+    done && \
+    # Install production dependencies for extensions that need them
+    cd /directus/extensions && \
+    for ext_dir in */; do \
+        if [ -f "$ext_dir/package.json" ]; then \
+            echo "Installing production deps for $ext_dir"; \
+            (cd "$ext_dir" && npm install --production --no-package-lock); \
+        fi; \
+    done && \
+    # Clean up build artifacts
+    rm -rf /directus/extensions-build
+
+# Verify extensions were copied
+RUN ls -la /directus/extensions && \
+    echo "Extensions built and ready"
+
+# Switch back to node user for runtime
+USER node
+
+# Use the standard Directus entrypoint
+CMD ["node", "/directus/cli.js", "start"]

@@ -3,10 +3,11 @@
 #
 # Usage:
 #   cp .env.development.example .env
-#   docker compose -f docker-compose.dev.yml up
+#   docker compose -f docker-compose.dev.yml up --build
 #
 # Features:
-# - Hot reload for extensions (mounted directly)
+# - Custom Directus image with extensions baked in
+# - Hot reload for extension development (rebuild image to update)
 # - Exposed ports for easy access
 # - Local PostgreSQL and Redis
 # - Dev-friendly logging
@@ -14,9 +15,12 @@
 version: '3.8'
 
 services:
-  # Main Directus application
+  # Main Directus application with custom extensions
   directus:
-    image: directus/directus:11.12.0
+    build:
+      context: .
+      dockerfile: Dockerfile.directus
+    image: directapp-dev:latest
     container_name: directapp-dev
     restart: unless-stopped
 
@@ -27,9 +31,10 @@ services:
     ports:
       - "8055:8055"
 
-    # Mount extensions for hot reload
-    volumes:
-      - ./extensions:/directus/extensions:cached
+    # For development: mount extensions for quick iteration
+    # Uncomment to enable hot reload (requires container restart)
+    # volumes:
+    #   - ./extensions:/directus/extensions:cached
 
     environment:
       # ========================================
@@ -68,10 +73,10 @@ services:
       REDIS: redis://redis:6379
 
       # ========================================
-      # EXTENSIONS (Hot reload for dev)
+      # EXTENSIONS (Baked into image)
       # ========================================
       EXTENSIONS_PATH: /directus/extensions
-      EXTENSIONS_AUTO_RELOAD: "true"  # Auto-reload on changes
+      EXTENSIONS_AUTO_RELOAD: "false"  # Extensions are in image, not mounted
 
       # ========================================
       # STORAGE (Local for dev)
@@ -193,8 +198,10 @@ volumes:
     driver: local
 
 # Development notes:
-# - Extensions are mounted from ./extensions/ for hot reload
+# - Extensions are baked into the image (rebuild to update)
+# - To enable hot reload: uncomment volumes section and set EXTENSIONS_AUTO_RELOAD=true
 # - Database is persisted in named volume (survives container restart)
 # - Ports exposed: 8055 (Directus), 5432 (PostgreSQL), 6379 (Redis)
 # - Logging is verbose (debug level)
 # - CORS and rate limiting disabled for easier testing
+# - Rebuild image after extension changes: docker compose -f docker-compose.dev.yml build

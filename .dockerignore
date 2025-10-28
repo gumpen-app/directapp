@@ -1,10 +1,36 @@
-**/.editorconfig
-**/.dockerignore
-**/Dockerfile
-**/.git
-**/.DS_Store
-**/.vscode
-**/node_modules
-**/dist
-**/.env
-**/.cache
+# Ignore node_modules from extensions (will be installed in container)
+extensions/*/node_modules
+extensions/**/node_modules
+extensions/.pnpm-store
+
+# Ignore build artifacts
+extensions/*/dist
+extensions/**/dist
+
+# Ignore disabled extensions
+extensions/*.disabled
+
+# Ignore common files
+.git
+.github
+.vscode
+.idea
+*.log
+
+# Ignore Docker files
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Ignore env files
+.env*
+!.env.example
+
+# Ignore test files
+**/*.test.ts
+**/*.spec.ts
+**/tests
+**/test
+
+# Ignore documentation
+docs/
