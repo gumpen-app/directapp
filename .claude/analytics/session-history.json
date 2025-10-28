@@ -42,10 +42,89 @@
       "id": "session_1761047122910",
       "number": 5,
       "started_at": "2025-10-21T11:45:22.910Z",
-      "ended_at": null,
-      "duration_hours": null,
+      "ended_at": "2025-10-21T12:04:08.601Z",
+      "duration_hours": 0,
+      "commands_run": 0,
+      "tasks_completed": 0,
+      "orphaned": true
+    },
+    {
+      "id": "session_1761048248601",
+      "number": 6,
+      "started_at": "2025-10-21T12:04:08.601Z",
+      "ended_at": "2025-10-21T15:18:20.343Z",
+      "duration_hours": 0,
+      "commands_run": 0,
+      "tasks_completed": 0,
+      "orphaned": true
+    },
+    {
+      "id": "session_1761059900344",
+      "number": 7,
+      "started_at": "2025-10-21T15:18:20.344Z",
+      "ended_at": "2025-10-21T15:20:09.107Z",
+      "duration_hours": 0,
+      "commands_run": 0,
+      "tasks_completed": 0,
+      "orphaned": true
+    },
+    {
+      "id": "session_1761060009107",
+      "number": 8,
+      "started_at": "2025-10-21T15:20:09.108Z",
+      "ended_at": "2025-10-21T15:50:04.274Z",
+      "duration_hours": 0.5,
       "commands_run": 0,
       "tasks_completed": 0
+    },
+    {
+      "id": "session_1761061977856",
+      "number": 9,
+      "started_at": "2025-10-21T15:52:57.856Z",
+      "ended_at": "2025-10-28T20:48:23.244599+00:00",
+      "duration_hours": 172.9,
+      "commands_run": 3,
+      "tasks_completed": 1,
+      "active_task": {
+        "issue_number": 66,
+        "title": "Phase 1.2: Deployment Pipeline Validation",
+        "branch": "feature/issue-66-phase-1-2-deployment-pipeline-validation",
+        "pr_number": 73,
+        "status": "validation_complete",
+        "blockers_found": 5,
+        "docs_created": [
+          "DEPLOYMENT_VALIDATION_REPORT.md",
+          "DOKPLOY_MANAGEMENT_COMPLETE.md"
+        ],
+        "next_action": "fix_ssl_certificate"
+      }
+    },
+    {
+      "id": "session_1761684907797",
+      "number": 10,
+      "started_at": "2025-10-28T20:55:07.797279+00:00",
+      "ended_at": null,
+      "duration_hours": null,
+      "commands_run": 1,
+      "tasks_completed": 0,
+      "active_task": {
+        "issue_number": 67,
+        "title": "Phase 1.3: Local Development Environment Setup",
+        "branch": "feature/issue-67-phase-1-3-local-dev-environment",
+        "priority": "high",
+        "type": "chore",
+        "component": "deployment",
+        "estimated_hours": 3,
+        "verification_steps": [
+          "docker compose -f docker-compose.dev.yml up works",
+          "Access Directus at http://localhost:8055",
+          "Admin login works (admin@example.com / admin)",
+          "Extensions hot reload when modified",
+          "Database migrations apply correctly",
+          "Redis cache functional",
+          "MCP server connects to local instance"
+        ]
+      }
     }
   ]
 }
