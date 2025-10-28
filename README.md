@@ -46,7 +46,7 @@ open http://localhost:8055/admin
 
 # 4. Login (default credentials)
 # Email: admin@dev.local
-# Password: DevPassword123!
+# Password: admin
 ```
 
 **Complete guide:** [Development Workflow](./docs/DEVELOPMENT_WORKFLOW.md)

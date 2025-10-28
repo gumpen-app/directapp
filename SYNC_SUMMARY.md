@@ -95,7 +95,7 @@ docker compose -f docker-compose.development.yml up
 
 # Wait for healthy (~2 min)
 # Open http://localhost:8055/admin
-# Login: admin@dev.local / DevPassword123!
+# Login: admin@dev.local / admin
 ```
 
 ### Step 2: Fix Critical Permissions (Issues #1, #2, #3)

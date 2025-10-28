@@ -72,7 +72,7 @@ pnpm dev
 
 # 3. Access Directus
 open http://localhost:8055/admin
-# Login: admin@dev.local / DevPassword123!
+# Login: admin@dev.local / admin
 
 # 4. Read the workflow guide
 cat docs/DEVELOPMENT_WORKFLOW.md

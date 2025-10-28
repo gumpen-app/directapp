@@ -1,12 +1,13 @@
 {
   "mcpServers": {
     "directapp-dev": {
-      "url": "http://localhost:8055/mcp",
-      "transport": "http",
-      "headers": {
-        "Authorization": "Bearer xbocgDn1b9VN6OvZXtsX4VHhs68AS8-a"
+      "command": "npx",
+      "args": ["-y", "@staminna/directus-mcp-server"],
+      "env": {
+        "DIRECTUS_URL": "http://localhost:8055",
+        "DIRECTUS_TOKEN": "xbocgDn1b9VN6OvZXtsX4VHhs68AS8-a"
       },
-      "description": "Directus CMS (local development - Official HTTP MCP)"
+      "description": "Directus CMS (local development)"
     },
     "directapp-pilot": {
       "command": "npx",

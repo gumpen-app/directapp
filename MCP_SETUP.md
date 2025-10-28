@@ -26,7 +26,7 @@ This document explains how to connect to the DirectApp Directus instance via Mod
          "command": "npx",
          "args": [
            "-y",
-           "@directus/mcp-server",
+           "@staminna/directus-mcp-server",
            "--url",
            "http://localhost:8055",
            "--token",
@@ -44,7 +44,7 @@ This document explains how to connect to the DirectApp Directus instance via Mod
 ```bash
 # Quick token for testing
 cat > /tmp/login.json <<'EOF'
-{"email":"admin@example.com","password":"DevPassword123!"}
+{"email":"admin@dev.local","password":"admin"}
 EOF
 
 TOKEN=$(curl -s -X POST http://localhost:8055/auth/login \
@@ -58,8 +58,8 @@ source directus_token.env
 ### Method 2: Static Token (Recommended - Never expires)
 
 1. Log into Directus: http://localhost:8055
-   - Email: `admin@example.com`
-   - Password: `DevPassword123!`
+   - Email: `admin@dev.local`
+   - Password: `admin`
 
 2. Navigate to **Settings → Access Tokens**
 
@@ -138,8 +138,8 @@ await mcp.read_items({
 - Check that the policy linked to your token includes the collections you're accessing
 
 ### MCP server not found
-- Ensure `@directus/mcp-server` is available via npx
-- Try: `npx -y @directus/mcp-server --help`
+- Ensure `@staminna/directus-mcp-server` is available via npx
+- Try: `npx -y @staminna/directus-mcp-server --help`
 
 ### Connection refused
 - Check that Directus is running: `docker ps | grep directapp`
@@ -149,9 +149,9 @@ await mcp.read_items({
 ## Development Notes
 
 - **Development URL:** http://localhost:8055
-- **Admin Login:** admin@example.com / DevPassword123!
+- **Admin Login:** admin@dev.local / admin
 - **Database:** PostgreSQL on localhost:5433
-- **Redis:** localhost:6380
+- **Redis:** localhost:6379
 
 ## Security Notes
 

@@ -57,6 +57,7 @@
 		"pnpm": ">=10 <11"
 	},
 	"dependencies": {
+		"@directus/extensions-sdk": "catalog:",
 		"@directus/sdk": "catalog:"
 	}
 }

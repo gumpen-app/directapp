@@ -93,7 +93,7 @@ Contains:
    ```
    http://localhost:8055
    Email: admin@dev.local
-   Password: DevPassword123!
+   Password: admin
    ```
 
 2. **For Each Policy:**
