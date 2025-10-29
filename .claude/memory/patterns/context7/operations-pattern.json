@@ -1,0 +1,178 @@
+{
+  "name": "directus-operations-pattern",
+  "source": "context7",
+  "library": "/directus/docs",
+  "confidence": 0.95,
+  "extractedAt": "2025-10-28T21:35:00Z",
+  "pattern": {
+    "type": "operation",
+    "description": "Directus operations are reusable building blocks for Flows (automation workflows). They consist of two files: app.js (UI config) and api.js (execution logic).",
+    "files": {
+      "app.js": "UI configuration - defines how operation appears in Flow builder",
+      "api.js": "Backend logic - executes when Flow runs",
+      "package.json": "Extension metadata"
+    },
+    "structure": {
+      "app": {
+        "id": "Unique operation identifier",
+        "name": "Display name in UI",
+        "icon": "Material icon name",
+        "description": "Brief description",
+        "overview": "Function returning array of {label, text} for operation card",
+        "options": "Array of field definitions for user configuration"
+      },
+      "api": {
+        "id": "Must match app.js id",
+        "handler": "Function receiving (options, context) => result"
+      }
+    },
+    "examples": [
+      {
+        "name": "Twilio SMS Operation",
+        "description": "Send SMS messages via Twilio API",
+        "files": {
+          "app.js": "import { defineOperationApp } from '@directus/extensions-sdk';\n\nexport default defineOperationApp({\n  id: 'operation-twilio-sms',\n  name: 'Twilio SMS',\n  icon: 'forum',\n  description: 'Send SMS using the Twilio API.',\n  overview: ({ phone_number, message }) => [\n    {\n      label: 'Phone Number',\n      text: phone_number,\n    },\n    {\n      label: 'Message',\n      text: message,\n    },\n  ],\n  options: [\n    {\n      field: 'phone_number',\n      name: 'Phone Number',\n      type: 'string',\n      meta: {\n        width: 'full',\n        interface: 'input',\n      },\n    },\n    {\n      field: 'message',\n      name: 'Message',\n      type: 'text',\n      meta: {\n        width: 'full',\n        interface: 'input-multiline',\n      },\n    },\n  ],\n});",
+          "api.js": "import { defineOperationApi } from '@directus/extensions-sdk';\nimport twilio from 'twilio';\n\nexport default defineOperationApi({\n  id: 'operation-twilio-sms',\n  handler: async ({ phone_number, message }, { env }) => {\n    const client = twilio(\n      env.TWILIO_ACCOUNT_SID,\n      env.TWILIO_AUTH_TOKEN\n    );\n\n    await client.messages.create({\n      body: message,\n      from: env.TWILIO_PHONE_NUMBER,\n      to: phone_number,\n    });\n\n    return { success: true };\n  },\n});"
+        },
+        "useCases": [
+          "Send SMS notifications",
+          "Two-factor authentication",
+          "Alert systems"
+        ]
+      },
+      {
+        "name": "NPM Package Integration (Lodash)",
+        "description": "Use npm packages within operations",
+        "files": {
+          "app.js": "export default {\n  id: 'operation-lodash-camelcase',\n  name: 'Lodash Camel Case',\n  icon: 'electric_bolt',\n  description: 'Use Lodash Camel Case Function.',\n  overview: ({ text }) => [\n    {\n      label: 'Text',\n      text: text,\n    },\n  ],\n  options: [\n    {\n      field: 'text',\n      name: 'Text',\n      type: 'string',\n      meta: {\n        width: 'full',\n        interface: 'input',\n      },\n    },\n  ],\n};",
+          "api.js": "import { defineOperationApi } from '@directus/extensions-sdk';\nimport { camelCase } from 'lodash';\n\nexport default defineOperationApi({\n  id: 'operation-lodash-camelcase',\n  handler: ({ text }) => {\n    return {\n      text: camelCase(text),\n    };\n  },\n});"
+        },
+        "useCases": [
+          "String transformation",
+          "Data formatting",
+          "Text processing"
+        ]
+      },
+      {
+        "name": "Logger Initialization with Metadata",
+        "description": "Initialize logging context with UUID and metadata",
+        "files": {
+          "app.js": "import { defineOperationApp } from '@directus/extensions-sdk';\n\nexport default defineOperationApp({\n  id: 'initialize_logger',\n  name: 'Init Logger',\n  icon: 'box',\n  description: 'Simple operation that sets the context and uuid for the session scope',\n  overview: ({ loggingContext, metaData }) => [\n    {\n      label: 'Logging Context',\n      text: loggingContext,\n    },\n    {\n      label: 'Meta Data',\n      text: metaData,\n    },\n  ],\n  options: [\n    {\n      field: 'loggingContext',\n      name: 'Logging Context',\n      type: 'string',\n      meta: {\n        width: 'full',\n        interface: 'input',\n      },\n    },\n    {\n      field: 'metaData',\n      name: 'Meta Data',\n      type: 'json',\n      meta: {\n        interface: 'code',\n        options: {\n          language: 'json'\n        },\n      }\n    },\n  ],\n});",
+          "api.js": "import { defineOperationApi } from '@directus/extensions-sdk';\nimport { randomUUID as uuidv4 } from 'crypto';\nimport { mapValues, isPlainObject } from 'lodash';\n\ntype Options = {\n  loggingContext: string;\n  metaData: any\n};\n\nexport default defineOperationApi<Options>({\n  id: 'initialize_logger',\n  handler: ({ loggingContext, metaData }, { logger }) => {\n    // Deep map to mask sensitive data\n    const mapValuesDeep = (obj, fn) =>\n      mapValues(obj, (val, key) =>\n        isPlainObject(val) ? mapValuesDeep(val, fn) : fn(val, key, obj)\n      );\n\n    metaData = mapValuesDeep(metaData, function(val, key, obj) {\n      if (key === 'password') {\n        val = '*****';\n      }\n      return val;\n    });\n\n    return { uuid: uuidv4(), context: loggingContext, meta: metaData };\n  },\n});"
+        },
+        "useCases": [
+          "Event logging",
+          "Audit trails",
+          "Debugging workflows"
+        ]
+      }
+    ],
+    "contextParams": {
+      "services": "Access to Directus services (ItemsService, etc.)",
+      "getSchema": "Function to get current schema",
+      "env": "Environment variables",
+      "database": "Knex database instance",
+      "logger": "Directus logger instance",
+      "data": "Data chain from previous operations",
+      "accountability": "Current user accountability"
+    },
+    "patterns": {
+      "dataChainAccess": {
+        "description": "Access data from previous operations in Flow",
+        "code": "handler: (options, { data }) => {\n  const previousResult = data.previousOperationKey;\n  const triggerData = data.$trigger;\n  const currentUser = data.$accountability.user;\n  \n  // Process data\n  return { result: processed };\n}",
+        "recommendation": "Use operation keys to reference previous results, not $last"
+      },
+      "envVariables": {
+        "description": "Access environment variables for API keys",
+        "code": "handler: async (options, { env }) => {\n  const apiKey = env.EXTERNAL_API_KEY;\n  const apiSecret = env.EXTERNAL_API_SECRET;\n  \n  // Use credentials\n}",
+        "recommendation": "Never hardcode secrets, always use env variables"
+      },
+      "serviceUsage": {
+        "description": "Use Directus services to interact with data",
+        "code": "handler: async (options, { services, getSchema, accountability }) => {\n  const { ItemsService } = services;\n  const items = new ItemsService('collection_name', {\n    schema: await getSchema(),\n    accountability\n  });\n  \n  const data = await items.readByQuery({ filter: { status: { _eq: 'active' } } });\n  return { items: data };\n}",
+        "recommendation": "Use services to respect permissions and accountability"
+      }
+    },
+    "recommendations": [
+      {
+        "priority": "HIGH",
+        "title": "Return Data for Next Operations",
+        "description": "Always return an object that next operations can access via data chain",
+        "timeSaved": "2-3 hours debugging flow data",
+        "example": "return { success: true, result: processedData };"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Use defineOperationApi/App",
+        "description": "Use SDK functions for proper typing and validation",
+        "timeSaved": "1-2 hours fixing type errors",
+        "example": "import { defineOperationApi } from '@directus/extensions-sdk';"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Handle Async Operations",
+        "description": "Wrap async operations in try-catch for error handling",
+        "timeSaved": "2-4 hours debugging flow failures",
+        "example": "try { await apiCall(); } catch (error) { logger.error(error); throw error; }"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Provide Meaningful Overview",
+        "description": "Overview function shows key info on operation card in Flow builder",
+        "timeSaved": "Better UX, easier debugging",
+        "example": "overview: ({ field1, field2 }) => [{ label: 'Field 1', text: field1 }]"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Use Proper Field Interfaces",
+        "description": "Choose appropriate interface for each option field",
+        "timeSaved": "Better user experience",
+        "example": "meta: { interface: 'input-multiline' } // for text areas"
+      },
+      {
+        "priority": "LOW",
+        "title": "TypeScript for Type Safety",
+        "description": "Use TypeScript with type definitions for options",
+        "timeSaved": "Catch errors at compile time",
+        "example": "type Options = { text: string; count: number };"
+      }
+    ],
+    "antiPatterns": [
+      {
+        "name": "Not Returning Data",
+        "bad": "handler: ({ text }) => {\n  console.log(text);\n  // No return statement\n}",
+        "good": "handler: ({ text }) => {\n  console.log(text);\n  return { processed: text };\n}",
+        "reason": "Next operations can't access results"
+      },
+      {
+        "name": "Hardcoded API Keys",
+        "bad": "const apiKey = 'sk_live_abc123';",
+        "good": "const apiKey = env.API_KEY;",
+        "reason": "Security risk - credentials exposed in code"
+      },
+      {
+        "name": "Using $last in Options",
+        "bad": "// In Flow config\n{{ $last.value }}",
+        "good": "{{ operationKey.value }}",
+        "reason": "$last breaks when operations are reordered"
+      },
+      {
+        "name": "Missing Error Handling",
+        "bad": "handler: async ({ url }) => {\n  const response = await fetch(url);\n  return response.json();\n}",
+        "good": "handler: async ({ url }, { logger }) => {\n  try {\n    const response = await fetch(url);\n    return await response.json();\n  } catch (error) {\n    logger.error('Fetch failed:', error);\n    throw error;\n  }\n}",
+        "reason": "Unhandled errors break entire Flow"
+      },
+      {
+        "name": "Mismatched IDs",
+        "bad": "// app.js: id: 'operation-sms'\n// api.js: id: 'sms-operation'",
+        "good": "// Both files: id: 'operation-sms'",
+        "reason": "Operation won't register correctly"
+      }
+    ]
+  },
+  "metadata": {
+    "codeExamples": 15,
+    "useCases": 9,
+    "recommendationsCount": 6
+  }
+}

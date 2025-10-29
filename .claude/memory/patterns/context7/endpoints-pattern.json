@@ -1,0 +1,176 @@
+{
+  "name": "directus-endpoints-pattern",
+  "source": "context7",
+  "library": "/directus/docs",
+  "confidence": 0.95,
+  "extractedAt": "2025-10-28T21:35:00Z",
+  "pattern": {
+    "type": "endpoint",
+    "description": "Directus endpoints allow you to register custom API routes with Express-style routing. Supports authentication, service integration, and external API proxying.",
+    "files": {
+      "index.js": "Main entrypoint - exports router handler or config object",
+      "package.json": "Extension metadata with directus:extension type"
+    },
+    "apiSignatures": {
+      "basicHandler": {
+        "export": "export default (router, context) => { router.get('/', (req, res) => res.send('Hello, World!')); }",
+        "description": "Simple function export - mounts routes under /extension-name"
+      },
+      "configHandler": {
+        "export": "export default { id: 'greet', handler: (router, context) => { /* routes */ } }",
+        "description": "Config object with custom ID - mounts routes under /id"
+      },
+      "sandboxHandler": {
+        "export": "export default (router: SandboxEndpointRouter) => { router.get('/', () => ({ status: 200, body: 'Hello' })) }",
+        "description": "Sandboxed environment - no req/res, return response objects"
+      },
+      "contextParams": {
+        "services": "Access to Directus services (ItemsService, UsersService, etc.)",
+        "getSchema": "Function to get current schema",
+        "env": "Environment variables",
+        "database": "Knex database instance",
+        "logger": "Directus logger instance"
+      }
+    },
+    "examples": [
+      {
+        "name": "Authenticated External API Proxy",
+        "description": "Proxy external API with Directus authentication",
+        "code": "export default {\n  id: 'pokeapi',\n  handler: (router, { services }) => {\n    const { ItemsService } = services;\n\n    router.get('/*', async (req, res) => {\n      try {\n        const user = req.accountability?.user;\n        \n        // Validate user is authenticated\n        const users = new ItemsService('directus_users', {\n          schema: await getSchema(),\n          accountability: req.accountability\n        });\n        const authenticatedUser = await users.readOne(user);\n        \n        if (!authenticatedUser) {\n          res.status(403);\n          return res.send('You don\\'t have permission to access this.');\n        }\n\n        // Proxy to external API\n        const response = await fetch(`https://pokeapi.co/api/v2/${req.url}`);\n        \n        if (response.ok) {\n          res.json(await response.json());\n        } else {\n          res.status(response.status);\n          res.send(response.statusText);\n        }\n      } catch (error) {\n        res.status(500);\n        res.send(error.message);\n      }\n    });\n  }\n}",
+        "useCases": [
+          "Proxy external APIs through Directus auth",
+          "Add caching layer to external APIs",
+          "Transform external API responses"
+        ]
+      },
+      {
+        "name": "Multiple Routes with Config",
+        "description": "Define multiple sub-routes under a single endpoint",
+        "code": "export default {\n  id: 'greet',\n  handler: (router, context) => {\n    router.get('/', (req, res) => res.send('Hello, World!'));\n    router.get('/intro', (req, res) => res.send('Nice to meet you.'));\n    router.get('/goodbye', (req, res) => res.send('Goodbye!'));\n  }\n};\n// Available at: /greet, /greet/intro, /greet/goodbye",
+        "useCases": [
+          "Create RESTful API endpoints",
+          "Group related routes together",
+          "Custom admin interfaces"
+        ]
+      },
+      {
+        "name": "Stripe Integration Endpoint",
+        "description": "Integration with Stripe API with permission checks",
+        "code": "import Stripe from 'stripe';\n\nexport default {\n  id: 'stripe',\n  handler: (router, { env, services }) => {\n    const stripe = new Stripe(env.STRIPE_LIVE_SECRET_KEY);\n\n    // Middleware to check permissions\n    async function checkPermissions(req, res, next) {\n      try {\n        const response = await fetch(`http://directus.example.com/permissions/me`, {\n          headers: {\n            'Authorization': `Bearer ${req.token}`,\n            'Content-Type': 'application/json'\n          }\n        });\n        const permissions = await response.json();\n        \n        if (permissions.data[env.STRIPE_CUSTOMERS_COLLECTION]?.read?.access === 'full') {\n          next();\n        } else {\n          res.sendStatus(401);\n        }\n      } catch(e) {\n        res.sendStatus(401);\n      }\n    }\n\n    router.get('/payments', checkPermissions, async (req, res) => {\n      const output = [];\n      await stripe.paymentIntents.list({ limit: 100 })\n        .autoPagingEach((payment) => output.push(payment));\n      res.json(output);\n    });\n\n    router.post('/customers', checkPermissions, async (req, res) => {\n      if (req.body.email) {\n        const customer = await stripe.customers.create({\n          email: req.body.email,\n          name: req.body.name\n        });\n        res.json(customer);\n      } else {\n        res.sendStatus(400);\n      }\n    });\n  }\n}",
+        "useCases": [
+          "Payment gateway integration",
+          "Permission-based API access",
+          "External service orchestration"
+        ]
+      },
+      {
+        "name": "TypeScript Sandboxed Endpoint",
+        "description": "Type-safe sandboxed endpoint with limited access",
+        "code": "/// <reference types=\"@directus/extensions/api.d.ts\" />\nimport type { SandboxEndpointRouter } from 'directus:api';\n\nexport default (router: SandboxEndpointRouter) => {\n  router.get('/', () => {\n    return {\n      status: 200,\n      body: 'Hello World'\n    };\n  });\n  \n  router.post('/data', (request) => {\n    const { body } = request;\n    \n    // Process data\n    return {\n      status: 200,\n      body: { processed: true, data: body }\n    };\n  });\n}",
+        "useCases": [
+          "Secure extension environment",
+          "Type-safe endpoints",
+          "Restricted access scenarios"
+        ]
+      }
+    ],
+    "patterns": {
+      "authentication": {
+        "description": "Check user authentication in endpoints",
+        "code": "const user = req.accountability?.user;\nif (!user) {\n  res.status(403);\n  return res.send('Authentication required');\n}",
+        "recommendation": "ALWAYS validate req.accountability before accessing protected data"
+      },
+      "serviceUsage": {
+        "description": "Use Directus services for data access",
+        "code": "const { ItemsService } = services;\nconst items = new ItemsService('collection_name', {\n  schema: await getSchema(),\n  accountability: req.accountability\n});\nconst data = await items.readByQuery({ filter: { status: { _eq: 'published' } } });",
+        "recommendation": "Use services instead of raw database queries to respect permissions"
+      },
+      "errorHandling": {
+        "description": "Proper error handling in async routes",
+        "code": "router.get('/data', async (req, res) => {\n  try {\n    const data = await fetchExternalData();\n    res.json(data);\n  } catch (error) {\n    res.status(500).send(error.message);\n  }\n});",
+        "recommendation": "ALWAYS wrap async operations in try-catch"
+      }
+    },
+    "recommendations": [
+      {
+        "priority": "HIGH",
+        "title": "Always Validate Authentication",
+        "description": "Check req.accountability before processing sensitive operations",
+        "timeSaved": "2-4 hours debugging security issues",
+        "example": "if (!req.accountability?.user) return res.sendStatus(403);"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Use Services for Data Access",
+        "description": "Use ItemsService instead of raw database queries to respect permissions",
+        "timeSaved": "3-5 hours fixing permission bugs",
+        "example": "new ItemsService('collection', { schema, accountability })"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Handle Async Errors",
+        "description": "Wrap all async route handlers in try-catch",
+        "timeSaved": "1-2 hours debugging crashes",
+        "example": "try { await operation(); } catch (e) { res.status(500).send(e.message); }"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Use Config Object for Custom Paths",
+        "description": "Export config with 'id' to customize endpoint path",
+        "timeSaved": "1 hour understanding routing",
+        "example": "export default { id: 'custom-path', handler: (router) => {} }"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Environment Variables for Secrets",
+        "description": "Access secrets via context.env, never hardcode",
+        "timeSaved": "Security vulnerability avoided",
+        "example": "const apiKey = env.EXTERNAL_API_KEY;"
+      },
+      {
+        "priority": "LOW",
+        "title": "Consider Sandboxed Mode",
+        "description": "Use sandboxed endpoints for restricted environments",
+        "timeSaved": "Enhanced security",
+        "example": "/// <reference types=\"@directus/extensions/api.d.ts\" />"
+      }
+    ],
+    "antiPatterns": [
+      {
+        "name": "Hardcoded Credentials",
+        "bad": "const apiKey = 'sk_live_abc123';",
+        "good": "const apiKey = env.STRIPE_API_KEY;",
+        "reason": "Security risk - credentials in code"
+      },
+      {
+        "name": "Raw Database Queries",
+        "bad": "const data = await database('items').where('status', 'published');",
+        "good": "const items = new ItemsService('items', { schema, accountability });\nconst data = await items.readByQuery({ filter: { status: { _eq: 'published' } } });",
+        "reason": "Bypasses permissions and accountability"
+      },
+      {
+        "name": "Missing Error Handling",
+        "bad": "router.get('/', async (req, res) => {\n  const data = await fetch(url);\n  res.json(data);\n});",
+        "good": "router.get('/', async (req, res) => {\n  try {\n    const data = await fetch(url);\n    res.json(data);\n  } catch (error) {\n    res.status(500).send(error.message);\n  }\n});",
+        "reason": "Unhandled promise rejection crashes server"
+      },
+      {
+        "name": "No Authentication Check",
+        "bad": "router.get('/data', async (req, res) => {\n  const data = await getPrivateData();\n  res.json(data);\n});",
+        "good": "router.get('/data', async (req, res) => {\n  if (!req.accountability?.user) return res.sendStatus(403);\n  const data = await getPrivateData();\n  res.json(data);\n});",
+        "reason": "Exposes private data without authentication"
+      },
+      {
+        "name": "Synchronous Blocking Operations",
+        "bad": "router.get('/', (req, res) => {\n  const data = fs.readFileSync('large-file.json');\n  res.json(data);\n});",
+        "good": "router.get('/', async (req, res) => {\n  const data = await fs.promises.readFile('large-file.json');\n  res.json(data);\n});",
+        "reason": "Blocks event loop, degrades performance"
+      }
+    ]
+  },
+  "metadata": {
+    "codeExamples": 20,
+    "useCases": 10,
+    "recommendationsCount": 6
+  }
+}

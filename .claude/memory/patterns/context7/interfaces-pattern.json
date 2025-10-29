@@ -1,0 +1,181 @@
+{
+  "name": "directus-interfaces-pattern",
+  "source": "context7",
+  "library": "/directus/docs",
+  "confidence": 0.95,
+  "extractedAt": "2025-10-28T21:35:00Z",
+  "pattern": {
+    "type": "interface",
+    "description": "Directus interfaces are custom input components for field editing in the Data Studio. Built with Vue 3 and can use Directus UI library components.",
+    "files": {
+      "index.js": "Interface configuration and registration",
+      "interface.vue": "Vue 3 component for the interface UI",
+      "package.json": "Extension metadata"
+    },
+    "structure": {
+      "config": {
+        "id": "Unique interface identifier",
+        "name": "Display name",
+        "icon": "Material icon",
+        "description": "Brief description",
+        "component": "Vue component reference",
+        "types": "Array of supported field types",
+        "options": "Configuration options for interface"
+      },
+      "vueComponent": {
+        "props": ["value", "...custom options"],
+        "emits": ["input"],
+        "required": "Must emit 'input' event when value changes"
+      }
+    },
+    "examples": [
+      {
+        "name": "Basic Custom Interface",
+        "description": "Simple text input with custom styling",
+        "files": {
+          "index.js": "import { defineInterface } from '@directus/extensions-sdk';\nimport InterfaceComponent from './interface.vue';\n\nexport default defineInterface({\n  id: 'custom',\n  name: 'Custom',\n  icon: 'box',\n  description: 'This is my custom interface!',\n  component: InterfaceComponent,\n  types: ['string'],\n  options: [\n    {\n      field: 'text',\n      name: 'Text',\n      type: 'string',\n      meta: {\n        interface: 'input',\n        width: 'full',\n      }\n    },\n  ],\n});",
+          "interface.vue": "<template>\n  <input :value=\"value\" @input=\"handleChange($event.target.value)\" />\n  <span>{{ text }}</span>\n</template>\n\n<script setup>\ndefineProps(['text', 'value']);\nconst emit = defineEmits(['input']);\n\nfunction handleChange(value) {\n  emit('input', value);\n}\n</script>"
+        },
+        "useCases": [
+          "Custom text formatting",
+          "Specialized data entry",
+          "Field validation"
+        ]
+      },
+      {
+        "name": "Collaborative Editing Compatible",
+        "description": "Interface with data attributes for collaborative editing",
+        "files": {
+          "interface.vue": "<template>\n  <div\n    :data-collection=\"collection\"\n    :data-field=\"field\"\n    :data-primary-key=\"primaryKey\"\n    class=\"custom-interface\"\n  >\n    <input\n      v-model=\"value\"\n      type=\"text\"\n      class=\"custom-input\"\n    />\n  </div>\n</template>\n\n<script setup lang=\"ts\">\ninterface Props {\n  value: any;\n  collection: string;\n  field: string;\n  primaryKey: string | number;\n}\n\ninterface Emits {\n  (event: 'input', value: any): void;\n}\n\nconst props = defineProps<Props>();\nconst emit = defineEmits<Emits>();\n\nconst value = computed({\n  get: () => props.value,\n  set: (newValue) => emit('input', newValue)\n});\n</script>"
+        },
+        "useCases": [
+          "Real-time collaborative editing",
+          "Multi-user data entry",
+          "Live preview systems"
+        ]
+      },
+      {
+        "name": "Using Directus UI Components",
+        "description": "Interface using built-in Directus components",
+        "files": {
+          "interface.vue": "<template>\n  <div>\n    <VButton @click=\"handleClick\">Click Me</VButton>\n    <VInput v-model=\"localValue\" />\n    <VNotice v-if=\"error\" type=\"danger\">{{ error }}</VNotice>\n  </div>\n</template>\n\n<script setup>\nimport { ref, watch } from 'vue';\n\nconst props = defineProps(['value']);\nconst emit = defineEmits(['input']);\n\nconst localValue = ref(props.value);\nconst error = ref(null);\n\nwatch(localValue, (newValue) => {\n  emit('input', newValue);\n});\n\nfunction handleClick() {\n  // Custom logic\n}\n</script>\n\n<style>\n/* Customize Directus components */\n.custom-interface .v-button {\n  --v-button-color-hover: black;\n}\n</style>"
+        },
+        "useCases": [
+          "Consistent UI with Directus design",
+          "Quick prototyping",
+          "Native-looking custom fields"
+        ]
+      },
+      {
+        "name": "Dynamic Form Element",
+        "description": "Interface that renders different components based on config",
+        "files": {
+          "interface.vue": "<script setup lang=\"ts\">\nimport type { DirectusField } from '@directus/sdk';\nimport Input from './Input.vue';\nimport TextArea from './TextArea.vue';\nimport Select from './Select.vue';\nimport DateTime from './DateTime.vue';\n\nconst props = defineProps({\n  field: {\n    type: Object as () => DirectusField,\n    required: true\n  }\n});\n\nconst fieldLookup = computed(() => {\n  switch (props.field.meta.interface) {\n    case 'input':\n      return Input;\n    case 'input-rich-text-md':\n      return TextArea;\n    case 'select-dropdown':\n      return Select;\n    case 'datetime':\n      return DateTime;\n    default:\n      return Input;\n  }\n});\n</script>\n\n<template>\n  <component\n    v-if=\"!field.meta.hidden\"\n    :key=\"field.field\"\n    :is=\"fieldLookup\"\n    :field=\"field.field\"\n    :width=\"field.meta.width\"\n    :defaultValue=\"field.schema.default_value\"\n    :label=\"field.meta.field\"\n    :options=\"field.meta.options\"\n  />\n</template>"
+        },
+        "useCases": [
+          "Dynamic forms",
+          "Conditional field rendering",
+          "Form builders"
+        ]
+      }
+    ],
+    "vuePatterns": {
+      "propsAndEmits": {
+        "description": "Required props and emits for interfaces",
+        "code": "const props = defineProps({\n  value: {\n    type: String,\n    default: null\n  },\n  // Custom options from interface config\n  customOption: {\n    type: Boolean,\n    default: false\n  }\n});\n\nconst emit = defineEmits(['input']);\n\n// Update value\nemit('input', newValue);",
+        "recommendation": "MUST emit 'input' event when value changes"
+      },
+      "vModel": {
+        "description": "Use computed v-model for two-way binding",
+        "code": "const value = computed({\n  get: () => props.value,\n  set: (newValue) => emit('input', newValue)\n});\n\n// In template\n<input v-model=\"value\" />",
+        "recommendation": "Simplifies value handling and updates"
+      },
+      "directusComponents": {
+        "description": "Use Directus UI components",
+        "code": "// No import needed - globally registered\n<VButton>Save</VButton>\n<VInput v-model=\"text\" />\n<VNotice type=\"warning\">Warning message</VNotice>",
+        "recommendation": "Use for consistent UI with Directus design system"
+      }
+    },
+    "recommendations": [
+      {
+        "priority": "HIGH",
+        "title": "Always Emit Input Event",
+        "description": "MUST emit 'input' event when value changes for data binding",
+        "timeSaved": "2-4 hours debugging why values don't save",
+        "example": "emit('input', newValue);"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Support Correct Field Types",
+        "description": "Declare all compatible field types in types array",
+        "timeSaved": "1-2 hours confusion about missing interface",
+        "example": "types: ['string', 'text', 'json']"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Use Vue 3 Composition API",
+        "description": "Use <script setup> and Composition API for modern Vue patterns",
+        "timeSaved": "Cleaner code, better performance",
+        "example": "<script setup>\nconst props = defineProps(['value']);\nconst emit = defineEmits(['input']);\n</script>"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Leverage Directus UI Components",
+        "description": "Use built-in VButton, VInput, etc. for consistent design",
+        "timeSaved": "5-10 hours building custom UI components",
+        "example": "<VButton @click=\"save\">Save</VButton>"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Add Collaborative Editing Support",
+        "description": "Include data-collection, data-field, data-primary-key attributes",
+        "timeSaved": "Real-time collaboration support",
+        "example": "<div :data-collection=\"collection\" :data-field=\"field\" :data-primary-key=\"primaryKey\">"
+      },
+      {
+        "priority": "LOW",
+        "title": "Provide Interface Options",
+        "description": "Allow users to configure interface behavior",
+        "timeSaved": "Better UX, reusable interfaces",
+        "example": "options: [{ field: 'placeholder', name: 'Placeholder', type: 'string' }]"
+      }
+    ],
+    "antiPatterns": [
+      {
+        "name": "Not Emitting Input",
+        "bad": "<input :value=\"value\" @input=\"localValue = $event.target.value\" />",
+        "good": "<input :value=\"value\" @input=\"emit('input', $event.target.value)\" />",
+        "reason": "Value won't be saved to database"
+      },
+      {
+        "name": "Mutating Props Directly",
+        "bad": "props.value = newValue;",
+        "good": "emit('input', newValue);",
+        "reason": "Vue props are read-only, causes errors"
+      },
+      {
+        "name": "Missing Type Declarations",
+        "bad": "types: ['string'] // but works with numbers too",
+        "good": "types: ['string', 'integer', 'float']",
+        "reason": "Interface won't appear for compatible field types"
+      },
+      {
+        "name": "Importing Global Components",
+        "bad": "import VButton from '@directus/components';",
+        "good": "// No import needed\n<VButton>Click</VButton>",
+        "reason": "Directus components are globally registered"
+      },
+      {
+        "name": "Using Options API",
+        "bad": "export default {\n  props: ['value'],\n  methods: {\n    handleChange() {}\n  }\n}",
+        "good": "<script setup>\nconst props = defineProps(['value']);\nfunction handleChange() {}\n</script>",
+        "reason": "Composition API is modern Vue 3 standard"
+      }
+    ]
+  },
+  "metadata": {
+    "codeExamples": 12,
+    "useCases": 11,
+    "recommendationsCount": 6
+  }
+}

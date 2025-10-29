@@ -1,0 +1,133 @@
+{
+  "name": "Extension Development Workflow",
+  "version": "1.0.0",
+  "description": "Configuration for collection UX and extension development using patterns",
+
+  "patterns": {
+    "enabled": true,
+    "location": ".claude/memory/patterns/context7/",
+    "auto_load": ["interfaces", "panels", "hooks", "endpoints", "operations"],
+    "validation": {
+      "check_recommendations": true,
+      "warn_anti_patterns": true,
+      "require_type_checking": true
+    }
+  },
+
+  "development": {
+    "hot_reload": true,
+    "auto_restart": false,
+    "type_check_on_save": true,
+    "lint_on_save": false
+  },
+
+  "extension_types": {
+    "interface": {
+      "template": "interfaces-pattern.json",
+      "scaffold_command": "npx create-directus-extension@latest",
+      "base_path": "extensions/interfaces/",
+      "checklist": [
+        "Review interfaces-pattern.json",
+        "Check HIGH priority recommendations (emit input event, type declarations, Vue 3 Composition API)",
+        "Use Directus UI components (VButton, VInput, VNotice)",
+        "Add collaborative editing support (data-collection, data-field, data-primary-key)",
+        "Type check: pnpm type-check",
+        "Test in Docker dev environment"
+      ]
+    },
+    "panel": {
+      "template": "panels-pattern.json",
+      "scaffold_command": "npx create-directus-extension@latest",
+      "base_path": "extensions/panels/",
+      "checklist": [
+        "Review panels-pattern.json",
+        "Set minimum dimensions (min width/height)",
+        "Check permissions before rendering",
+        "Handle loading/error states",
+        "Use useApi composable for data fetching",
+        "Test responsive layout"
+      ]
+    },
+    "hook": {
+      "template": "hooks-pattern.json",
+      "scaffold_command": "npx create-directus-extension@latest",
+      "base_path": "extensions/hooks/",
+      "checklist": [
+        "Review hooks-pattern.json",
+        "Choose correct type (filter=BEFORE/blocking, action=AFTER/non-blocking)",
+        "ALWAYS return payload in filter hooks",
+        "Wrap async in try-catch",
+        "Use services (not raw DB queries)",
+        "Test with workflow-guard as reference"
+      ]
+    },
+    "endpoint": {
+      "template": "endpoints-pattern.json",
+      "scaffold_command": "npx create-directus-extension@latest",
+      "base_path": "extensions/endpoints/",
+      "checklist": [
+        "Review endpoints-pattern.json",
+        "Validate authentication (req.accountability?.user)",
+        "Use ItemsService for permissions",
+        "Wrap async in try-catch",
+        "Add health check endpoint",
+        "Test with vehicle-lookup as reference"
+      ]
+    },
+    "operation": {
+      "template": "operations-pattern.json",
+      "scaffold_command": "npx create-directus-extension@latest",
+      "base_path": "extensions/operations/",
+      "checklist": [
+        "Review operations-pattern.json",
+        "ALWAYS return data (next operations need it)",
+        "Use defineOperationApi for typing",
+        "Handle async operations with try-catch",
+        "Create both app.js (UI) and api.js (logic)",
+        "Test in Flows interface"
+      ]
+    }
+  },
+
+  "collection_ux": {
+    "focus_areas": [
+      "Field interfaces",
+      "Collection layouts",
+      "Dashboard panels",
+      "Form validation",
+      "Conditional field visibility",
+      "Display templates"
+    ],
+    "best_practices": {
+      "always_check_schema": "Use mcp__directapp-dev__schema before creating fields",
+      "use_directus_components": "Leverage VButton, VInput, VSelect, VNotice, etc.",
+      "test_permissions": "Validate RBAC works for all 9 Norwegian roles",
+      "responsive_design": "Test mobile, tablet, desktop layouts",
+      "accessibility": "Use semantic HTML, ARIA labels, keyboard navigation"
+    }
+  },
+
+  "quick_commands": {
+    "start_dev": "pnpm dev",
+    "build_extensions": "pnpm extensions:build",
+    "watch_extensions": "pnpm extensions:dev",
+    "type_check": "pnpm extensions:type-check",
+    "lint": "pnpm extensions:lint",
+    "restart_directus": "docker compose restart directus",
+    "logs": "pnpm dev:logs"
+  },
+
+  "references": {
+    "existing_extensions": [
+      "directus-extension-vehicle-lookup-button (interface)",
+      "directus-extension-workflow-guard (hook)",
+      "directus-extension-vehicle-lookup (endpoint)",
+      "directus-extension-ask-cars-ai (operation)"
+    ],
+    "documentation": [
+      "extensions/README.md",
+      ".claude/memory/patterns/context7/PATTERN_SUMMARY.md",
+      "https://docs.directus.io/extensions/"
+    ]
+  }
+}

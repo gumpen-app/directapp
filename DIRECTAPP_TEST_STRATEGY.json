@@ -1,0 +1,1327 @@
+{
+  "meta": {
+    "title": "DirectApp Comprehensive Test Strategy",
+    "version": "1.0.0",
+    "created": "2025-10-29",
+    "author": "Agent 3: Test Strategy Designer",
+    "context": {
+      "roadmap": "8-week implementation (November 4 - December 30, 2025)",
+      "total_effort": "88.35 hours development + 40 hours testing = 128.35 hours",
+      "agent1_findings": "IMP-001 needs 40 test cases, IMP-025 needs selective 80/280 test cases",
+      "agent2_findings": "Phase 1 has 27 atomic tasks with 4h testing allocation per task"
+    }
+  },
+
+  "test_layers": {
+    "1_unit_tests": {
+      "name": "Unit Tests (Extensions & Hooks)",
+      "target_coverage": "80%+ code coverage",
+      "focus_areas": [
+        "workflow-guard hook logic",
+        "vehicle-lookup endpoint",
+        "vehicle-search endpoint",
+        "ask-cars-ai endpoint",
+        "branding-inject hook",
+        "deadline-monitor operation (future)",
+        "quality-check-auto-assigner operation (future)"
+      ],
+      "tools": ["Vitest", "@directus/errors mocks", "@directus/extensions-sdk mocks"],
+      "when": "During development (IMP-022 - Week 2-3)",
+      "effort": "16 hours (included in IMP-022)",
+      "test_count_estimate": "120-150 unit tests",
+      "examples": [
+        {
+          "extension": "workflow-guard",
+          "test_file": "extensions/directus-extension-workflow-guard/src/__tests__/index.test.ts",
+          "test_cases": [
+            "validates nybil workflow transitions (22 states)",
+            "validates bruktbil workflow transitions (13 states)",
+            "prevents skipping required workflow steps",
+            "auto-fills timestamp fields on status change",
+            "enforces dealership data isolation",
+            "prevents modification of archived cars",
+            "validates required fields for each status",
+            "prevents deletion of non-initial cars",
+            "creates workflow notifications on status change",
+            "handles invalid transitions gracefully"
+          ],
+          "priority": "Critical"
+        },
+        {
+          "extension": "vehicle-lookup",
+          "test_file": "extensions/directus-extension-vehicle-lookup/src/__tests__/index.test.ts",
+          "test_cases": [
+            "fetches vehicle data by VIN from Statens Vegvesen",
+            "fetches vehicle data by license plate (regnr)",
+            "handles invalid VIN format",
+            "handles API errors gracefully",
+            "validates response data structure",
+            "caches successful lookups",
+            "logs API failures for monitoring"
+          ],
+          "priority": "High"
+        },
+        {
+          "extension": "vehicle-search",
+          "test_file": "extensions/directus-extension-vehicle-search/src/__tests__/index.test.ts",
+          "test_cases": [
+            "searches cars by VIN",
+            "searches cars by license plate",
+            "searches cars by brand/model",
+            "applies dealership_id filter",
+            "handles no results gracefully",
+            "returns properly formatted results",
+            "validates input parameters"
+          ],
+          "priority": "Medium"
+        }
+      ]
+    },
+
+    "2_integration_tests": {
+      "name": "Integration Tests (API & Database)",
+      "target_coverage": "60%+ coverage of critical paths",
+      "focus_areas": [
+        "Collection CRUD with RBAC enforcement",
+        "Flow operations with database state changes",
+        "Webhook endpoint responses",
+        "Database constraint validation",
+        "Relation integrity checks"
+      ],
+      "tools": ["Directus SDK", "Test PostgreSQL database", "Supertest (API testing)"],
+      "when": "Phase 2a (IMP-022 - Week 2-3)",
+      "effort": "12 hours (included in IMP-022)",
+      "test_count_estimate": "60-80 integration tests",
+      "test_database_setup": {
+        "type": "PostgreSQL 15+",
+        "seed_data": "Minimal seed: 2 dealerships, 5 users (each role), 10 cars, 5 resource_bookings",
+        "reset_strategy": "Truncate all non-system collections before each test suite",
+        "isolation": "Each test runs in transaction (rollback after)"
+      },
+      "examples": [
+        {
+          "test_suite": "cars_collection_crud",
+          "test_file": "tests/integration/collections/cars.test.ts",
+          "test_cases": [
+            "CREATE: Nybilselger creates new car with auto-filled dealership_id",
+            "CREATE: Validates required fields (VIN, brand, model)",
+            "CREATE: Prevents creation with invalid initial status",
+            "READ: User sees only own dealership cars",
+            "READ: Admin sees all dealerships",
+            "UPDATE: Mekaniker can update tech_completed_date",
+            "UPDATE: Nybilselger cannot update workshop_tasks",
+            "UPDATE: Validates workflow state transitions",
+            "DELETE: Prevents deletion of non-initial cars",
+            "DELETE: Prevents cross-dealership deletion"
+          ],
+          "priority": "Critical"
+        },
+        {
+          "test_suite": "rbac_enforcement",
+          "test_file": "tests/integration/rbac/permissions.test.ts",
+          "test_cases": [
+            "Nybilselger sees only own dealership cars",
+            "Bruktbilselger can search cross-dealership (read-only)",
+            "Mekaniker sees only assigned cars",
+            "Booking sees all cars at prep center",
+            "Daglig leder sees all cars at own dealership",
+            "Admin sees all cars across all dealerships"
+          ],
+          "priority": "Critical"
+        },
+        {
+          "test_suite": "workflow_guard_integration",
+          "test_file": "tests/integration/hooks/workflow-guard.test.ts",
+          "test_cases": [
+            "Valid nybil workflow: ny_ordre → ankommet_klargjoring → teknisk_ferdig",
+            "Invalid nybil workflow: ny_ordre → teknisk_ferdig (skips states)",
+            "Valid bruktbil workflow: innbytte_registrert → vurdert_for_salg → klar_for_salg",
+            "Timestamp auto-fill on status change",
+            "Required field validation on status change",
+            "Notification creation on status change",
+            "Dealership isolation on update",
+            "Archived car modification blocked"
+          ],
+          "priority": "Critical"
+        }
+      ]
+    },
+
+    "3_e2e_tests": {
+      "name": "E2E Tests (User Workflows)",
+      "target_coverage": "10-15 critical user journeys",
+      "focus_areas": [
+        "Nybilselger registration workflow",
+        "Mechanic completion workflow",
+        "Booking capacity check workflow",
+        "Daglig leder dashboard viewing",
+        "Cross-dealership bruktbil search"
+      ],
+      "tools": ["Playwright", "Test Directus instance", "Seeded test data"],
+      "when": "Phase 2b (Week 4 - before dashboard launch)",
+      "effort": "8 hours",
+      "test_count_estimate": "10-15 end-to-end scenarios",
+      "test_environment": {
+        "directus_instance": "Staging environment with production data volume",
+        "browser": "Chromium (headless)",
+        "viewport": "1920x1080",
+        "network": "Fast 3G throttling (to simulate real conditions)",
+        "test_users": "1 user per role (10 total) with known credentials"
+      },
+      "scenarios": [
+        {
+          "scenario_id": "E2E-001",
+          "name": "Nybilselger: Complete Car Registration with Vehicle Lookup",
+          "role": "Nybilselger",
+          "steps": [
+            "Login as Nybilselger (Kristiansand dealership)",
+            "Navigate to Cars collection",
+            "Click 'Create Item'",
+            "Enter VIN: WVW1J7A34AW123456",
+            "Click 'Fetch Vehicle Data' button (vehicle-lookup-button)",
+            "Verify brand, model, variant, fuel_type auto-filled",
+            "Add accessories: ['Navigation', 'Leather seats']",
+            "Click Save",
+            "Verify status is 'ny_ordre'",
+            "Verify car appears in list with correct dealership"
+          ],
+          "expected_duration": "5 minutes (down from 12 minutes without vehicle lookup)",
+          "success_criteria": [
+            "Car created successfully",
+            "VIN auto-lookup fetched correct data",
+            "Status is 'ny_ordre'",
+            "dealership_id matches user's dealership",
+            "seller_id matches current user",
+            "registered_at timestamp is set"
+          ],
+          "priority": "Critical"
+        },
+        {
+          "scenario_id": "E2E-002",
+          "name": "Mekaniker: View Assigned Cars and Mark Technical Complete",
+          "role": "Mekaniker",
+          "steps": [
+            "Login as Mekaniker (Gumpen Skade og Bilpleie prep center)",
+            "Open Mechanic Dashboard module (future - Week 4)",
+            "Verify assigned cars list shows only own assignments",
+            "Verify cars sorted by deadline (approaching first)",
+            "Click on car card (VW Golf 2025)",
+            "Update technical_notes: 'Oil change completed, brakes checked'",
+            "Click 'Mark Technical Complete' quick action",
+            "Verify status changed to 'teknisk_ferdig'",
+            "Verify tech_completed_date is set to today"
+          ],
+          "expected_duration": "3 minutes (down from 8 minutes with dashboard)",
+          "success_criteria": [
+            "Dashboard shows only assigned cars",
+            "Cars sorted by deadline",
+            "Status transition successful",
+            "tech_completed_date auto-filled",
+            "Notification sent to booking role"
+          ],
+          "priority": "High"
+        },
+        {
+          "scenario_id": "E2E-003",
+          "name": "Booking: Check Capacity and Schedule Klargjøring",
+          "role": "Booking",
+          "steps": [
+            "Login as Booking (Gumpen Skade og Bilpleie)",
+            "Open Resource Capacity Panel (future - Week 4)",
+            "Select date: 2025-11-15",
+            "Verify available capacity: 40 hours technical, 40 hours cosmetic",
+            "Navigate to Cars collection",
+            "Filter: status = 'mottakskontroll_godkjent'",
+            "Click on Audi A4 2025",
+            "Set scheduled_technical_date: 2025-11-15",
+            "Set scheduled_technical_time: 08:00",
+            "Assign assigned_mechanic_id: John Doe",
+            "Click Save",
+            "Verify capacity panel shows 37.5 hours remaining (2.5h booked)"
+          ],
+          "expected_duration": "2 minutes (down from 5 minutes with capacity panel)",
+          "success_criteria": [
+            "Capacity panel shows real-time availability",
+            "Booking successful",
+            "Capacity updated correctly",
+            "Mechanic receives notification",
+            "Car status remains 'mottakskontroll_godkjent' (until mechanic starts)"
+          ],
+          "priority": "High"
+        },
+        {
+          "scenario_id": "E2E-004",
+          "name": "Daglig Leder: View Workflow Status Dashboard",
+          "role": "Daglig leder",
+          "steps": [
+            "Login as Daglig leder (Kristiansand dealership)",
+            "Open Workflow Status Dashboard module (future - Week 4)",
+            "Verify all workflow stages shown with car counts",
+            "Verify average age per stage",
+            "Verify bottleneck alerts (stages > 5 days old)",
+            "Click on 'teknisk_prep' stage",
+            "Verify drill-down shows list of cars in technical prep",
+            "Export report as CSV"
+          ],
+          "expected_duration": "2 minutes (down from 15 minutes manual)",
+          "success_criteria": [
+            "Dashboard loads < 2 seconds",
+            "All stages show correct counts",
+            "Bottleneck alerts visible",
+            "Drill-down works correctly",
+            "CSV export includes all expected fields"
+          ],
+          "priority": "High"
+        },
+        {
+          "scenario_id": "E2E-005",
+          "name": "Bruktbilselger: Search Cross-Dealership for Synergy Sale",
+          "role": "Bruktbilselger",
+          "steps": [
+            "Login as Bruktbilselger (Kristiansand dealership)",
+            "Navigate to Cars collection",
+            "Apply filters: car_type = 'bruktbil', brand = 'VW', status = 'klar_for_salg'",
+            "Verify cars from multiple dealerships appear (read-only for others)",
+            "Click on car from Mandal dealership",
+            "Verify details are visible (read-only)",
+            "Verify 'Edit' button is disabled for cross-dealership car",
+            "Contact Mandal dealership via notification system (future)",
+            "Navigate back to own dealership cars",
+            "Verify 'Edit' button is enabled for own cars"
+          ],
+          "expected_duration": "4 minutes",
+          "success_criteria": [
+            "Cross-dealership search works",
+            "Read-only access enforced for other dealerships",
+            "Edit access only for own dealership",
+            "No data isolation violation"
+          ],
+          "priority": "Medium"
+        },
+        {
+          "scenario_id": "E2E-006",
+          "name": "Mottakskontrollør: Perform Inspection with Photo Upload",
+          "role": "Mottakskontrollør",
+          "steps": [
+            "Login as Mottakskontrollør (Gumpen Skade og Bilpleie)",
+            "Navigate to Cars collection",
+            "Filter: status = 'ankommet_klargjoring'",
+            "Click on BMW X5 2025",
+            "Scan nøkkeltag (simulate with manual VIN entry - future OCR)",
+            "Verify car auto-matched",
+            "Upload inspection photos: ['front.jpg', 'rear.jpg', 'damage_1.jpg']",
+            "Add inspection_notes: 'Minor scratch on rear bumper'",
+            "Set inspection_approved: false",
+            "Set status: 'mottakskontroll_avvik'",
+            "Click Save",
+            "Verify notification sent to seller"
+          ],
+          "expected_duration": "5 minutes",
+          "success_criteria": [
+            "Inspection workflow completed",
+            "Photos uploaded successfully",
+            "Status changed to 'mottakskontroll_avvik'",
+            "Seller notified of avvik",
+            "inspection_completed_at timestamp set"
+          ],
+          "priority": "High"
+        },
+        {
+          "scenario_id": "E2E-007",
+          "name": "Delelager: Order Parts and Confirm Arrival",
+          "role": "Delelager",
+          "steps": [
+            "Login as Delelager (Kristiansand dealership)",
+            "Navigate to Notifications",
+            "Click on 'Ny ordre fra Nybilselger' notification",
+            "Verify car details and accessories list",
+            "Upload parts order confirmation PDF",
+            "Set parts_ordered_seller_at: today",
+            "Click Save",
+            "Verify notification sent to prep center Delelager",
+            "Wait for parts arrival (simulate)",
+            "Login as Delelager (Gumpen Skade og Bilpleie prep center)",
+            "Set parts_arrived_prep_at: today",
+            "Click Save",
+            "Verify notification sent to Booking"
+          ],
+          "expected_duration": "6 minutes (split across two users)",
+          "success_criteria": [
+            "Parts ordered at seller dealership",
+            "Parts arrived at prep center",
+            "Notifications sent at each stage",
+            "PDF attachment saved correctly",
+            "Booking notified car is ready for scheduling"
+          ],
+          "priority": "Medium"
+        },
+        {
+          "scenario_id": "E2E-008",
+          "name": "Admin: Configure User Roles and Data Isolation",
+          "role": "Admin",
+          "steps": [
+            "Login as Admin",
+            "Navigate to Settings → Roles & Permissions",
+            "Create new role: 'Nybilselger'",
+            "Set permissions: cars (CREATE, READ own dealership, UPDATE own dealership)",
+            "Set field permissions: hide workshop_tasks, hide tech_completed_date",
+            "Click Save",
+            "Navigate to Settings → Users",
+            "Create new user: 'test-nybilselger@example.com'",
+            "Assign role: 'Nybilselger'",
+            "Assign dealership: 'Kristiansand'",
+            "Logout and login as 'test-nybilselger@example.com'",
+            "Verify cars collection shows only Kristiansand cars",
+            "Verify workshop_tasks field is hidden",
+            "Attempt to update car from Mandal dealership (should fail)"
+          ],
+          "expected_duration": "8 minutes",
+          "success_criteria": [
+            "Role created with correct permissions",
+            "User assigned to role and dealership",
+            "Data isolation enforced (only Kristiansand cars visible)",
+            "Field-level permissions enforced",
+            "Cross-dealership modification blocked"
+          ],
+          "priority": "Critical"
+        },
+        {
+          "scenario_id": "E2E-009",
+          "name": "Bilpleiespesialist: Complete Cosmetic Klargjøring",
+          "role": "Bilpleiespesialist",
+          "steps": [
+            "Login as Bilpleiespesialist (Gumpen Skade og Bilpleie)",
+            "Open own calendar (future dashboard - Week 4)",
+            "Click on scheduled job: Mercedes C-Class 2025",
+            "Verify status is 'kosmetisk_pågår'",
+            "Upload before photos: ['dirty_exterior.jpg', 'interior_before.jpg']",
+            "Upload after photos: ['clean_exterior.jpg', 'interior_after.jpg']",
+            "Add cosmetic_notes: 'Full exterior wash, interior vacuum, leather conditioning'",
+            "Click 'Mark Cosmetic Complete'",
+            "Verify status changed to 'kosmetisk_ferdig'",
+            "Verify cosmetic_completed_at timestamp set",
+            "Verify car moved to 'klar_for_levering' status (auto or manual?)"
+          ],
+          "expected_duration": "4 minutes",
+          "success_criteria": [
+            "Cosmetic workflow completed",
+            "Before/after photos uploaded",
+            "Status changed to 'kosmetisk_ferdig'",
+            "cosmetic_completed_at timestamp set",
+            "Seller notified car is ready"
+          ],
+          "priority": "Medium"
+        },
+        {
+          "scenario_id": "E2E-010",
+          "name": "Økonomiansvarlig: View Financial Reports",
+          "role": "Økonomiansvarlig",
+          "steps": [
+            "Login as Økonomiansvarlig (Kristiansand dealership)",
+            "Open Dealership KPI Panel (future - Week 4)",
+            "Verify KPIs: total cars, avg days to sale, revenue forecast",
+            "Navigate to Cars collection",
+            "Verify price fields are visible (purchase_price, sale_price, prep_cost)",
+            "Apply filter: status IN ('solgt_til_kunde', 'levert_til_kunde')",
+            "Calculate total revenue",
+            "Export financial report as CSV",
+            "Verify CSV includes all price fields"
+          ],
+          "expected_duration": "5 minutes",
+          "success_criteria": [
+            "KPI panel shows accurate financial metrics",
+            "Price fields visible to Økonomiansvarlig role",
+            "Financial report export successful",
+            "Revenue calculations accurate"
+          ],
+          "priority": "Medium"
+        }
+      ]
+    },
+
+    "4_security_tests": {
+      "name": "Security Tests (RBAC & Data Isolation)",
+      "target_coverage": "100% role coverage, selective collection sampling",
+      "focus_areas": [
+        "Data isolation per dealership (IMP-001)",
+        "RBAC policies per role (IMP-010)",
+        "Field-level permissions",
+        "Production data validation (IMP-025)"
+      ],
+      "tools": ["Manual testing", "Directus SDK scripts", "Postman collections"],
+      "when": {
+        "IMP-001": "Phase 1 (Week 1) - 40 test cases",
+        "IMP-010": "Phase 2a (Week 2-3) - 60 test cases",
+        "IMP-025": "Phase 3 (Week 5-6) - 80 test cases (selective from 280 total)"
+      },
+      "effort": {
+        "IMP-001": "4 hours (included in 12h total for IMP-001)",
+        "IMP-010": "6 hours (testing 6 roles)",
+        "IMP-025": "8 hours (production data validation)"
+      },
+      "test_matrices": {
+        "IMP-001_data_isolation": {
+          "total_tests": 40,
+          "breakdown": "10 roles × 4 CRUD operations",
+          "test_cases": [
+            {
+              "test_id": "ISO-001",
+              "role": "Nybilselger",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "User A (Kristiansand) creates car",
+              "expected_result": "Car created with dealership_id=Kristiansand",
+              "verification": "Read car, verify dealership_id field",
+              "acceptance_criteria": "Car visible to Kristiansand users only, not Mandal users"
+            },
+            {
+              "test_id": "ISO-002",
+              "role": "Nybilselger",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "User A (Kristiansand) reads cars collection",
+              "expected_result": "Only Kristiansand cars returned",
+              "verification": "Count cars, verify all have dealership_id=Kristiansand",
+              "acceptance_criteria": "No Mandal cars visible"
+            },
+            {
+              "test_id": "ISO-003",
+              "role": "Nybilselger",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "User A (Kristiansand) attempts to update Mandal car",
+              "expected_result": "403 Forbidden error",
+              "verification": "Attempt UPDATE via API, expect rejection",
+              "acceptance_criteria": "Update blocked, error message mentions dealership isolation"
+            },
+            {
+              "test_id": "ISO-004",
+              "role": "Nybilselger",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "User A (Kristiansand) attempts to delete Mandal car",
+              "expected_result": "403 Forbidden error",
+              "verification": "Attempt DELETE via API, expect rejection",
+              "acceptance_criteria": "Delete blocked, error message mentions dealership isolation"
+            },
+            {
+              "test_id": "ISO-005",
+              "role": "Bruktbilselger",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "User B (Mandal) creates bruktbil",
+              "expected_result": "Car created with dealership_id=Mandal",
+              "verification": "Read car, verify dealership_id field",
+              "acceptance_criteria": "Car visible to Mandal users only, not Kristiansand users"
+            },
+            {
+              "test_id": "ISO-006",
+              "role": "Bruktbilselger",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "User B (Mandal) reads cars collection with cross-dealership filter",
+              "expected_result": "All bruktbil cars visible (read-only for others)",
+              "verification": "Count cars, verify Mandal + other dealerships visible",
+              "acceptance_criteria": "Cross-dealership search works, edit disabled for others"
+            },
+            {
+              "test_id": "ISO-007",
+              "role": "Bruktbilselger",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "User B (Mandal) attempts to update Kristiansand bruktbil",
+              "expected_result": "403 Forbidden error",
+              "verification": "Attempt UPDATE via API, expect rejection",
+              "acceptance_criteria": "Update blocked for cross-dealership cars"
+            },
+            {
+              "test_id": "ISO-008",
+              "role": "Bruktbilselger",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "User B (Mandal) attempts to delete own dealership car",
+              "expected_result": "Car deleted (if initial status)",
+              "verification": "Attempt DELETE via API, expect success",
+              "acceptance_criteria": "Delete successful for own dealership initial-state cars"
+            },
+            {
+              "test_id": "ISO-009",
+              "role": "Mekaniker",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "Mechanic at prep center attempts to create car",
+              "expected_result": "403 Forbidden (mechanics don't create cars)",
+              "verification": "Attempt CREATE via API, expect rejection",
+              "acceptance_criteria": "CREATE blocked for Mekaniker role"
+            },
+            {
+              "test_id": "ISO-010",
+              "role": "Mekaniker",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "Mechanic at prep center reads cars",
+              "expected_result": "Only assigned cars visible",
+              "verification": "Read cars, verify assigned_mechanic_id = current_user",
+              "acceptance_criteria": "Only assigned cars visible, not all prep center cars"
+            },
+            {
+              "test_id": "ISO-011",
+              "role": "Mekaniker",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "Mechanic updates tech_completed_date on assigned car",
+              "expected_result": "Update successful",
+              "verification": "Update tech_completed_date, verify field changed",
+              "acceptance_criteria": "Update successful for assigned car"
+            },
+            {
+              "test_id": "ISO-012",
+              "role": "Mekaniker",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "Mechanic attempts to delete car",
+              "expected_result": "403 Forbidden (mechanics don't delete)",
+              "verification": "Attempt DELETE via API, expect rejection",
+              "acceptance_criteria": "DELETE blocked for Mekaniker role"
+            },
+            {
+              "test_id": "ISO-013",
+              "role": "Booking",
+              "action": "CREATE",
+              "collection": "resource_bookings",
+              "scenario": "Booking creates resource booking at prep center",
+              "expected_result": "Booking created with provider_dealership_id=prep center",
+              "verification": "Read booking, verify provider_dealership_id",
+              "acceptance_criteria": "Booking visible to prep center users"
+            },
+            {
+              "test_id": "ISO-014",
+              "role": "Booking",
+              "action": "READ",
+              "collection": "resource_bookings",
+              "scenario": "Booking reads resource_bookings at prep center",
+              "expected_result": "All prep center bookings visible",
+              "verification": "Count bookings, verify provider_dealership_id=prep center",
+              "acceptance_criteria": "Only prep center bookings visible"
+            },
+            {
+              "test_id": "ISO-015",
+              "role": "Booking",
+              "action": "UPDATE",
+              "collection": "resource_bookings",
+              "scenario": "Booking updates own prep center booking",
+              "expected_result": "Update successful",
+              "verification": "Update booking, verify field changed",
+              "acceptance_criteria": "Update successful for own prep center"
+            },
+            {
+              "test_id": "ISO-016",
+              "role": "Booking",
+              "action": "DELETE",
+              "collection": "resource_bookings",
+              "scenario": "Booking attempts to delete booking",
+              "expected_result": "Delete successful (if not completed)",
+              "verification": "Attempt DELETE via API, expect success",
+              "acceptance_criteria": "DELETE successful for non-completed bookings"
+            },
+            {
+              "test_id": "ISO-017",
+              "role": "Daglig leder",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "Daglig leder creates car at own dealership",
+              "expected_result": "Car created with dealership_id=own dealership",
+              "verification": "Read car, verify dealership_id",
+              "acceptance_criteria": "Car visible to own dealership users"
+            },
+            {
+              "test_id": "ISO-018",
+              "role": "Daglig leder",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "Daglig leder reads all cars at own dealership",
+              "expected_result": "All own dealership cars visible (all statuses)",
+              "verification": "Count cars, verify dealership_id=own dealership",
+              "acceptance_criteria": "All own dealership cars visible, no other dealerships"
+            },
+            {
+              "test_id": "ISO-019",
+              "role": "Daglig leder",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "Daglig leder updates any field on own dealership car",
+              "expected_result": "Update successful (full access to own dealership)",
+              "verification": "Update field, verify changed",
+              "acceptance_criteria": "Full update access for own dealership"
+            },
+            {
+              "test_id": "ISO-020",
+              "role": "Daglig leder",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "Daglig leder deletes initial-state car at own dealership",
+              "expected_result": "Delete successful",
+              "verification": "Attempt DELETE via API, expect success",
+              "acceptance_criteria": "DELETE successful for initial-state cars"
+            },
+            {
+              "test_id": "ISO-021",
+              "role": "Økonomiansvarlig",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "Økonomiansvarlig attempts to create car",
+              "expected_result": "403 Forbidden (finance doesn't create cars)",
+              "verification": "Attempt CREATE via API, expect rejection",
+              "acceptance_criteria": "CREATE blocked for Økonomiansvarlig role"
+            },
+            {
+              "test_id": "ISO-022",
+              "role": "Økonomiansvarlig",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "Økonomiansvarlig reads cars with price fields",
+              "expected_result": "All own dealership cars visible with price fields",
+              "verification": "Read cars, verify purchase_price/sale_price visible",
+              "acceptance_criteria": "Price fields visible to Økonomiansvarlig"
+            },
+            {
+              "test_id": "ISO-023",
+              "role": "Økonomiansvarlig",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "Økonomiansvarlig updates price fields",
+              "expected_result": "Update successful (price fields)",
+              "verification": "Update purchase_price, verify changed",
+              "acceptance_criteria": "Price field updates allowed"
+            },
+            {
+              "test_id": "ISO-024",
+              "role": "Økonomiansvarlig",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "Økonomiansvarlig attempts to delete car",
+              "expected_result": "403 Forbidden (finance doesn't delete)",
+              "verification": "Attempt DELETE via API, expect rejection",
+              "acceptance_criteria": "DELETE blocked for Økonomiansvarlig role"
+            },
+            {
+              "test_id": "ISO-025",
+              "role": "Mottakskontrollør",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "Mottakskontrollør attempts to create car",
+              "expected_result": "403 Forbidden (inspectors don't create)",
+              "verification": "Attempt CREATE via API, expect rejection",
+              "acceptance_criteria": "CREATE blocked for Mottakskontrollør role"
+            },
+            {
+              "test_id": "ISO-026",
+              "role": "Mottakskontrollør",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "Mottakskontrollør reads cars at prep center",
+              "expected_result": "All prep center cars visible (for inspection)",
+              "verification": "Count cars, verify prep_center_id=own dealership",
+              "acceptance_criteria": "All prep center cars visible"
+            },
+            {
+              "test_id": "ISO-027",
+              "role": "Mottakskontrollør",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "Mottakskontrollør updates inspection fields",
+              "expected_result": "Update successful (inspection_notes, inspection_approved)",
+              "verification": "Update inspection_notes, verify changed",
+              "acceptance_criteria": "Inspection field updates allowed"
+            },
+            {
+              "test_id": "ISO-028",
+              "role": "Mottakskontrollør",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "Mottakskontrollør attempts to delete car",
+              "expected_result": "403 Forbidden (inspectors don't delete)",
+              "verification": "Attempt DELETE via API, expect rejection",
+              "acceptance_criteria": "DELETE blocked for Mottakskontrollør role"
+            },
+            {
+              "test_id": "ISO-029",
+              "role": "Delelager",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "Delelager attempts to create car",
+              "expected_result": "403 Forbidden (parts warehouse doesn't create)",
+              "verification": "Attempt CREATE via API, expect rejection",
+              "acceptance_criteria": "CREATE blocked for Delelager role"
+            },
+            {
+              "test_id": "ISO-030",
+              "role": "Delelager",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "Delelager reads cars with parts orders",
+              "expected_result": "All own dealership cars visible (to check parts needs)",
+              "verification": "Count cars, verify dealership_id=own dealership",
+              "acceptance_criteria": "Own dealership cars visible"
+            },
+            {
+              "test_id": "ISO-031",
+              "role": "Delelager",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "Delelager updates parts_ordered_seller_at",
+              "expected_result": "Update successful (parts fields)",
+              "verification": "Update parts_ordered_seller_at, verify changed",
+              "acceptance_criteria": "Parts field updates allowed"
+            },
+            {
+              "test_id": "ISO-032",
+              "role": "Delelager",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "Delelager attempts to delete car",
+              "expected_result": "403 Forbidden (parts warehouse doesn't delete)",
+              "verification": "Attempt DELETE via API, expect rejection",
+              "acceptance_criteria": "DELETE blocked for Delelager role"
+            },
+            {
+              "test_id": "ISO-033",
+              "role": "Bilpleiespesialist",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "Bilpleiespesialist attempts to create car",
+              "expected_result": "403 Forbidden (detailers don't create)",
+              "verification": "Attempt CREATE via API, expect rejection",
+              "acceptance_criteria": "CREATE blocked for Bilpleiespesialist role"
+            },
+            {
+              "test_id": "ISO-034",
+              "role": "Bilpleiespesialist",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "Bilpleiespesialist reads assigned cars",
+              "expected_result": "Only assigned cars visible",
+              "verification": "Read cars, verify assigned_detailer_id = current_user",
+              "acceptance_criteria": "Only assigned cars visible"
+            },
+            {
+              "test_id": "ISO-035",
+              "role": "Bilpleiespesialist",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "Bilpleiespesialist updates cosmetic_completed_at",
+              "expected_result": "Update successful (cosmetic fields)",
+              "verification": "Update cosmetic_completed_at, verify changed",
+              "acceptance_criteria": "Cosmetic field updates allowed"
+            },
+            {
+              "test_id": "ISO-036",
+              "role": "Bilpleiespesialist",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "Bilpleiespesialist attempts to delete car",
+              "expected_result": "403 Forbidden (detailers don't delete)",
+              "verification": "Attempt DELETE via API, expect rejection",
+              "acceptance_criteria": "DELETE blocked for Bilpleiespesialist role"
+            },
+            {
+              "test_id": "ISO-037",
+              "role": "Admin",
+              "action": "CREATE",
+              "collection": "cars",
+              "scenario": "Admin creates car at any dealership",
+              "expected_result": "Car created with specified dealership_id",
+              "verification": "Read car, verify dealership_id",
+              "acceptance_criteria": "Admin can create cars at any dealership"
+            },
+            {
+              "test_id": "ISO-038",
+              "role": "Admin",
+              "action": "READ",
+              "collection": "cars",
+              "scenario": "Admin reads all cars across all dealerships",
+              "expected_result": "All cars visible (no filter)",
+              "verification": "Count cars, verify all dealerships present",
+              "acceptance_criteria": "Admin sees all dealerships"
+            },
+            {
+              "test_id": "ISO-039",
+              "role": "Admin",
+              "action": "UPDATE",
+              "collection": "cars",
+              "scenario": "Admin updates any field on any car",
+              "expected_result": "Update successful (full access)",
+              "verification": "Update field, verify changed",
+              "acceptance_criteria": "Admin has full update access"
+            },
+            {
+              "test_id": "ISO-040",
+              "role": "Admin",
+              "action": "DELETE",
+              "collection": "cars",
+              "scenario": "Admin deletes any car (any status)",
+              "expected_result": "Delete successful (admin override)",
+              "verification": "Attempt DELETE via API, expect success",
+              "acceptance_criteria": "Admin can delete any car (override workflow restrictions)"
+            }
+          ]
+        },
+
+        "IMP-025_rbac_production": {
+          "total_potential_tests": 280,
+          "breakdown": "10 roles × 4 CRUD × 7 collections",
+          "selective_sample": 80,
+          "sampling_strategy": {
+            "rationale": "Test high-risk combinations, prioritize critical collections and sensitive operations",
+            "high_risk_roles": ["Admin", "Mekaniker", "Booking", "Nybilselger", "Økonomiansvarlig"],
+            "high_risk_collections": ["cars", "resource_bookings", "dealership", "directus_users"],
+            "high_risk_operations": ["DELETE", "UPDATE with cross-dealership", "READ with price fields"],
+            "sample_percentage": {
+              "high_risk": "100% (all combinations)",
+              "medium_risk": "50% (selected combinations)",
+              "low_risk": "20% (spot checks)"
+            }
+          },
+          "test_cases": [
+            {
+              "test_id": "RBAC-PROD-001",
+              "role": "Mekaniker",
+              "collection": "cars",
+              "action": "UPDATE",
+              "field": "tech_completed_date",
+              "scenario": "Mechanic marks technical prep complete on assigned car",
+              "expected_result": "Update successful",
+              "acceptance_criteria": "Field updated, status can change to 'teknisk_ferdig'"
+            },
+            {
+              "test_id": "RBAC-PROD-002",
+              "role": "Booking",
+              "collection": "resource_bookings",
+              "action": "DELETE",
+              "scenario": "Booking deletes completed resource booking (should fail)",
+              "expected_result": "403 Forbidden",
+              "acceptance_criteria": "Completed bookings cannot be deleted"
+            },
+            {
+              "test_id": "RBAC-PROD-003",
+              "role": "Nybilselger",
+              "collection": "cars",
+              "action": "READ",
+              "field": "workshop_tasks",
+              "scenario": "Nybilselger attempts to view workshop_tasks field",
+              "expected_result": "Field hidden",
+              "acceptance_criteria": "workshop_tasks not returned in API response"
+            },
+            {
+              "test_id": "RBAC-PROD-004",
+              "role": "Økonomiansvarlig",
+              "collection": "cars",
+              "action": "READ",
+              "field": "purchase_price",
+              "scenario": "Økonomiansvarlig views purchase_price",
+              "expected_result": "Field visible",
+              "acceptance_criteria": "purchase_price returned in API response"
+            },
+            {
+              "test_id": "RBAC-PROD-005",
+              "role": "Admin",
+              "collection": "directus_users",
+              "action": "DELETE",
+              "scenario": "Admin deletes user with foreign key references",
+              "expected_result": "Delete blocked by foreign key constraint (user_created/user_updated)",
+              "acceptance_criteria": "Database constraint prevents deletion"
+            }
+          ],
+          "production_data_requirements": {
+            "cars": "10,000+ cars (realistic data volume for performance testing)",
+            "dealerships": "7 dealerships (matching production)",
+            "users": "50+ users across all roles",
+            "resource_bookings": "1,000+ bookings",
+            "anonymization": "Anonymize customer_name, customer_phone, customer_email"
+          }
+        }
+      }
+    },
+
+    "5_performance_tests": {
+      "name": "Performance Tests (Query Optimization)",
+      "target_coverage": "All critical queries < 100ms",
+      "focus_areas": [
+        "Dealership status query (500ms → 45ms)",
+        "Mechanic workload query (350ms → 52ms)",
+        "Capacity query (280ms → 70ms)",
+        "Dashboard load time (< 2s)",
+        "Vehicle lookup API (< 1s)"
+      ],
+      "tools": ["PostgreSQL EXPLAIN ANALYZE", "k6 (load testing)", "Artillery (scenario testing)"],
+      "when": "Phase 1 (IMP-006), Phase 2b (dashboard launch - Week 4)",
+      "effort": "4 hours",
+      "test_count_estimate": "10 performance tests",
+      "performance_baselines": {
+        "dealership_status_query": {
+          "query": "SELECT dealership_id, status, COUNT(*) FROM cars WHERE dealership_id = ? GROUP BY dealership_id, status",
+          "baseline": "500ms",
+          "target": "45ms",
+          "optimization": "Add composite index: (dealership_id, status)",
+          "improvement": "91% faster"
+        },
+        "mechanic_workload_query": {
+          "query": "SELECT assigned_mechanic_id, COUNT(*), AVG(EXTRACT(DAY FROM NOW() - scheduled_technical_date)) FROM cars WHERE assigned_mechanic_id IS NOT NULL AND status IN ('teknisk_pågår', 'planlagt_teknisk') GROUP BY assigned_mechanic_id",
+          "baseline": "350ms",
+          "target": "52ms",
+          "optimization": "Add index: (assigned_mechanic_id)",
+          "improvement": "85% faster"
+        },
+        "capacity_query": {
+          "query": "SELECT dealership_id, resource_type_id, date, SUM(allocated_hours) - SUM(used_hours) AS available FROM resource_capacities WHERE dealership_id = ? AND date = ? GROUP BY dealership_id, resource_type_id, date",
+          "baseline": "280ms",
+          "target": "70ms",
+          "optimization": "Add composite index: (dealership_id, resource_type_id, date)",
+          "improvement": "75% faster"
+        },
+        "dashboard_load_time": {
+          "description": "Workflow status dashboard initial load",
+          "baseline": "N/A (not yet implemented)",
+          "target": "< 2000ms",
+          "measurement_process": {
+            "tool": "Chrome DevTools Performance tab",
+            "start_event": "Navigation start (route change)",
+            "end_event": "First meaningful paint (dashboard data visible)",
+            "environment": "Staging with production data volume (10,000 cars)",
+            "test_conditions": "5 runs, median value",
+            "network": "Fast 3G throttling (1.6 Mbps download, 750 Kbps upload)",
+            "threshold": "< 2000ms"
+          }
+        },
+        "vehicle_lookup_api": {
+          "description": "Vehicle lookup via Statens Vegvesen API",
+          "baseline": "800-1200ms (external API)",
+          "target": "< 1000ms (95th percentile)",
+          "measurement_process": {
+            "tool": "k6 load testing",
+            "test_type": "HTTP request timing",
+            "sample_size": "100 requests",
+            "acceptance": "95% < 1000ms, 99% < 2000ms"
+          }
+        }
+      }
+    }
+  },
+
+  "bug_severity_classification": {
+    "levels": [
+      {
+        "level": "Critical",
+        "definition": "System unusable, data loss, or security breach",
+        "examples": [
+          "Data isolation bypass (User A sees User B's cars)",
+          "workflow-guard allows deletion of sold cars",
+          "Unauthorized role escalation",
+          "Production data loss",
+          "Complete system outage"
+        ],
+        "action": "Blocks deployment, immediate fix required",
+        "response_time": "< 4 hours",
+        "escalation": "Notify Product Owner immediately"
+      },
+      {
+        "level": "High",
+        "definition": "Major functionality broken, significant workflow impact",
+        "examples": [
+          "Mekaniker cannot update tech_completed_date (workflow blocker)",
+          "Vehicle lookup button returns 500 error",
+          "Dashboard fails to load",
+          "Notifications not sent",
+          "Index missing causing 500ms queries"
+        ],
+        "action": "Fix before next deployment",
+        "response_time": "< 24 hours",
+        "escalation": "Notify Dev Lead"
+      },
+      {
+        "level": "Medium",
+        "definition": "Minor functionality broken, workaround available",
+        "examples": [
+          "Display template syntax error (minor visual glitch)",
+          "Field validation missing (data quality issue)",
+          "Notification delay (arrives 5 min late instead of real-time)",
+          "Non-critical dashboard widget fails"
+        ],
+        "action": "Fix in next sprint",
+        "response_time": "< 1 week",
+        "escalation": "Log in issue tracker"
+      },
+      {
+        "level": "Low",
+        "definition": "Cosmetic issue, no functionality impact",
+        "examples": [
+          "Button text not translated",
+          "Icon misaligned",
+          "Color inconsistency",
+          "Field order non-optimal"
+        ],
+        "action": "Fix when convenient",
+        "response_time": "< 1 month",
+        "escalation": "Backlog"
+      }
+    ]
+  },
+
+  "test_execution_schedule": {
+    "week_1": {
+      "phase": "Phase 1 - Critical Fixes",
+      "test_focus": "Data isolation, DELETE restrictions, workflow-guard",
+      "test_types": [
+        "Security: IMP-001 data isolation (40 test cases)",
+        "Unit: workflow-guard basic validation",
+        "Manual: DELETE permission verification"
+      ],
+      "effort": "4 hours (included in Phase 1)",
+      "pass_criteria": "All 40 data isolation tests pass, 0 security issues"
+    },
+    "week_2_3": {
+      "phase": "Phase 2a - RBAC + Testing",
+      "test_focus": "Unit tests, integration tests, RBAC validation",
+      "test_types": [
+        "Unit: All extensions (120-150 tests)",
+        "Integration: Collection CRUD (60-80 tests)",
+        "Security: RBAC policies (60 test cases for 6 roles)"
+      ],
+      "effort": "24 hours (IMP-022 + IMP-023)",
+      "pass_criteria": "80%+ unit test coverage, 60%+ integration coverage, all RBAC tests pass"
+    },
+    "week_4": {
+      "phase": "Phase 2b - Dashboards + CI/CD",
+      "test_focus": "E2E tests, performance tests, dashboard validation",
+      "test_types": [
+        "E2E: 10-15 user journeys (Playwright)",
+        "Performance: Dashboard load time (< 2s)",
+        "Performance: Query optimization validation"
+      ],
+      "effort": "8 hours",
+      "pass_criteria": "All E2E tests pass, dashboard < 2s load time, queries < 100ms"
+    },
+    "week_5_6": {
+      "phase": "Phase 3 - Automation + Production Data",
+      "test_focus": "Production data validation, RBAC with real data",
+      "test_types": [
+        "Security: IMP-025 RBAC with production data (80 test cases)",
+        "Integration: Production schema validation",
+        "Regression: All previous tests re-run"
+      ],
+      "effort": "12 hours",
+      "pass_criteria": "80/80 RBAC production tests pass, 0 regressions"
+    },
+    "week_7_8": {
+      "phase": "Phase 4 - Polish + Production Prep",
+      "test_focus": "UAT, final validation, production deployment dry-run",
+      "test_types": [
+        "UAT: User acceptance testing (all roles)",
+        "Regression: Full test suite re-run",
+        "Performance: Production load simulation"
+      ],
+      "effort": "6 hours",
+      "pass_criteria": "UAT sign-off, 0 critical bugs, production ready"
+    }
+  },
+
+  "test_data_requirements": {
+    "security_tests": {
+      "dealerships": "2 (Kristiansand, Mandal)",
+      "users": "10 (1 per role)",
+      "cars": "20 (10 per dealership, various statuses)",
+      "resource_bookings": "10 (5 per dealership)",
+      "resource_capacities": "14 (7 days × 2 resource types per dealership)"
+    },
+    "e2e_tests": {
+      "dealerships": "3 (Kristiansand, Mandal, Gumpen Skade og Bilpleie prep center)",
+      "users": "15 (at least 1 per role, some roles 2 users)",
+      "cars": "50 (complete workflow dataset from registration → delivery)",
+      "resource_bookings": "30 (realistic booking patterns)",
+      "resource_capacities": "60 (30 days × 2 resource types per dealership)",
+      "workflow_coverage": "Each car must go through complete workflow to test transitions"
+    },
+    "performance_tests": {
+      "dealerships": "7 (all production dealerships)",
+      "users": "50+ (realistic user base)",
+      "cars": "10,000+ (production data volume)",
+      "resource_bookings": "1,000+ (realistic booking history)",
+      "resource_capacities": "2,000+ (60 days × 7 dealerships × 5 resource types)",
+      "anonymization": "Customer PII must be anonymized"
+    },
+    "rbac_tests": {
+      "source": "Production schema + anonymized data",
+      "dealerships": "All production dealerships",
+      "users": "Complete role matrix (10 roles × 7 dealerships = 70 test users)",
+      "cars": "Representative sample across all statuses",
+      "anonymization_fields": ["customer_name", "customer_phone", "customer_email"]
+    }
+  },
+
+  "tools_and_frameworks": {
+    "unit_testing": {
+      "framework": "Vitest",
+      "reason": "Fast, modern, TypeScript-first, built for Vite (Directus uses Vite)",
+      "configuration": "vitest.config.ts in each extension",
+      "coverage_tool": "c8 (built into Vitest)",
+      "mocking": "@vitest/spy for Directus services"
+    },
+    "integration_testing": {
+      "framework": "Vitest + Directus SDK",
+      "database": "PostgreSQL test instance",
+      "reason": "Same tool as unit tests for consistency, SDK for API testing",
+      "setup": "Docker Compose with test Directus + PostgreSQL",
+      "teardown": "Truncate collections after each test suite"
+    },
+    "e2e_testing": {
+      "framework": "Playwright",
+      "reason": "Modern, reliable, supports multiple browsers, great debugging",
+      "browsers": ["Chromium (primary)", "Firefox (compatibility)", "WebKit (Safari)"],
+      "configuration": "playwright.config.ts",
+      "test_environment": "Staging Directus instance with seeded data"
+    },
+    "security_testing": {
+      "manual_testing": "Postman collections for API testing",
+      "automation": "Directus SDK scripts (TypeScript)",
+      "rbac_validation": "Custom validation scripts per role/collection matrix"
+    },
+    "performance_testing": {
+      "database": "PostgreSQL EXPLAIN ANALYZE",
+      "load_testing": "k6 (Go-based, scriptable)",
+      "scenario_testing": "Artillery (YAML configuration)",
+      "browser_performance": "Chrome DevTools Performance tab (manual + Lighthouse CI)"
+    },
+    "ci_cd": {
+      "platform": "GitHub Actions",
+      "workflow_file": ".github/workflows/directus-ci.yml",
+      "triggers": ["push to main/develop", "pull_request", "manual workflow_dispatch"],
+      "stages": ["lint", "type-check", "unit-tests", "integration-tests", "build"]
+    }
+  },
+
+  "success_metrics": {
+    "coverage_targets": {
+      "unit_tests": "80%+ code coverage (extensions)",
+      "integration_tests": "60%+ API endpoint coverage",
+      "e2e_tests": "10-15 critical user journeys",
+      "security_tests": "100% role coverage, 80/280 RBAC tests (selective)",
+      "performance_tests": "100% critical query coverage"
+    },
+    "defect_rates": {
+      "critical_bugs": "0 (block deployment)",
+      "high_bugs": "< 3 (fix before next deployment)",
+      "medium_bugs": "< 10 (fix in next sprint)",
+      "low_bugs": "< 20 (backlog)"
+    },
+    "performance_targets": {
+      "dealership_status_query": "< 100ms (target: 45ms)",
+      "mechanic_workload_query": "< 100ms (target: 52ms)",
+      "capacity_query": "< 100ms (target: 70ms)",
+      "dashboard_load_time": "< 2000ms",
+      "vehicle_lookup_api": "< 1000ms (95th percentile)"
+    },
+    "security_targets": {
+      "data_isolation": "100% enforcement (0 cross-dealership leaks)",
+      "rbac_coverage": "100% (all 10 roles implemented)",
+      "permission_coverage": "95%+ (collection + field-level)",
+      "security_score": "9.0/10 (up from 2.5/10)"
+    }
+  },
+
+  "risk_mitigation": {
+    "high_risk_areas": [
+      {
+        "risk": "Data isolation implementation breaks existing functionality",
+        "probability": "Medium",
+        "impact": "High",
+        "mitigation": [
+          "Test with all 10 roles before deployment",
+          "Verify Admin can still see all dealerships",
+          "Rollback plan: Remove dealership_id filter from permissions",
+          "Gradual rollout: Enable for one dealership first"
+        ]
+      },
+      {
+        "risk": "RBAC complexity causes delays in Phase 2a",
+        "probability": "High",
+        "impact": "Medium",
+        "mitigation": [
+          "Follow ROLE_PERMISSIONS_PLAN.md exactly",
+          "Allocate buffer time (6h → 8h)",
+          "Implement roles incrementally (highest priority first)",
+          "Use existing Admin/Mechanic/Booking roles as templates"
+        ]
+      },
+      {
+        "risk": "Dashboard performance issues with 10,000+ cars",
+        "probability": "Low",
+        "impact": "High",
+        "mitigation": [
+          "Optimize queries with indices (IMP-006)",
+          "Implement server-side aggregation",
+          "Use pagination for large datasets",
+          "Cache dashboard data (5-minute TTL)",
+          "Load test before deployment"
+        ]
+      },
+      {
+        "risk": "Production schema import fails or causes data loss",
+        "probability": "Medium",
+        "impact": "Critical",
+        "mitigation": [
+          "Test schema import on staging first",
+          "Full database backup before import",
+          "Validate data integrity after import",
+          "Anonymize PII in test environment",
+          "Run RBAC tests on imported data"
+        ]
+      }
+    ]
+  },
+
+  "documentation_deliverables": [
+    "TEST_STRATEGY.md (this document)",
+    "UNIT_TEST_GUIDE.md (how to write unit tests for extensions)",
+    "INTEGRATION_TEST_GUIDE.md (API testing patterns)",
+    "E2E_TEST_GUIDE.md (Playwright test scenarios)",
+    "PERFORMANCE_TEST_GUIDE.md (query optimization + load testing)",
+    "RBAC_TEST_MATRIX.md (role/collection/action test cases)",
+    "BUG_REPORT_TEMPLATE.md (standardized bug reporting)",
+    "TEST_DATA_SEED_SCRIPTS.sql (SQL scripts to seed test data)",
+    "CI_CD_SETUP.md (GitHub Actions configuration)",
+    "UAT_CHECKLIST.md (user acceptance testing checklist)"
+  ],
+
+  "next_steps": {
+    "immediate": [
+      "Create test framework setup (IMP-022)",
+      "Write unit tests for workflow-guard",
+      "Write data isolation tests (IMP-001)",
+      "Set up GitHub Actions CI/CD pipeline (IMP-023)"
+    ],
+    "week_2_3": [
+      "Complete unit test coverage (80%+)",
+      "Write integration tests for RBAC",
+      "Implement RBAC for 6 remaining roles",
+      "Validate all test matrices"
+    ],
+    "week_4": [
+      "Write E2E tests (10-15 scenarios)",
+      "Performance test dashboards",
+      "Validate query optimizations",
+      "UAT preparation"
+    ],
+    "week_5_6": [
+      "Import production schema to staging",
+      "Run RBAC tests with production data (80 cases)",
+      "Performance test with 10,000+ cars",
+      "Regression testing"
+    ],
+    "week_7_8": [
+      "Final UAT with all roles",
+      "Production deployment dry-run",
+      "Final regression test suite",
+      "Post-deployment monitoring plan"
+    ]
+  }
+}
