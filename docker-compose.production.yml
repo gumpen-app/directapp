@@ -21,7 +21,7 @@ services:
   # Main Directus application
   directus:
     image: directus/directus:11.12.0  # PINNED for MCP support - update deliberately
-    container_name: directapp
+    container_name: directapp-production
     restart: unless-stopped
 
     # Dokploy network - REQUIRED for Traefik integration
@@ -215,7 +215,7 @@ services:
   # PostgreSQL Database (Debian-based for locale support)
   postgres:
     image: postgres:15.6  # PINNED - Debian variant for nb_NO.UTF-8
-    container_name: directapp-postgres
+    container_name: directapp-production-postgres
     restart: unless-stopped
 
     networks:
@@ -251,7 +251,7 @@ services:
   # Redis Cache
   redis:
     image: redis:7.2.4-alpine  # PINNED
-    container_name: directapp-redis
+    container_name: directapp-production-redis
     restart: unless-stopped
 
     networks:
@@ -282,7 +282,7 @@ services:
   # Automated Database Backups
   backup:
     image: prodrigestivill/postgres-backup-local:15-alpine  # PINNED
-    container_name: directapp-backup
+    container_name: directapp-production-backup
     restart: unless-stopped
 
     networks:
