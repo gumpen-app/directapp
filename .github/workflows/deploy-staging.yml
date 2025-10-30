@@ -25,8 +25,8 @@ jobs:
           echo "Application ID: $APP_ID"
           echo ""
 
-          # Deploy via Dokploy API
-          RESPONSE=$(curl -X POST "$DOKPLOY_URL/api/application.deploy" \
+          # Deploy via Dokploy API (using redeploy endpoint)
+          RESPONSE=$(curl -X POST "$DOKPLOY_URL/api/application.redeploy" \
             -H "Content-Type: application/json" \
             -H "x-api-key: $DOKPLOY_API_KEY" \
             -H "accept: application/json" \
