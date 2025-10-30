@@ -2,9 +2,9 @@ name: DirectApp CI/CD
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, staging, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main, staging, develop]
   workflow_dispatch:
 
 env:
@@ -402,13 +402,13 @@ jobs:
           head: HEAD
 
   # ========================================
-  # Deploy Extensions to Staging (auto on main)
+  # Deploy Extensions to Staging (auto on staging branch)
   # ========================================
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [build-extensions, validate-patterns, validate-schema, integration-test]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/staging'
     environment:
       name: staging
       url: https://staging-gapp.coms.no
