@@ -125,6 +125,21 @@
           "MCP server connects to local instance"
         ]
       }
+    },
+    {
+      "id": "session_1761791678883",
+      "number": 11,
+      "started_at": "2025-10-30T11:47:58.883Z",
+      "active_task": {
+        "issue_number": 66,
+        "title": "Phase 1.2: Deployment Pipeline Validation",
+        "branch": "feature/issue-66-phase-1-2-deployment-pipeline-validation",
+        "priority": "high",
+        "type": "chore",
+        "component": "deployment",
+        "estimated_hours": 24,
+        "status": "in_progress"
+      }
     }
   ]
 }

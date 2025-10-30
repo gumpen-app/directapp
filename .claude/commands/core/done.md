@@ -24,16 +24,24 @@ One command to finish your work.
    - Links to issue
    - Triggers CI automatically
 
-3. **Update Status**
+3. **CI/CD Integration**
+   - Monitors GitHub Actions workflow
+   - Reports build status
+   - Shows pattern validation results
+   - Tracks deployment readiness
+
+4. **Update Status**
    - Sets GitHub Project status to "Review"
    - Updates KANBAN.md
    - Logs analytics
+   - Records CI/CD metrics
 
-4. **Session End**
+5. **Session End**
    - Calculates session duration
    - Logs task completion
    - Updates streak
    - Archives CLAUDE.md history if needed
+   - Syncs deployment analytics
 
 ## Usage
 
@@ -59,11 +67,21 @@ One command to finish your work.
 ✓ Pushed to origin/feature/issue-142-add-dark-mode-toggle
 ✓ PR #156 created: Add dark mode toggle
 ✓ Linked to issue #142
-✓ CI triggered
+✓ CI triggered: directus-ci.yml
+
+🔄 CI/CD Pipeline Status:
+✓ Build Extensions (1m 23s)
+✓ Lint & Type Check (45s)
+✓ Pattern Validation (32s) - No violations
+✓ Schema Validation (18s)
+✓ Integration Tests (3m 45s)
+✓ Security Scan (2m 10s)
+⏳ Deploy to Staging - Queued (on merge to main)
 
 📊 GitHub Project updated:
 ✓ Status: Review
 ✓ PR linked
+✓ CI passing
 
 ⏱️  Task completed:
    Estimated: 2.5h

@@ -404,6 +404,160 @@ git add .
 
 ---
 
+## CI/CD INTEGRATION (Pattern-First Development)
+
+### GitHub Actions Workflow
+
+The `.github/workflows/directus-ci.yml` workflow enforces the pattern-first development methodology:
+
+**Pipeline Jobs:**
+1. **build-extensions** - Builds all extensions using official Directus SDK
+2. **lint-extensions** - Type checking and linting
+3. **validate-patterns** - Pattern compliance (NEW)
+4. **validate-schema** - Schema consistency checks
+5. **integration-test** - Ephemeral Directus testing
+6. **security-scan** - Trivy + TruffleHog scanning
+7. **health-monitor** - Workflow health scoring (NEW)
+8. **deploy-staging** - Auto-deploy on `main` branch
+9. **deploy-production** - Manual deployment trigger
+
+### Pattern Validation (Enforces Official Directus Patterns)
+
+**Validates:**
+- ✅ Extension structure (package.json + src/index.ts)
+- ✅ Directus config in package.json
+- ✅ Naming conventions (lowercase with hyphens)
+- ✅ No committed node_modules
+- ✅ No .disabled extensions
+- ✅ No monorepo infrastructure
+
+**Prevents Anti-Patterns:**
+- ❌ Committed dependencies (195MB+ bloat)
+- ❌ Custom monorepo setup
+- ❌ Disabled extensions without archiving
+- ❌ Invalid naming conventions
+
+### Health Monitoring
+
+**Workflow Health Score:**
+- Calculated: `(successful_jobs / total_jobs) * 100`
+- Tiers: EXCELLENT (90-100%), GOOD (75-89%), FAIR (60-74%), POOR (<60%)
+- Tracked in analytics database
+- Alerts on degradation
+
+**Commands:**
+```bash
+/advanced:workflow-health         # View CI/CD health
+/advanced:workflow-health --detailed  # Deep analysis
+```
+
+### Commands Integration
+
+**Workflow-Connected Commands:**
+
+```bash
+# /core:done - Creates PR + triggers CI
+/core:done
+  ├─ Commits changes
+  ├─ Creates PR
+  ├─ Triggers directus-ci.yml workflow
+  ├─ Monitors CI status
+  ├─ Reports pattern validation results
+  └─ Records analytics
+
+# /core:deploy - Manual deployment
+/core:deploy staging
+  ├─ Pre-deployment validation
+  ├─ Pattern compliance check
+  ├─ Triggers GitHub Actions
+  ├─ Monitors deployment
+  └─ Health checks
+
+# /advanced:workflow-health - CI/CD monitoring
+/advanced:workflow-health
+  ├─ Fetches workflow runs
+  ├─ Calculates health score
+  ├─ Pattern validation stats
+  └─ Deployment analytics
+```
+
+### Deployment Flow Integration
+
+**Staging (Automatic):**
+```
+/core:done → PR merged to main → GitHub Actions
+  ├─ Pattern validation
+  ├─ Build extensions
+  ├─ Integration tests
+  ├─ Security scan
+  └─ Deploy to staging → Health check
+```
+
+**Production (Manual):**
+```
+/core:deploy production → workflow_dispatch
+  ├─ Manual approval gate
+  ├─ All validation jobs
+  └─ Deploy to production → Health check
+```
+
+### Analytics Integration
+
+**Tracked in `.claude/analytics/analytics.db`:**
+- Workflow runs (status, duration, failures)
+- Deployment events (environment, success rate)
+- Pattern violations (caught, prevented)
+- Health scores (trends over time)
+
+**Query Examples:**
+```sql
+-- Workflow success rate
+SELECT
+  COUNT(*) as total,
+  SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) as successful,
+  ROUND(100.0 * SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) / COUNT(*), 2) as rate
+FROM workflow_runs
+WHERE workflow_name = 'directus-ci';
+
+-- Pattern violations over time
+SELECT DATE(timestamp), COUNT(*) as violations
+FROM pattern_checks
+WHERE violations > 0
+GROUP BY DATE(timestamp);
+```
+
+### Environment Configuration
+
+**Required GitHub Secrets:**
+- `DOKPLOY_URL` - Dokploy API endpoint
+- `DOKPLOY_API_KEY` - API authentication
+- `DOKPLOY_STAGING_ID` - Staging compose ID
+- `DOKPLOY_PRODUCTION_ID` - Production compose ID
+
+**GitHub Environments:**
+- `staging` - Auto-deploy, no approval
+- `production` - Manual trigger, optional approval
+
+### Philosophy Integration
+
+**Machine→Intelligence:**
+- Scripts: Deterministic validation (pattern checks, builds, tests)
+- LLM: Analysis and recommendations (health assessment, improvement suggestions)
+
+**Pattern-First Development:**
+- 95% confidence from official Directus docs
+- Prevents anti-patterns proactively
+- Validates before deployment
+- Zero tolerance for pattern violations
+
+**Continuous Improvement:**
+- Health monitoring tracks trends
+- Analytics guide optimization
+- Failure patterns identified
+- Preventive measures suggested
+
+---
+
 ## WHAT WORKS RIGHT NOW
 
 ✅ **Session Management:**
