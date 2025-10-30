@@ -1,0 +1,17 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [development]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Staging
+    environment: staging
+    uses: ./.github/workflows/deploy-dokploy.yml
+    with:
+      application_id: ${{ vars.APP_ID }}
+      environment: staging
+      wait_for_completion: true
+    secrets: inherit
