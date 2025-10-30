@@ -25,12 +25,12 @@ jobs:
           echo "Application ID: $APP_ID"
           echo ""
 
-          # Deploy via Dokploy API (using redeploy endpoint)
-          RESPONSE=$(curl -X POST "$DOKPLOY_URL/api/application.redeploy" \
+          # Deploy via Dokploy API (compose service)
+          RESPONSE=$(curl -X POST "$DOKPLOY_URL/api/compose.redeploy" \
             -H "Content-Type: application/json" \
             -H "x-api-key: $DOKPLOY_API_KEY" \
             -H "accept: application/json" \
-            -d "{\"applicationId\": \"$APP_ID\"}" \
+            -d "{\"composeId\": \"$APP_ID\"}" \
             --fail-with-body \
             --silent \
             --show-error)
