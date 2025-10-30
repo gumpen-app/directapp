@@ -115,6 +115,12 @@ services:
       # ========================================
       TELEMETRY: "false"
 
+      # ========================================
+      # EXTERNAL API TOKENS (Custom Extensions)
+      # ========================================
+      # Norwegian Vehicle Registry API (vehicle-lookup extension)
+      STATENS_VEGVESEN_TOKEN: ${STATENS_VEGVESEN_TOKEN}
+
     depends_on:
       postgres:
         condition: service_healthy

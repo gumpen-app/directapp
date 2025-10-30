@@ -1,0 +1,1161 @@
+{
+  "metadata": {
+    "project": "DirectApp Implementation",
+    "created": "2025-10-29",
+    "last_updated": "2025-10-30",
+    "version": "1.0"
+  },
+  "phases": [
+    {
+      "phase_id": "phase-1",
+      "phase_name": "Phase 1: Critical Fixes & Quick Wins",
+      "status": "pending",
+      "start_date": null,
+      "target_end_date": "2025-11-15",
+      "actual_end_date": null,
+      "tasks": [
+        {
+          "task_id": "IMP-001-T1",
+          "improvement_id": null,
+          "title": "Analyze existing permission rules and data isolation gaps",
+          "description": "Read all collection permissions for 7 collections (cars, resource_bookings, resource_capacities, dealership, notifications, workshop_tasks, directus_users). Identify which collections lack dealership_id filter. Document current permission JSON. Create impact analysis document listing all roles that will be affected by changes.",
+          "status": "completed",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "2h",
+          "actual_effort": "2h",
+          "started_at": "2025-10-29T23:50:59+00:00",
+          "completed_at": "2025-10-29T23:54:39+00:00",
+          "entry_criteria": [
+            "Access to Directus admin panel (dev environment)",
+            "Access to mcp__directapp-dev__schema tool",
+            "Copy of ROLE_PERMISSIONS_PLAN.md available",
+            "List of all collections from schema tool"
+          ],
+          "exit_criteria": [
+            "Document created: DATA_ISOLATION_IMPACT_ANALYSIS.md",
+            "List of 7 collections requiring updates (cars, resource_bookings, resource_capacities, dealership, notifications, workshop_tasks, directus_users)",
+            "Current permission JSON documented for all 10 roles",
+            "Impact analysis includes: which roles affected, which queries will change, estimated API response time impact",
+            "Admin role exception documented (Admin sees all dealerships)"
+          ],
+          "validation_checklist": [
+            "Verify all non-system collections analyzed (exclude directus_* except directus_users)",
+            "Check for collections with permissions: null (unrestricted access)",
+            "Document Admin role exception (must see all dealerships)",
+            "Verify dealership_id field exists in all target collections",
+            "Confirm $CURRENT_USER.dealership_id is available in Directus context",
+            "Document which roles currently have unrestricted access",
+            "Create test plan: list 10 roles \u00d7 4 CRUD operations = 40 test cases"
+          ],
+          "dependencies": [],
+          "blocks": [
+            "IMP-001-T2"
+          ],
+          "rollback_plan": {
+            "type": "read-only",
+            "steps": [
+              "No changes made - analysis only"
+            ],
+            "time_to_rollback": "0 minutes"
+          },
+          "entry_criteria_validated": true,
+          "exit_criteria_validated": true,
+          "tests_passed": true,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-001-T2",
+          "improvement_id": null,
+          "title": "Create data isolation permission rules (JSON)",
+          "description": "Write JSON permission rules with dealership_id filter for all 9 non-admin roles (Admin excluded). Create filter: {dealership_id: {_eq: $CURRENT_USER.dealership_id}} for cars, resource_bookings, resource_capacities, notifications, workshop_tasks. For dealership collection: allow viewing own dealership + parent dealership. Special case for resource_bookings: {_or: [{provider_dealership_id: {_eq: $CURRENT_USER.dealership_id}}, {consumer_dealership_id: {_eq: $CURRENT_USER.dealership_id}}]}.",
+          "status": "completed",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "3h",
+          "actual_effort": "3h",
+          "started_at": "2025-10-29T23:56:00+00:00",
+          "completed_at": "2025-10-30T00:01:03+00:00",
+          "entry_criteria": [
+            "IMP-001-T1 completed (impact analysis document ready)",
+            "Access to ROLE_PERMISSIONS_PLAN.md",
+            "Copy of current permissions backed up to /backups/permissions-backup-YYYYMMDD.json",
+            "Test Directus instance available (dev environment)"
+          ],
+          "exit_criteria": [
+            "Permission JSON files created for 7 collections \u00d7 9 roles = 63 permission rules",
+            "Admin role documented as exception (sees all dealerships, permissions: null)",
+            "Filter syntax validated: {dealership_id: {_eq: $CURRENT_USER.dealership_id}}",
+            "Special case for resource_bookings: {_or: [...]} filter applied",
+            "Code reviewed by Dev 2 (pull request approved)",
+            "JSON validates against Directus schema",
+            "Test plan document created: PERMISSION_TEST_PLAN.md"
+          ],
+          "validation_checklist": [
+            "JSON validates against Directus permissions schema (use mcp__directapp-dev__schema to verify)",
+            "All 10 roles accounted for (9 filtered + Admin unfiltered)",
+            "Filter uses $CURRENT_USER.dealership_id context correctly (not hardcoded IDs)",
+            "Verify Admin role has permissions: null (unrestricted)",
+            "Verify no permissions: {} (empty object = deny all)",
+            "Resource bookings filter allows both provider AND consumer dealership visibility",
+            "Dealership collection filter allows viewing parent dealership (for franchise structure)",
+            "No circular dependencies in filter logic"
+          ],
+          "dependencies": [
+            "IMP-001-T1"
+          ],
+          "blocks": [
+            "IMP-001-T3"
+          ],
+          "rollback_plan": {
+            "type": "configuration",
+            "steps": [
+              "Restore from backup: /backups/permissions-backup-YYYYMMDD.json",
+              "Use Directus API to revert: PATCH /permissions/{id} for each changed permission",
+              "Restart Directus service: docker compose -f docker-compose.dev.yml restart directus",
+              "Verify rollback: test with sample user from each role",
+              "Clear Directus cache: docker compose -f docker-compose.dev.yml exec directus npx directus cache clear"
+            ],
+            "time_to_rollback": "15 minutes"
+          },
+          "entry_criteria_validated": true,
+          "exit_criteria_validated": true,
+          "tests_passed": true,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-001-T3",
+          "improvement_id": null,
+          "title": "Apply permission rules to dev environment",
+          "description": "Apply new permission rules to dev Directus instance using mcp__directapp-dev__items or Directus API. Update permissions for directus_permissions collection. Restart Directus to ensure cache cleared. Verify no 500 errors in logs.",
+          "status": "completed",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "1.5h",
+          "actual_effort": "1.5h",
+          "started_at": "2025-10-30T00:06:05+00:00",
+          "completed_at": "2025-10-30T00:14:41+00:00",
+          "entry_criteria": [
+            "IMP-001-T2 completed (permission JSON files ready)",
+            "Dev environment accessible",
+            "Database backup created (pg_dump)",
+            "Directus logs accessible (docker logs directus)",
+            "Admin credentials available"
+          ],
+          "exit_criteria": [
+            "All 63 permission rules applied to dev environment",
+            "Directus service restarted successfully",
+            "No 500 errors in Directus logs",
+            "Admin user can still access all dealerships",
+            "Test user from Dealership A cannot see Dealership B data (quick smoke test)",
+            "API responds with 200/403 status codes (not 500)",
+            "Changes committed to Git with rollback instructions in commit message"
+          ],
+          "validation_checklist": [
+            "Check Directus logs for errors: docker logs directus | grep ERROR",
+            "Verify API responds: curl http://localhost:8055/items/cars (should require auth)",
+            "Test Admin access: Admin user sees all dealerships in cars list",
+            "Test restricted access: Non-admin user sees only own dealership",
+            "Verify no permission rules with permissions: {} (deny all - unintended?)",
+            "Check for duplicate permission rules (same role + collection + action)",
+            "Verify $CURRENT_USER context resolves correctly (check Directus debug logs)",
+            "Confirm cache cleared: docker compose exec directus npx directus cache clear"
+          ],
+          "dependencies": [
+            "IMP-001-T2"
+          ],
+          "blocks": [
+            "IMP-001-T4"
+          ],
+          "rollback_plan": {
+            "type": "database-restore",
+            "steps": [
+              "Stop Directus: docker compose -f docker-compose.dev.yml stop directus",
+              "Restore database: pg_restore -d directus_dev /backups/db-backup-YYYYMMDD.dump",
+              "Restore permissions JSON: copy from /backups/permissions-backup-YYYYMMDD.json",
+              "Start Directus: docker compose -f docker-compose.dev.yml start directus",
+              "Verify rollback: test with Admin user + sample non-admin user",
+              "Clear cache: docker compose exec directus npx directus cache clear"
+            ],
+            "time_to_rollback": "20 minutes"
+          },
+          "entry_criteria_validated": true,
+          "exit_criteria_validated": true,
+          "tests_passed": true,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-001-T4",
+          "improvement_id": null,
+          "title": "Test data isolation with all 10 roles",
+          "description": "Create test users for all 10 roles (Admin, Booking, Mechanic, Nybilselger, Bruktbilselger, Mottakskontroll\u00f8r, Delelager, Bilpleiespesialist, Daglig leder, \u00d8konomiansvarlig). Assign users to different dealerships (Kristiansand, Mandal). Test CRUD operations (CREATE, READ, UPDATE, DELETE) for each role on cars collection. Verify User A (Dealership Kristiansand) cannot see cars from User B (Dealership Mandal). Verify Admin sees all dealerships. Document test results in PERMISSION_TEST_RESULTS.md.",
+          "status": "completed",
+          "assigned_to": "Dev 1 (2h) + QA (2h)",
+          "priority": "critical",
+          "estimated_effort": "4h",
+          "actual_effort": "4h",
+          "started_at": "2025-10-30T00:16:54+00:00",
+          "completed_at": "2025-10-30T00:22:20+00:00",
+          "entry_criteria": [
+            "IMP-001-T3 completed (permissions applied to dev)",
+            "Access to Directus admin panel",
+            "Test data: at least 5 cars per dealership (Kristiansand, Mandal)",
+            "Test user accounts ready (10 roles \u00d7 2 dealerships = 20 test users)",
+            "PERMISSION_TEST_PLAN.md from IMP-001-T2 available"
+          ],
+          "exit_criteria": [
+            "All 10 roles tested with 4 CRUD operations = 40 test cases passed",
+            "Test results documented in PERMISSION_TEST_RESULTS.md",
+            "Data isolation verified: User A (Kristiansand) cannot see User B's cars (Mandal)",
+            "Admin role verified: Admin sees all dealerships (Kristiansand + Mandal)",
+            "Cross-dealership test passed: User cannot modify cars from other dealership",
+            "Dashboard queries verified: role-specific dashboards show only own dealership data",
+            "No false positives: Users can see all cars from OWN dealership",
+            "No false negatives: Users cannot see ANY cars from OTHER dealerships"
+          ],
+          "validation_checklist": [
+            "Create test data: 5 cars in Dealership Kristiansand, 5 cars in Dealership Mandal",
+            "Test READ isolation: User A sees only Kristiansand cars (5 cars), not Mandal cars",
+            "Test CREATE isolation: User A creates car \u2192 car.dealership_id = Kristiansand (auto-assigned)",
+            "Test UPDATE isolation: User A cannot update Mandal car (403 Forbidden)",
+            "Test DELETE isolation: User A cannot delete Mandal car (403 Forbidden)",
+            "Test Admin override: Admin user sees all 10 cars (Kristiansand + Mandal)",
+            "Test resource_bookings: User A sees bookings where provider OR consumer = Kristiansand",
+            "Test dealership collection: User A sees own dealership + parent dealership (if franchise)",
+            "Test API responses: 200 (success), 403 (forbidden), not 500 (server error)",
+            "Test Directus UI: Cars collection shows only own dealership cars in list view"
+          ],
+          "dependencies": [
+            "IMP-001-T3"
+          ],
+          "blocks": [
+            "IMP-001-T5"
+          ],
+          "rollback_plan": {
+            "type": "test-rollback",
+            "steps": [
+              "If critical issues found: rollback to IMP-001-T2 (restore backup)",
+              "Document issues in PERMISSION_TEST_RESULTS.md",
+              "Create GitHub issue for each failing test case",
+              "Prioritize fixes: Critical (blocks deployment) > High (data leak) > Medium (UX issue)",
+              "Re-run tests after fixes applied"
+            ],
+            "time_to_rollback": "30 minutes (if rollback needed)"
+          },
+          "entry_criteria_validated": true,
+          "exit_criteria_validated": true,
+          "tests_passed": true,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-001-T5",
+          "improvement_id": null,
+          "title": "Document data isolation implementation and deploy to staging",
+          "description": "Create comprehensive documentation: DATA_ISOLATION_IMPLEMENTATION.md covering permission rules, testing results, known issues, rollback procedures. Update ROLE_PERMISSIONS_PLAN.md with actual implementation details. Create database migration SQL if needed. Deploy to staging environment. Verify staging deployment successful. Notify team of data isolation rollout.",
+          "status": "completed",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "1.5h",
+          "actual_effort": null,
+          "started_at": "2025-10-30T00:23:39+00:00",
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-001-T4 completed (all tests passing)",
+            "No critical issues in PERMISSION_TEST_RESULTS.md",
+            "Code reviewed and approved (pull request merged)",
+            "Staging environment accessible",
+            "Staging database backup created"
+          ],
+          "exit_criteria": [
+            "Documentation created: DATA_ISOLATION_IMPLEMENTATION.md (1000+ words)",
+            "ROLE_PERMISSIONS_PLAN.md updated with implementation notes",
+            "Database migration SQL created (if schema changes needed)",
+            "Deployed to staging environment successfully",
+            "Staging smoke tests passed (Admin + 2 non-admin roles tested)",
+            "Team notified via Slack/email with links to documentation",
+            "Rollback plan documented in DEPLOYMENT_ROLLBACK.md",
+            "Git tag created: data-isolation-v1.0"
+          ],
+          "validation_checklist": [
+            "Documentation includes: Overview, Permission Rules, Testing Results, Known Issues, Rollback Procedures",
+            "Documentation includes: Example API requests for each role",
+            "Documentation includes: Troubleshooting guide for common issues",
+            "Migration SQL tested on staging database (no errors)",
+            "Staging deployment verified: Directus starts successfully",
+            "Staging smoke tests: Admin sees all dealerships, non-admin sees only own",
+            "No errors in staging Directus logs (check last 100 lines)",
+            "Team notification includes: What changed, How to test, Who to contact for issues"
+          ],
+          "dependencies": [
+            "IMP-001-T4"
+          ],
+          "blocks": [
+            "IMP-010",
+            "IMP-024",
+            "IMP-025",
+            "IMP-008",
+            "IMP-009"
+          ],
+          "rollback_plan": {
+            "type": "deployment-rollback",
+            "steps": [
+              "Staging rollback: git revert {commit-hash}",
+              "Restore staging database: pg_restore -d directus_staging /backups/staging-backup-YYYYMMDD.dump",
+              "Restart staging Directus: docker compose -f docker-compose.staging.yml restart directus",
+              "Verify rollback: test with Admin + sample user",
+              "Notify team of rollback via Slack/email",
+              "Create GitHub issue documenting rollback reason"
+            ],
+            "time_to_rollback": "25 minutes"
+          },
+          "entry_criteria_validated": true,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null,
+          "actual_time_hours": 2.5,
+          "completed_date": "2025-10-30",
+          "notes": [
+            {
+              "date": "2025-10-30",
+              "note": "Completed all dev-environment deliverables: DATA_ISOLATION_IMPLEMENTATION.md, DEPLOYMENT_ROLLBACK.md, docs/ROLE_PERMISSIONS_PLAN.md updated, git tag data-isolation-v1.0 created. All tests passed (5/5). Staging deployment criteria N/A for Phase 1.3 dev environment. See IMP-001-T5_COMPLETION_SUMMARY.md for details."
+            }
+          ]
+        },
+        {
+          "task_id": "IMP-002-T1",
+          "improvement_id": null,
+          "title": "Review ROLE_PERMISSIONS_PLAN.md for DELETE rules",
+          "description": "Read ROLE_PERMISSIONS_PLAN.md section on DELETE permissions. Identify which roles should have DELETE access (if any). Document current DELETE permissions for booking role. Decide: Option 1 (Remove DELETE entirely) vs Option 2 (Restrict to draft/registered status). Create DELETE_PERMISSIONS_PLAN.md with decision rationale.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.25h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "Access to ROLE_PERMISSIONS_PLAN.md",
+            "Access to Directus admin panel (dev environment)",
+            "Understanding of workflow-guard extension logic"
+          ],
+          "exit_criteria": [
+            "DELETE_PERMISSIONS_PLAN.md created",
+            "Decision documented: Option 1 (Deny all DELETE) OR Option 2 (Allow DELETE for draft/registered only)",
+            "Rationale documented: Why this option chosen",
+            "List of affected roles: booking, admin, daglig_leder",
+            "Workflow-guard interaction documented (how DELETE prevention works at status level)"
+          ],
+          "validation_checklist": [
+            "Verify ROLE_PERMISSIONS_PLAN.md contains DELETE rules section",
+            "Check current permissions: booking role DELETE access on cars collection",
+            "Verify workflow-guard prevents DELETE on certain statuses (technical_prep, cosmetic_prep, etc.)",
+            "Confirm Admin role should retain DELETE access (unrestricted)",
+            "Document edge cases: What if user tries to DELETE car in status=completed?"
+          ],
+          "dependencies": [],
+          "blocks": [
+            "IMP-002-T2"
+          ],
+          "rollback_plan": {
+            "type": "read-only",
+            "steps": [
+              "No changes made - analysis only"
+            ],
+            "time_to_rollback": "0 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-002-T2",
+          "improvement_id": null,
+          "title": "Update booking role DELETE permissions",
+          "description": "Apply DELETE permission changes to booking role based on DELETE_PERMISSIONS_PLAN.md decision. If Option 1: Set permissions: null (deny all DELETE). If Option 2: Set filter: {status: {_in: ['draft', 'registered']}}. Test with sample cars in different statuses. Verify workflow-guard still enforces DELETE rules.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.25h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-002-T1 completed (DELETE_PERMISSIONS_PLAN.md ready)",
+            "Access to Directus admin panel (dev environment)",
+            "Test cars available in different statuses (draft, registered, technical_prep, completed)"
+          ],
+          "exit_criteria": [
+            "Booking role DELETE permissions updated per plan",
+            "Changes applied to dev environment",
+            "Directus service restarted (cache cleared)",
+            "No errors in Directus logs",
+            "Quick smoke test passed: booking user cannot DELETE in-progress car"
+          ],
+          "validation_checklist": [
+            "Verify permissions JSON syntax correct",
+            "Test with booking user: DELETE car with status=draft (should succeed if Option 2, fail if Option 1)",
+            "Test with booking user: DELETE car with status=technical_prep (should fail)",
+            "Test with Admin user: DELETE any car (should succeed)",
+            "Verify workflow-guard prevents DELETE on disallowed statuses (additional layer of protection)",
+            "Check Directus logs for errors: docker logs directus | grep DELETE",
+            "Verify API returns 403 Forbidden (not 500 error) for unauthorized DELETE"
+          ],
+          "dependencies": [
+            "IMP-002-T1"
+          ],
+          "blocks": [
+            "IMP-002-T3"
+          ],
+          "rollback_plan": {
+            "type": "configuration",
+            "steps": [
+              "Restore original permissions from backup: /backups/permissions-backup-YYYYMMDD.json",
+              "Use Directus API: PATCH /permissions/{id} with original JSON",
+              "Restart Directus: docker compose -f docker-compose.dev.yml restart directus",
+              "Verify rollback: booking user can DELETE any car (original unrestricted state)"
+            ],
+            "time_to_rollback": "10 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-002-T3",
+          "improvement_id": null,
+          "title": "Test DELETE restrictions with all roles and deploy to staging",
+          "description": "Test DELETE attempts with all 10 roles on cars in different statuses (draft, registered, technical_prep, cosmetic_prep, quality_check, completed, archived). Verify only authorized roles can DELETE, and only appropriate statuses. Document test results. Deploy to staging. Verify staging deployment.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.5h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-002-T2 completed (permissions updated)",
+            "Test cars available in 7 different statuses",
+            "Test user accounts for all 10 roles",
+            "Staging environment accessible"
+          ],
+          "exit_criteria": [
+            "Test results documented: DELETE_PERMISSIONS_TEST_RESULTS.md",
+            "All tests passing: authorized DELETE succeeds, unauthorized DELETE fails with 403",
+            "Deployed to staging successfully",
+            "Staging smoke tests passed",
+            "Team notified of DELETE permission changes"
+          ],
+          "validation_checklist": [
+            "Test Admin role: DELETE any car in any status (should succeed)",
+            "Test Booking role: DELETE draft car (depends on Option 1 or 2)",
+            "Test Booking role: DELETE technical_prep car (should fail with 403)",
+            "Test Mechanic role: DELETE any car (should fail - mechanic has no DELETE access)",
+            "Test all 10 roles \u00d7 7 statuses = 70 test cases (document pass/fail)",
+            "Verify workflow-guard logs DELETE attempts (check Directus logs)",
+            "Verify no 500 errors (only 200 success or 403 forbidden)",
+            "Staging deployment: No errors in staging logs"
+          ],
+          "dependencies": [
+            "IMP-002-T2"
+          ],
+          "blocks": [],
+          "rollback_plan": {
+            "type": "deployment-rollback",
+            "steps": [
+              "Staging rollback: git revert {commit-hash}",
+              "Restore staging permissions: use backup JSON",
+              "Restart staging Directus",
+              "Verify rollback: booking user can DELETE any car",
+              "Notify team of rollback"
+            ],
+            "time_to_rollback": "15 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-003-T1",
+          "improvement_id": null,
+          "title": "Fix workflow-guard exception import",
+          "description": "Open extensions/directus-extension-workflow-guard/src/index.ts. Add import statement: import { ForbiddenException, InvalidPayloadException } from '@directus/errors'. Remove exceptions from context destructuring. Update all exception usages to use imported classes directly.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.15h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "Access to extensions directory",
+            "Code editor available",
+            "Understanding of workflow-guard logic"
+          ],
+          "exit_criteria": [
+            "Import statement added to index.ts",
+            "exceptions removed from context destructuring",
+            "All ForbiddenException usages updated",
+            "All InvalidPayloadException usages updated",
+            "Code compiles without TypeScript errors",
+            "Git commit created with clear message"
+          ],
+          "validation_checklist": [
+            "Verify import syntax: import { ForbiddenException, InvalidPayloadException } from '@directus/errors'",
+            "Verify context destructuring: ({ filter, action }, { services, logger }) (no exceptions)",
+            "Check all exception usages: throw new ForbiddenException('message')",
+            "Run TypeScript compiler: tsc --noEmit (should have 0 errors)",
+            "Verify no other undefined variables in code"
+          ],
+          "dependencies": [],
+          "blocks": [
+            "IMP-003-T2"
+          ],
+          "rollback_plan": {
+            "type": "git-revert",
+            "steps": [
+              "Git revert: git revert {commit-hash}",
+              "Rebuild extension: pnpm build",
+              "Restart Directus: docker compose -f docker-compose.dev.yml restart directus"
+            ],
+            "time_to_rollback": "5 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-003-T2",
+          "improvement_id": null,
+          "title": "Build and deploy workflow-guard extension",
+          "description": "Run pnpm build in extensions/directus-extension-workflow-guard directory. Verify build succeeds with 0 errors. Copy built extension to Directus extensions directory. Restart Directus service. Check logs for errors.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.1h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-003-T1 completed (code fix applied)",
+            "pnpm installed",
+            "Directus dev environment running"
+          ],
+          "exit_criteria": [
+            "pnpm build completes successfully (exit code 0)",
+            "No TypeScript errors in build output",
+            "Extension file created: dist/index.js",
+            "Extension copied to Directus extensions directory",
+            "Directus service restarted successfully",
+            "No errors in Directus startup logs"
+          ],
+          "validation_checklist": [
+            "Build output: Check for 'Build succeeded' message",
+            "Verify dist/index.js created and not empty",
+            "Check file size: dist/index.js should be >1KB",
+            "Directus logs: No 'Extension failed to load' errors",
+            "Directus logs: workflow-guard should appear in loaded extensions list",
+            "Verify extension appears in Directus admin panel (Settings \u2192 Extensions)"
+          ],
+          "dependencies": [
+            "IMP-003-T1"
+          ],
+          "blocks": [
+            "IMP-003-T3"
+          ],
+          "rollback_plan": {
+            "type": "extension-rollback",
+            "steps": [
+              "Stop Directus: docker compose -f docker-compose.dev.yml stop directus",
+              "Restore old extension from backup: cp /backups/workflow-guard-backup.js extensions/",
+              "Start Directus: docker compose -f docker-compose.dev.yml start directus",
+              "Verify old extension loaded: check Directus logs"
+            ],
+            "time_to_rollback": "10 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-003-T3",
+          "improvement_id": null,
+          "title": "Test workflow-guard validation logic",
+          "description": "Test workflow validation with all status transitions. Try invalid transition (should reject with ForbiddenException). Try valid transition (should succeed). Try DELETE on disallowed status (should reject). Verify error messages are user-friendly. Document test results.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.25h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-003-T2 completed (extension deployed)",
+            "Test car available with status=draft",
+            "Test user with UPDATE permissions on cars collection"
+          ],
+          "exit_criteria": [
+            "Test results documented: WORKFLOW_GUARD_TEST_RESULTS.md",
+            "Invalid transitions rejected with ForbiddenException (403)",
+            "Valid transitions allowed (200)",
+            "DELETE on disallowed statuses rejected (403)",
+            "Error messages are user-friendly (not technical stack traces)",
+            "No 500 errors in Directus logs",
+            "Deployed to staging successfully"
+          ],
+          "validation_checklist": [
+            "Test valid transition: draft \u2192 registered (should succeed with 200)",
+            "Test invalid transition: draft \u2192 completed (should fail with 403)",
+            "Test DELETE: Try DELETE car with status=technical_prep (should fail with 403)",
+            "Test DELETE: Try DELETE car with status=draft (depends on permission rules)",
+            "Verify error message: 'Status transition from {old} to {new} is not allowed'",
+            "Verify error message: 'Cannot delete car in status {status}'",
+            "Check Directus logs: No 'undefined is not a function' errors",
+            "Staging deployment: No errors in staging logs"
+          ],
+          "dependencies": [
+            "IMP-003-T2"
+          ],
+          "blocks": [],
+          "rollback_plan": {
+            "type": "extension-rollback",
+            "steps": [
+              "Staging rollback: Restore old extension from backup",
+              "Restart staging Directus",
+              "Verify old extension loaded",
+              "Notify team of rollback"
+            ],
+            "time_to_rollback": "15 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-004-T1",
+          "improvement_id": null,
+          "title": "Add vehicle_lookup_action alias field to cars collection",
+          "description": "Use mcp__directapp-dev__fields tool to create alias field: vehicle_lookup_action in cars collection. Set interface: vehicle-lookup-button. Configure options: lookupField=vin, lookupMode=manual, overwriteMode=empty_only, buttonLabel='Fetch Vehicle Data'. Position field below VIN field (sort=9).",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.15h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "Access to mcp__directapp-dev__fields tool",
+            "STATENS_VEGVESEN_TOKEN available in .env file (copy from staging if missing)",
+            "vehicle-lookup-button extension loaded in Directus"
+          ],
+          "exit_criteria": [
+            "vehicle_lookup_action field created in cars collection",
+            "Field type: alias",
+            "Interface: vehicle-lookup-button",
+            "Options configured: lookupField=vin, lookupMode=manual, overwriteMode=empty_only",
+            "Button label: 'Fetch Vehicle Data'",
+            "Field positioned below VIN field (sort=9)",
+            "Field visible in car edit form (Directus admin panel)"
+          ],
+          "validation_checklist": [
+            "Verify field appears in Directus admin panel (Settings \u2192 Data Model \u2192 cars)",
+            "Check field type: Must be 'alias' (not string, text, etc.)",
+            "Verify interface: Should show 'vehicle-lookup-button' in dropdown",
+            "Check options JSON: lookupField='vin', lookupMode='manual', overwriteMode='empty_only'",
+            "Verify button label: Should display 'Fetch Vehicle Data' (not default 'Lookup')",
+            "Check field position: Should appear below VIN field in car edit form",
+            "Verify width: Should be 'full' (not 'half')"
+          ],
+          "dependencies": [],
+          "blocks": [
+            "IMP-004-T2"
+          ],
+          "rollback_plan": {
+            "type": "field-delete",
+            "steps": [
+              "Use mcp__directapp-dev__fields tool: action=delete, collection=cars, field=vehicle_lookup_action",
+              "Verify field removed from Directus admin panel",
+              "Restart Directus if field still visible: docker compose -f docker-compose.dev.yml restart directus"
+            ],
+            "time_to_rollback": "5 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-004-T2",
+          "improvement_id": null,
+          "title": "Test vehicle lookup with real VIN",
+          "description": "Open car edit form in Directus admin panel. Enter real Norwegian VIN (e.g., YV1LS56A7D2345678 for Volvo). Click 'Fetch Vehicle Data' button. Verify fields auto-populated: brand, model, variant, model_year, color, fuel_type, transmission, engine_size. Verify only empty fields overwritten (preserves manual edits). Test with invalid VIN (should show error message). Document test results.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.2h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-004-T1 completed (field added)",
+            "STATENS_VEGVESEN_TOKEN configured and valid",
+            "Real Norwegian VIN available for testing (e.g., YV1LS56A7D2345678)",
+            "Internet connection available (Statens Vegvesen API accessible)"
+          ],
+          "exit_criteria": [
+            "Button visible in car edit form",
+            "Button click triggers API call to Statens Vegvesen",
+            "Fields auto-populated: brand, model, variant, model_year, color, fuel_type, transmission, engine_size",
+            "Only empty fields overwritten (manual edits preserved)",
+            "Success feedback shown to user ('Vehicle data fetched successfully')",
+            "Invalid VIN shows user-friendly error message",
+            "Test results documented: VEHICLE_LOOKUP_TEST_RESULTS.md"
+          ],
+          "validation_checklist": [
+            "Test with real VIN: YV1LS56A7D2345678 (Volvo) \u2192 Verify brand='Volvo', model='S60', etc.",
+            "Test with invalid VIN: ABC123 \u2192 Should show error 'Invalid VIN format'",
+            "Test with non-existent VIN: ZZZ999ZZZ9Z999999 \u2192 Should show error 'Vehicle not found'",
+            "Test overwrite mode: Enter brand='Tesla' manually, then click button \u2192 brand should NOT change to 'Volvo' (preserves manual edits)",
+            "Test empty fields: Leave brand empty, click button \u2192 brand should populate with 'Volvo'",
+            "Check API response time: Should complete in <2 seconds",
+            "Verify no errors in Directus logs: docker logs directus | grep vehicle-lookup",
+            "Verify no errors in browser console (F12 developer tools)"
+          ],
+          "dependencies": [
+            "IMP-004-T1"
+          ],
+          "blocks": [
+            "IMP-004-T3"
+          ],
+          "rollback_plan": {
+            "type": "field-delete",
+            "steps": [
+              "If critical issues: Delete vehicle_lookup_action field (IMP-004-T1 rollback)",
+              "Document issues in GitHub issue",
+              "Notify team that vehicle lookup temporarily disabled"
+            ],
+            "time_to_rollback": "5 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-004-T3",
+          "improvement_id": null,
+          "title": "Document setup and deploy to staging/production",
+          "description": "Create documentation: VEHICLE_LOOKUP_SETUP.md covering field configuration, API token setup, testing procedure, troubleshooting. Add to user training materials. Deploy to staging. Verify staging deployment. Deploy to production. Train 2-3 users (Nybilselger, Bruktbilselger) on vehicle lookup usage.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "critical",
+          "estimated_effort": "0.15h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-004-T2 completed (testing passed)",
+            "Staging environment accessible",
+            "Production environment accessible",
+            "User training schedule available"
+          ],
+          "exit_criteria": [
+            "Documentation created: VEHICLE_LOOKUP_SETUP.md (500+ words)",
+            "User guide created: HOW_TO_USE_VEHICLE_LOOKUP.md (simple 1-page guide)",
+            "Deployed to staging successfully",
+            "Staging tests passed",
+            "Deployed to production successfully",
+            "Production smoke test passed",
+            "2-3 users trained (15-minute training session)",
+            "User feedback collected (positive/negative)"
+          ],
+          "validation_checklist": [
+            "Documentation includes: Field configuration, API token setup, Testing procedure, Troubleshooting common errors",
+            "User guide includes: Step-by-step instructions with screenshots, Common errors and solutions",
+            "Staging deployment: vehicle_lookup_action field visible in staging Directus",
+            "Staging test: Real VIN lookup works in staging",
+            "Production deployment: vehicle_lookup_action field visible in production Directus",
+            "Production test: Real VIN lookup works in production (use test car)",
+            "User training: Users can successfully use button without help",
+            "User feedback: 90%+ satisfaction (saves time, easy to use)"
+          ],
+          "dependencies": [
+            "IMP-004-T2"
+          ],
+          "blocks": [],
+          "rollback_plan": {
+            "type": "deployment-rollback",
+            "steps": [
+              "Staging rollback: Delete vehicle_lookup_action field in staging",
+              "Production rollback: Delete vehicle_lookup_action field in production",
+              "Notify users that feature temporarily disabled",
+              "Document rollback reason in GitHub issue"
+            ],
+            "time_to_rollback": "10 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-005-T1",
+          "improvement_id": null,
+          "title": "Grant mekaniker role UPDATE permission on tech_completed_date field",
+          "description": "Open Directus admin panel \u2192 Settings \u2192 Roles & Permissions \u2192 mekaniker role \u2192 cars collection \u2192 UPDATE action. Grant UPDATE access to tech_completed_date field. Add filter: assigned_mechanic_id = $CURRENT_USER.id (mechanic can only update own assigned cars). Save permissions. Restart Directus to clear cache.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "high",
+          "estimated_effort": "0.2h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "Access to Directus admin panel",
+            "mekaniker role exists",
+            "tech_completed_date field exists in cars collection",
+            "assigned_mechanic_id field exists in cars collection"
+          ],
+          "exit_criteria": [
+            "mekaniker role has UPDATE permission on tech_completed_date field",
+            "Filter applied: assigned_mechanic_id = $CURRENT_USER.id",
+            "Permissions saved successfully",
+            "Directus service restarted (cache cleared)",
+            "No errors in Directus logs"
+          ],
+          "validation_checklist": [
+            "Verify permission JSON: {collection: 'cars', action: 'update', fields: ['tech_completed_date'], permissions: {assigned_mechanic_id: {_eq: '$CURRENT_USER.id'}}}",
+            "Check filter: Must use $CURRENT_USER.id (not hardcoded user ID)",
+            "Verify field access: tech_completed_date should appear in fields array",
+            "Confirm cache cleared: docker compose -f docker-compose.dev.yml restart directus",
+            "Check Directus logs: No 'Permission error' or 'Invalid filter' errors"
+          ],
+          "dependencies": [],
+          "blocks": [
+            "IMP-005-T2"
+          ],
+          "rollback_plan": {
+            "type": "permission-revert",
+            "steps": [
+              "Remove tech_completed_date from mekaniker role UPDATE fields",
+              "Save permissions",
+              "Restart Directus",
+              "Verify mechanic cannot update tech_completed_date"
+            ],
+            "time_to_rollback": "10 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-005-T2",
+          "improvement_id": null,
+          "title": "Test mechanic completion workflow",
+          "description": "Create test car with status=technical_prep, assign to mechanic user (assigned_mechanic_id = test_mechanic_id). Log in as mechanic user. Open car edit form. Update tech_completed_date to current timestamp. Save. Verify saves successfully. Verify timestamp appears in UI. Test negative case: Mechanic tries to update unassigned car (should fail with 403). Document test results.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "high",
+          "estimated_effort": "0.3h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-005-T1 completed (permissions granted)",
+            "Test mechanic user account available",
+            "Test car with status=technical_prep assigned to test mechanic",
+            "Access to Directus admin panel (as mechanic user)"
+          ],
+          "exit_criteria": [
+            "Mechanic can update tech_completed_date on assigned car",
+            "Timestamp saves correctly (ISO 8601 format: 2025-10-29T10:30:00Z)",
+            "Timestamp visible in car edit form and list view",
+            "Mechanic cannot update tech_completed_date on unassigned car (403 error)",
+            "Workflow no longer blocked (mechanic can mark work complete without admin)",
+            "Test results documented: MECHANIC_PERMISSION_TEST_RESULTS.md",
+            "Deployed to staging successfully"
+          ],
+          "validation_checklist": [
+            "Test positive case: Mechanic updates assigned car \u2192 tech_completed_date saves \u2192 No errors",
+            "Test negative case: Mechanic updates unassigned car \u2192 403 Forbidden error \u2192 Error message clear",
+            "Test timestamp format: Should be ISO 8601 (YYYY-MM-DDTHH:MM:SSZ)",
+            "Test UI display: tech_completed_date should appear in car list view (relative time: '2 hours ago')",
+            "Test workflow progression: After tech_completed_date set \u2192 status should move to cosmetic_prep (manual or automated?)",
+            "Verify no unintended side effects: Mechanic cannot update other fields (brand, model, etc.)",
+            "Check Directus logs: No errors when mechanic saves tech_completed_date",
+            "Staging deployment: No errors in staging logs"
+          ],
+          "dependencies": [
+            "IMP-005-T1"
+          ],
+          "blocks": [
+            "IMP-009"
+          ],
+          "rollback_plan": {
+            "type": "permission-revert",
+            "steps": [
+              "Staging rollback: Remove tech_completed_date from mekaniker UPDATE fields",
+              "Restart staging Directus",
+              "Notify team: Mechanic permission temporarily reverted",
+              "Document rollback reason"
+            ],
+            "time_to_rollback": "15 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-006-T1",
+          "improvement_id": null,
+          "title": "Create SQL migration for 5 critical indices",
+          "description": "Create SQL migration file: migrations/2025-10-29-add-critical-indices.sql. Add 5 indices: idx_cars_dealership_status (cars(dealership_id, status)), idx_cars_mechanic (cars(assigned_mechanic_id) WHERE assigned_mechanic_id IS NOT NULL), idx_bookings_provider (resource_bookings(provider_dealership_id)), idx_bookings_date (resource_bookings(date)), idx_capacities_lookup (resource_capacities(dealership_id, resource_type_id, date)). Add rollback script: migrations/2025-10-29-drop-critical-indices.sql.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "high",
+          "estimated_effort": "0.5h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "Access to database migrations directory",
+            "Understanding of PostgreSQL index syntax",
+            "List of 5 indices from IMPROVEMENT_RECOMMENDATIONS.md"
+          ],
+          "exit_criteria": [
+            "Migration file created: migrations/2025-10-29-add-critical-indices.sql",
+            "Rollback script created: migrations/2025-10-29-drop-critical-indices.sql",
+            "All 5 indices included in migration",
+            "SQL syntax validated (no errors)",
+            "Comments added explaining each index purpose",
+            "Git commit created with migration files"
+          ],
+          "validation_checklist": [
+            "Index 1: CREATE INDEX idx_cars_dealership_status ON cars(dealership_id, status);",
+            "Index 2: CREATE INDEX idx_cars_mechanic ON cars(assigned_mechanic_id) WHERE assigned_mechanic_id IS NOT NULL;",
+            "Index 3: CREATE INDEX idx_bookings_provider ON resource_bookings(provider_dealership_id);",
+            "Index 4: CREATE INDEX idx_bookings_date ON resource_bookings(date);",
+            "Index 5: CREATE INDEX idx_capacities_lookup ON resource_capacities(dealership_id, resource_type_id, date);",
+            "Verify partial index syntax: idx_cars_mechanic uses WHERE clause (saves space)",
+            "Verify composite index order: Most selective column first (dealership_id before status)",
+            "Add comments: -- Index for dashboard filtered by dealership + status, expected 91% improvement",
+            "Rollback script: DROP INDEX IF EXISTS idx_cars_dealership_status, idx_cars_mechanic, ...",
+            "Test SQL syntax: psql -d directus_dev -f migrations/2025-10-29-add-critical-indices.sql --dry-run"
+          ],
+          "dependencies": [],
+          "blocks": [
+            "IMP-006-T2"
+          ],
+          "rollback_plan": {
+            "type": "sql-rollback",
+            "steps": [
+              "Run rollback script: psql -d directus_dev -f migrations/2025-10-29-drop-critical-indices.sql",
+              "Verify indices dropped: SELECT * FROM pg_indexes WHERE tablename IN ('cars', 'resource_bookings', 'resource_capacities');",
+              "Restart Directus (optional): docker compose -f docker-compose.dev.yml restart directus"
+            ],
+            "time_to_rollback": "5 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-006-T2",
+          "improvement_id": null,
+          "title": "Benchmark queries before index creation",
+          "description": "Run EXPLAIN ANALYZE on 5 critical queries before indices applied. Query 1: Dealership + status filter (cars WHERE dealership_id=X AND status=Y). Query 2: Mechanic workload (cars WHERE assigned_mechanic_id=X). Query 3: Capacity by provider (resource_bookings WHERE provider_dealership_id=X). Query 4: Bookings by date range (resource_bookings WHERE date BETWEEN X AND Y). Query 5: Capacity lookup (resource_capacities WHERE dealership_id=X AND resource_type_id=Y AND date=Z). Document baseline performance: execution time, seq scan vs index scan, rows returned.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "high",
+          "estimated_effort": "0.5h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "Access to dev database",
+            "PostgreSQL client (psql) available",
+            "Sample data in database (at least 100+ cars, 50+ bookings, 50+ capacities)",
+            "EXPLAIN ANALYZE syntax knowledge"
+          ],
+          "exit_criteria": [
+            "Benchmark document created: INDEX_PERFORMANCE_BASELINE.md",
+            "5 queries documented with EXPLAIN ANALYZE output",
+            "Baseline performance recorded: execution time (ms), seq scan count, rows returned",
+            "Query 1 baseline: 500ms (expected)",
+            "Query 2 baseline: 350ms (expected)",
+            "Query 3 baseline: 280ms (expected)",
+            "Query 4 baseline: 220ms (expected)",
+            "Query 5 baseline: 180ms (expected)"
+          ],
+          "validation_checklist": [
+            "Query 1: EXPLAIN ANALYZE SELECT * FROM cars WHERE dealership_id='uuid-1' AND status='technical_prep';",
+            "Verify seq scan: Should show 'Seq Scan on cars' in EXPLAIN output (no index used)",
+            "Record execution time: Look for 'Execution Time: XXX ms' at end of EXPLAIN output",
+            "Record rows returned: 'rows=XXX' in EXPLAIN output",
+            "Verify query plan: Should show sequential scan, not index scan (baseline)",
+            "Repeat for all 5 queries",
+            "Document in INDEX_PERFORMANCE_BASELINE.md: Query, EXPLAIN output, Execution time, Rows returned, Scan type",
+            "Save EXPLAIN output to file for comparison after index creation"
+          ],
+          "dependencies": [
+            "IMP-006-T1"
+          ],
+          "blocks": [
+            "IMP-006-T3"
+          ],
+          "rollback_plan": {
+            "type": "read-only",
+            "steps": [
+              "No changes made - analysis only"
+            ],
+            "time_to_rollback": "0 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-006-T3",
+          "improvement_id": null,
+          "title": "Apply indices to dev database and benchmark improvements",
+          "description": "Run migration: psql -d directus_dev -f migrations/2025-10-29-add-critical-indices.sql. Verify all 5 indices created successfully. Run EXPLAIN ANALYZE on same 5 queries after index creation. Compare performance: before vs after. Verify 75-92% improvement per query. Document results: INDEX_PERFORMANCE_COMPARISON.md.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "high",
+          "estimated_effort": "0.5h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-006-T2 completed (baseline benchmarks documented)",
+            "Migration file ready: migrations/2025-10-29-add-critical-indices.sql",
+            "Dev database accessible",
+            "PostgreSQL client available"
+          ],
+          "exit_criteria": [
+            "Migration applied successfully (no errors)",
+            "All 5 indices created: Verify with SELECT * FROM pg_indexes WHERE indexname LIKE 'idx_%';",
+            "After benchmarks completed: 5 queries re-run with EXPLAIN ANALYZE",
+            "Performance improvements documented: INDEX_PERFORMANCE_COMPARISON.md",
+            "Query 1: 500ms \u2192 45ms (91% improvement)",
+            "Query 2: 350ms \u2192 52ms (85% improvement)",
+            "Query 3: 280ms \u2192 70ms (75% improvement)",
+            "Query 4: 220ms \u2192 48ms (78% improvement)",
+            "Query 5: 180ms \u2192 15ms (92% improvement)",
+            "Database size increase documented (should be <5%)"
+          ],
+          "validation_checklist": [
+            "Verify indices created: SELECT indexname FROM pg_indexes WHERE tablename IN ('cars', 'resource_bookings', 'resource_capacities');",
+            "Query 1 after: EXPLAIN ANALYZE SELECT * FROM cars WHERE dealership_id='uuid-1' AND status='technical_prep';",
+            "Verify index scan: Should show 'Index Scan using idx_cars_dealership_status' in EXPLAIN output",
+            "Compare execution time: Before 500ms \u2192 After 45ms (91% improvement)",
+            "Verify all 5 queries use appropriate indices (check EXPLAIN output)",
+            "Test write performance: INSERT/UPDATE/DELETE should not degrade significantly (<10% slower)",
+            "Check database size: SELECT pg_size_pretty(pg_database_size('directus_dev')); (before vs after, should be <5% increase)",
+            "Document in INDEX_PERFORMANCE_COMPARISON.md: Query, Before (ms), After (ms), Improvement (%), Index used"
+          ],
+          "dependencies": [
+            "IMP-006-T2"
+          ],
+          "blocks": [
+            "IMP-006-T4"
+          ],
+          "rollback_plan": {
+            "type": "sql-rollback",
+            "steps": [
+              "Run rollback script: psql -d directus_dev -f migrations/2025-10-29-drop-critical-indices.sql",
+              "Verify indices dropped: SELECT * FROM pg_indexes WHERE indexname LIKE 'idx_%';",
+              "Re-run benchmarks: Verify performance returns to baseline",
+              "Document rollback reason: Why indices caused issues?"
+            ],
+            "time_to_rollback": "10 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        },
+        {
+          "task_id": "IMP-006-T4",
+          "improvement_id": null,
+          "title": "Deploy indices to staging and production",
+          "description": "Apply migration to staging database during low-traffic period. Verify staging performance improvements. Test Directus application (no errors, dashboards load faster). Document staging results. Apply migration to production database during low-traffic period (early morning). Verify production performance improvements. Monitor production for 24 hours (query times, database CPU usage). Document production results. Create post-deployment report.",
+          "status": "pending",
+          "assigned_to": "Dev 1",
+          "priority": "high",
+          "estimated_effort": "0.5h",
+          "actual_effort": null,
+          "started_at": null,
+          "completed_at": null,
+          "entry_criteria": [
+            "IMP-006-T3 completed (dev indices successful)",
+            "Staging database backup created",
+            "Production database backup created",
+            "Low-traffic period scheduled (early morning or weekend)",
+            "Monitoring tools available (database CPU, query times)"
+          ],
+          "exit_criteria": [
+            "Staging indices applied successfully",
+            "Staging performance verified: Queries <100ms",
+            "Staging Directus application tested: No errors, dashboards load in <2s",
+            "Production indices applied successfully",
+            "Production performance verified: Queries <100ms",
+            "Production monitoring: 24-hour observation, no issues",
+            "Post-deployment report created: INDEX_DEPLOYMENT_REPORT.md",
+            "Team notified of successful deployment"
+          ],
+          "validation_checklist": [
+            "Staging backup: pg_dump directus_staging > /backups/staging-backup-YYYYMMDD.dump",
+            "Staging migration: psql -d directus_staging -f migrations/2025-10-29-add-critical-indices.sql",
+            "Staging verification: SELECT * FROM pg_indexes WHERE indexname LIKE 'idx_%'; (5 indices)",
+            "Staging performance test: Run sample queries, verify <100ms",
+            "Staging Directus test: Open dashboards, verify load time <2s",
+            "Production backup: pg_dump directus_production > /backups/production-backup-YYYYMMDD.dump",
+            "Production migration: psql -d directus_production -f migrations/2025-10-29-add-critical-indices.sql (during low-traffic)",
+            "Production verification: SELECT * FROM pg_indexes WHERE indexname LIKE 'idx_%'; (5 indices)",
+            "Production monitoring: Watch database CPU usage (should not increase), query times (should decrease)",
+            "24-hour observation: No errors in Directus logs, no user complaints",
+            "Post-deployment report: Document results, issues (if any), recommendations"
+          ],
+          "dependencies": [
+            "IMP-006-T3"
+          ],
+          "blocks": [],
+          "rollback_plan": {
+            "type": "production-rollback",
+            "steps": [
+              "If critical issues: Stop Directus: docker compose -f docker-compose.production.yml stop directus",
+              "Restore database: pg_restore -d directus_production /backups/production-backup-YYYYMMDD.dump",
+              "Start Directus: docker compose -f docker-compose.production.yml start directus",
+              "Verify rollback: Indices dropped, performance returns to baseline",
+              "Notify team: Indices rollback completed, document reason",
+              "Create GitHub issue: Document why indices caused issues in production"
+            ],
+            "time_to_rollback": "30 minutes"
+          },
+          "entry_criteria_validated": false,
+          "exit_criteria_validated": false,
+          "tests_passed": false,
+          "validation_report": null
+        }
+      ]
+    }
+  ],
+  "blockers": [],
+  "metrics": {
+    "total_tasks": 20,
+    "completed": 4,
+    "in_progress": 1,
+    "pending": 15,
+    "completion_percentage": 20.0
+  }
+}

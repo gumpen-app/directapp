@@ -1,0 +1,279 @@
+{
+  "name": "directus-hooks-pattern",
+  "source": "context7",
+  "library": "/directus/docs",
+  "confidence": 0.95,
+  "extractedAt": "2025-10-28T21:30:00Z",
+  "pattern": {
+    "type": "hook",
+    "description": "Directus hooks allow you to execute custom logic in response to events in your Directus instance. There are four types: filter (blocking, pre-event), action (non-blocking, post-event), init (lifecycle events), and schedule (cron-based).",
+    "files": {
+      "src/index.js": "export default ({ filter, action, init, schedule }) => {\n\t// Register event handlers\n}",
+      "package.json": {
+        "name": "directus-extension-hook-example",
+        "type": "module",
+        "directus:extension": {
+          "type": "hook",
+          "path": "dist/index.js",
+          "source": "src/index.js",
+          "host": "^10.0.0 || ^11.0.0"
+        }
+      }
+    },
+    "hookTypes": {
+      "filter": {
+        "description": "Blocking hooks that run BEFORE an event, allowing you to modify payload",
+        "signature": "filter(event, (payload, meta, context) => { return payload; })",
+        "mustReturn": true,
+        "blocking": true,
+        "commonMistake": "Forgetting to return the payload causes the operation to fail"
+      },
+      "action": {
+        "description": "Non-blocking hooks that run AFTER an event, ideal for side effects",
+        "signature": "action(event, (meta, context) => { /* side effects */ })",
+        "mustReturn": false,
+        "blocking": false,
+        "commonMistake": "Using action for data modification (use filter instead)"
+      },
+      "init": {
+        "description": "Lifecycle hooks for application initialization events",
+        "signature": "init(event, (meta) => { /* setup */ })",
+        "events": ["routes.before", "routes.after", "cli.before", "cli.after"],
+        "useCase": "Setting up routes, registering middleware"
+      },
+      "schedule": {
+        "description": "CRON-based scheduled tasks",
+        "signature": "schedule('*/15 * * * *', () => { /* task */ })",
+        "cronFormat": "second minute hour day month weekday",
+        "examples": ["'0 0 9 * * *' - Daily at 9 AM", "'0 */15 * * * *' - Every 15 minutes"]
+      }
+    },
+    "events": {
+      "items": {
+        "query": "Before querying items - can modify query",
+        "read": "Before reading items - can modify returned data",
+        "create": "Before/after creating items",
+        "update": "Before/after updating items",
+        "delete": "Before/after deleting items",
+        "promote": "Before/after promoting content version"
+      },
+      "auth": {
+        "login": "Before/after user login",
+        "jwt": "Before JWT token generation",
+        "create": "After user creation (OAuth/LDAP/SAML)",
+        "update": "After user update (OAuth/OpenID)"
+      },
+      "system": {
+        "websocket.authenticate": "WebSocket authentication",
+        "websocket.message": "WebSocket message received",
+        "request.not_found": "404 error handling",
+        "request.error": "Request error handling",
+        "database.error": "Database error handling",
+        "email.send": "Before sending email"
+      }
+    },
+    "context": {
+      "database": "Current database transaction - use for queries",
+      "schema": "Current API schema",
+      "accountability": "User/permission context (user, role, ip, etc.)",
+      "services": "Access to Directus services (ItemsService, MailService, etc.)"
+    },
+    "meta": {
+      "filter": {
+        "event": "Event name",
+        "collection": "Collection name (for item events)"
+      },
+      "action": {
+        "event": "Event name",
+        "payload": "Event data",
+        "key": "Primary key of affected item",
+        "keys": "Array of primary keys (for bulk operations)",
+        "collection": "Collection name"
+      }
+    },
+    "examples": [
+      {
+        "name": "Filter - Validate before create",
+        "type": "filter",
+        "event": "items.create",
+        "code": "filter('items.create', async (payload, { collection }, { database, schema, accountability }) => {\n\tif (collection !== 'customers') return payload;\n\t\n\t// Validate payload\n\tif (!payload.email) {\n\t\tthrow new Error('Email required');\n\t}\n\t\n\t// Modify payload\n\tpayload.email = payload.email.toLowerCase();\n\t\n\treturn payload; // MUST return\n})",
+        "notes": "Filter hooks are blocking and must return the payload (modified or original)"
+      },
+      {
+        "name": "Action - Send email after create",
+        "type": "action",
+        "event": "items.create",
+        "code": "action('items.create', async (meta, context) => {\n\tif (meta.collection !== 'orders') return;\n\t\n\tconst { MailService } = context.services;\n\tconst mailService = new MailService({ schema: context.schema, accountability: context.accountability });\n\t\n\tawait mailService.send({\n\t\tto: meta.payload.customer_email,\n\t\tsubject: 'Order Confirmation',\n\t\ttemplate: {\n\t\t\tname: 'order-confirmation',\n\t\t\tdata: { order: meta.payload }\n\t\t}\n\t});\n})",
+        "notes": "Action hooks are non-blocking, don't return value, ideal for side effects"
+      },
+      {
+        "name": "Init - Register custom route",
+        "type": "init",
+        "event": "routes.before",
+        "code": "init('routes.before', ({ app }) => {\n\tapp.get('/custom-health', (req, res) => {\n\t\tres.json({ status: 'healthy', timestamp: new Date() });\n\t});\n})",
+        "notes": "Init hooks run during app lifecycle, before routes are registered"
+      },
+      {
+        "name": "Schedule - Cleanup old records",
+        "type": "schedule",
+        "cron": "0 0 2 * * *",
+        "code": "schedule('0 0 2 * * *', async () => {\n\t// Runs daily at 2 AM\n\tconst { ItemsService } = services;\n\tconst itemsService = new ItemsService('logs', { schema, accountability: null });\n\t\n\tconst thirtyDaysAgo = new Date();\n\tthirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);\n\t\n\tawait itemsService.deleteByQuery({\n\t\tfilter: {\n\t\t\tdate_created: { _lt: thirtyDaysAgo.toISOString() }\n\t\t}\n\t});\n})",
+        "notes": "Schedule hooks use CRON syntax, great for background tasks"
+      },
+      {
+        "name": "Collection-specific filter",
+        "type": "filter",
+        "event": "books.items.create",
+        "code": "filter('books.items.create', async (payload) => {\n\t// Only runs for 'books' collection\n\tpayload.slug = payload.title.toLowerCase().replace(/\\s+/g, '-');\n\treturn payload;\n})",
+        "notes": "Prefix event with collection name to listen only to that collection"
+      },
+      {
+        "name": "Multiple keys update (bulk operation)",
+        "type": "action",
+        "event": "items.update",
+        "code": "action('items.update', async (meta, context) => {\n\t// meta.keys is an array for bulk updates\n\tawait Promise.all(\n\t\tmeta.keys.map(async (key) => {\n\t\t\t// Process each updated item\n\t\t\tconsole.log(`Item ${key} updated`);\n\t\t})\n\t);\n})",
+        "notes": "Use meta.keys for bulk operations, meta.key for single operations"
+      }
+    ],
+    "integration": {
+      "externalAPIs": {
+        "pattern": "Use action hooks to sync data to external services",
+        "example": "Stripe customer creation, Elasticsearch indexing, email notifications",
+        "bestPractice": "Handle API errors gracefully, consider retry logic"
+      },
+      "services": {
+        "ItemsService": "CRUD operations on collections",
+        "MailService": "Send emails with templates",
+        "UsersService": "Manage users",
+        "FilesService": "Handle file operations",
+        "PermissionsService": "Check and modify permissions"
+      },
+      "dependencies": {
+        "install": "npm install <package>",
+        "import": "import or require in hook file",
+        "note": "Can use any npm package (Twilio, Stripe, Algolia, etc.)"
+      }
+    }
+  },
+  "recommendations": [
+    {
+      "category": "implementation",
+      "priority": "HIGH",
+      "issue": "Filter hooks not returning payload",
+      "message": "Filter hooks MUST return the payload (modified or original). Forgetting to return causes the operation to fail silently.",
+      "action": "Always return payload from filter functions: return payload;",
+      "timeSaved": "2-4 hours debugging"
+    },
+    {
+      "category": "implementation",
+      "priority": "HIGH",
+      "issue": "Wrong hook type for use case",
+      "message": "Use filter for data modification (blocking, pre-event) and action for side effects (non-blocking, post-event).",
+      "action": "Filter = modify data BEFORE save. Action = side effects AFTER save.",
+      "timeSaved": "1-3 hours refactoring"
+    },
+    {
+      "category": "implementation",
+      "priority": "HIGH",
+      "issue": "Breaking change in Directus 11",
+      "message": "items.create action hook now receives FINAL payload (after filters/presets), not original payload.",
+      "action": "Update any hooks expecting original payload to use filter hook instead.",
+      "timeSaved": "1-2 hours debugging upgrade issues"
+    },
+    {
+      "category": "performance",
+      "priority": "HIGH",
+      "issue": "Filter hooks on read events",
+      "message": "Filter hooks on 'items.read' or 'items.query' are BLOCKING and impact performance on every read operation.",
+      "action": "Avoid filters on read events unless absolutely necessary. Use action hooks for logging.",
+      "timeSaved": "Performance issues avoided"
+    },
+    {
+      "category": "best-practices",
+      "priority": "MEDIUM",
+      "issue": "Missing collection check",
+      "message": "Generic event hooks (items.create) fire for ALL collections. Always check meta.collection.",
+      "action": "Add collection check: if (meta.collection !== 'target') return payload;",
+      "timeSaved": "1 hour debugging unexpected behavior"
+    },
+    {
+      "category": "best-practices",
+      "priority": "MEDIUM",
+      "issue": "Synchronous external API calls",
+      "message": "External API calls in filter hooks block the request. Use action hooks for async operations.",
+      "action": "Move API integrations (Stripe, Twilio, etc.) to action hooks unless you need to modify payload based on API response.",
+      "timeSaved": "Performance optimization"
+    },
+    {
+      "category": "error-handling",
+      "priority": "MEDIUM",
+      "issue": "Unhandled promise rejections",
+      "message": "Async operations in hooks must handle errors properly to avoid crashing Directus.",
+      "action": "Wrap async operations in try/catch blocks and log errors.",
+      "timeSaved": "1-2 hours debugging crashes"
+    },
+    {
+      "category": "typescript",
+      "priority": "LOW",
+      "issue": "Missing type safety",
+      "message": "TypeScript provides type safety for hook context and parameters.",
+      "action": "Use /// <reference types=\"@directus/extensions/api.d.ts\" /> and import SandboxHookRegisterContext.",
+      "timeSaved": "Autocomplete and type checking"
+    },
+    {
+      "category": "best-practices",
+      "priority": "LOW",
+      "issue": "Schedule hook CRON syntax",
+      "message": "Directus uses 6-field CRON format (second minute hour day month weekday), not traditional 5-field.",
+      "action": "Include seconds field: '0 */15 * * * *' (every 15 minutes) not '*/15 * * * *'",
+      "timeSaved": "30min debugging schedule issues"
+    },
+    {
+      "category": "development",
+      "priority": "LOW",
+      "issue": "Extension hot reload",
+      "message": "Set EXTENSIONS_AUTO_RELOAD=true in environment to avoid restarting Directus during development.",
+      "action": "Add to docker-compose.yml or .env file for faster iteration.",
+      "timeSaved": "Significant development time"
+    }
+  ],
+  "antiPatterns": [
+    {
+      "pattern": "Not returning payload from filter hook",
+      "why": "Causes operation to fail silently",
+      "fix": "Always return payload (modified or original)"
+    },
+    {
+      "pattern": "Using action hooks to modify data",
+      "why": "Action hooks run AFTER the event, data is already saved",
+      "fix": "Use filter hooks for data modification"
+    },
+    {
+      "pattern": "Blocking external API calls in filter hooks",
+      "why": "Slows down ALL requests to that collection",
+      "fix": "Move to action hooks unless you need API response to modify payload"
+    },
+    {
+      "pattern": "Not checking collection in generic event hooks",
+      "why": "Hook fires for all collections, causing unexpected behavior",
+      "fix": "Add collection check: if (collection !== 'target') return;"
+    },
+    {
+      "pattern": "Using $last instead of specific operation keys in flows",
+      "why": "Breaks when operations are reordered",
+      "fix": "Reference operations by their unique key"
+    }
+  ],
+  "quickStart": {
+    "create": "npx create-directus-extension@latest → Select 'hook' → Choose language",
+    "develop": "npm run dev (for hot reload during development)",
+    "build": "npm run build (compiles to dist/)",
+    "install": "Copy extension directory to directus/extensions/",
+    "enable": "Restart Directus or use EXTENSIONS_AUTO_RELOAD=true"
+  },
+  "relatedDocs": [
+    "https://github.com/directus/docs/blob/main/content/guides/09.extensions/2.api-extensions/1.hooks.md",
+    "https://docs.directus.io/extensions/hooks",
+    "https://docs.directus.io/extensions/creating-extensions"
+  ]
+}

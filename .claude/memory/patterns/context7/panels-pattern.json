@@ -1,0 +1,175 @@
+{
+  "name": "directus-panels-pattern",
+  "source": "context7",
+  "library": "/directus/docs",
+  "confidence": 0.95,
+  "extractedAt": "2025-10-28T21:35:00Z",
+  "pattern": {
+    "type": "panel",
+    "description": "Directus panels are custom dashboard widgets for Insights. Display external data, create forms, visualize metrics, or build custom admin interfaces.",
+    "files": {
+      "index.js": "Panel configuration and options",
+      "panel.vue": "Vue 3 component for panel display",
+      "package.json": "Extension metadata"
+    },
+    "structure": {
+      "config": {
+        "id": "Unique panel identifier",
+        "name": "Display name",
+        "icon": "Material icon",
+        "description": "Brief description",
+        "component": "Vue component reference",
+        "options": "Array of configuration fields",
+        "minWidth": "Minimum grid width (units)",
+        "minHeight": "Minimum grid height (units)",
+        "skipUndefinedKeys": "Optional array of keys to skip if undefined"
+      },
+      "vueComponent": {
+        "props": {
+          "showHeader": "Boolean - whether header is shown",
+          "width": "Panel width in grid units",
+          "height": "Panel height in grid units",
+          "custom": "Any custom options from config"
+        }
+      }
+    },
+    "examples": [
+      {
+        "name": "External API Data Panel (Weather)",
+        "description": "Display weather data from external API",
+        "files": {
+          "index.js": "import PanelComponent from './panel.vue';\n\nexport default {\n  id: 'panel-weather',\n  name: 'Weather Panel',\n  icon: 'wb_sunny',\n  description: 'Display weather information',\n  component: PanelComponent,\n  options: [\n    {\n      field: 'longitude',\n      name: 'Longitude',\n      type: 'string',\n      meta: {\n        interface: 'input',\n        width: 'half',\n      },\n    },\n    {\n      field: 'latitude',\n      name: 'Latitude',\n      type: 'string',\n      meta: {\n        interface: 'input',\n        width: 'half',\n      },\n    },\n  ],\n  minWidth: 12,\n  minHeight: 8,\n};",
+          "panel.vue": "<template>\n  <div class=\"panel\" :class=\"{ 'has-header': showHeader }\">\n    <div v-if=\"loading\">Loading...</div>\n    <div v-else-if=\"error\">{{ error }}</div>\n    <div v-else>\n      <h3>{{ weather.location }}</h3>\n      <p>Temperature: {{ weather.temp }}°C</p>\n      <p>Condition: {{ weather.condition }}</p>\n    </div>\n  </div>\n</template>\n\n<script setup>\nimport { useApi } from '@directus/extensions-sdk';\nimport { ref, watch } from 'vue';\n\nconst props = defineProps({\n  showHeader: {\n    type: Boolean,\n    default: false,\n  },\n  longitude: {\n    type: String,\n    default: '0',\n  },\n  latitude: {\n    type: String,\n    default: '0',\n  },\n});\n\nconst api = useApi();\nconst weather = ref({});\nconst loading = ref(true);\nconst error = ref(null);\n\nasync function fetchData() {\n  try {\n    loading.value = true;\n    const response = await api.get(\n      `/weather?longitude=${props.longitude}&latitude=${props.latitude}`\n    );\n    weather.value = response.data;\n  } catch (e) {\n    error.value = e.message;\n  } finally {\n    loading.value = false;\n  }\n}\n\nfetchData();\nwatch([() => props.longitude, () => props.latitude], fetchData);\n</script>\n\n<style scoped>\n.panel {\n  padding: 12px;\n}\n.panel.has-header {\n  padding: 0 12px;\n}\n</style>"
+        },
+        "useCases": [
+          "External API integration",
+          "Real-time data display",
+          "Third-party service dashboards"
+        ]
+      },
+      {
+        "name": "Internal Form Panel",
+        "description": "Create items directly from dashboard panel",
+        "files": {
+          "index.js": "import PanelComponent from './panel.vue';\n\nexport default {\n  id: 'panel-internal-form',\n  name: 'Internal Form',\n  icon: 'view_day',\n  description: 'Output a form to insert data into a collection.',\n  component: PanelComponent,\n  options: [\n    {\n      field: 'collection',\n      type: 'string',\n      name: '$t:collection',\n      meta: {\n        interface: 'system-collection',\n        options: {\n          includeSystem: true,\n          includeSingleton: false,\n        },\n        width: 'half',\n      },\n    },\n    {\n      field: 'fields',\n      type: 'string',\n      name: 'Included Fields',\n      meta: {\n        interface: 'system-field',\n        options: {\n          collectionField: 'collection',\n          multiple: true,\n        },\n        width: 'half',\n      },\n    },\n    {\n      field: 'responseFormat',\n      name: 'Response',\n      type: 'string',\n      meta: {\n        interface: 'system-display-template',\n        options: {\n          collectionField: 'collection',\n          placeholder: '{{ field }}',\n        },\n        width: 'full',\n      },\n    },\n  ],\n  minWidth: 12,\n  minHeight: 8,\n  skipUndefinedKeys: ['responseFormat'],\n};",
+          "panel.vue": "<template>\n  <div v-if=\"!hasPermission\" class=\"panel-error\">\n    <v-notice type=\"danger\" icon=\"warning\">\n      You do not have permissions to {{ collection }}\n    </v-notice>\n  </div>\n  <div v-else :class=\"['panel-form', { 'has-header': showHeader }]\">\n    <v-form v-if=\"fieldData\" v-model=\"formData\" :fields=\"fieldData\" />\n    <v-button v-if=\"Object.keys(formData).length > 0\" @click=\"submitForm()\">\n      Save\n    </v-button>\n    \n    <v-dialog v-model=\"responseDialog\" @esc=\"responseDialog = false\">\n      <v-sheet>\n        <v-notice v-if=\"formResponse\" type=\"success\" icon=\"done\">\n          Saved\n        </v-notice>\n        <v-notice v-else-if=\"formError\" type=\"danger\" icon=\"warning\">\n          An Error Occurred\n        </v-notice>\n        <v-button @click=\"responseDialog = false\">Done</v-button>\n      </v-sheet>\n    </v-dialog>\n  </div>\n</template>\n\n<script setup>\nimport { useApi, useCollection, useStores } from '@directus/extensions-sdk';\nimport { ref, watch } from 'vue';\n\nconst props = defineProps({\n  showHeader: Boolean,\n  collection: String,\n  fields: Array,\n  responseFormat: String,\n});\n\nconst { useFieldsStore, usePermissionsStore } = useStores();\nconst fieldsStore = useFieldsStore();\nconst permissionsStore = usePermissionsStore();\nconst hasPermission = permissionsStore.hasPermission(props.collection, 'create');\nconst api = useApi();\nconst { primaryKeyField } = useCollection(props.collection);\n\nconst formData = ref({});\nconst fieldData = ref([]);\nconst formResponse = ref(null);\nconst formError = ref(null);\nconst responseDialog = ref(false);\n\nfunction getFields() {\n  fieldData.value = props.fields.map(field =>\n    fieldsStore.getField(props.collection, field)\n  );\n}\n\ngetFields();\n\nasync function submitForm() {\n  try {\n    const response = await api.post(`/items/${props.collection}`, formData.value);\n    formResponse.value = response.data.data;\n    responseDialog.value = true;\n    formData.value = {};\n  } catch (error) {\n    formError.value = error;\n    responseDialog.value = true;\n  }\n}\n\nwatch([() => props.collection, () => props.fields], getFields);\n</script>"
+        },
+        "useCases": [
+          "Quick data entry",
+          "Dashboard forms",
+          "Admin utilities"
+        ]
+      },
+      {
+        "name": "Vonage SMS Activity Panel",
+        "description": "Display SMS activity from Vonage API with filtering",
+        "files": {
+          "index.js": "import PanelComponent from './panel.vue';\n\nexport default {\n  id: 'panel-vonage-activity',\n  name: 'Vonage Reports',\n  icon: 'list_alt',\n  description: 'View recent Vonage SMS activity.',\n  component: PanelComponent,\n  options: [\n    {\n      field: 'type',\n      name: 'Product Type',\n      type: 'string',\n      meta: {\n        width: 'half',\n        interface: 'select-dropdown',\n        options: {\n          choices: [\n            { text: 'SMS', value: 'SMS' },\n            { text: 'Messages', value: 'MESSAGES' },\n          ],\n        },\n      },\n    },\n    {\n      field: 'range',\n      type: 'dropdown',\n      name: '$t:date_range',\n      schema: {\n        default_value: '1 day',\n      },\n      meta: {\n        interface: 'select-dropdown',\n        width: 'half',\n        options: {\n          choices: [\n            { text: 'Past 1 Hour', value: '1 hour' },\n            { text: 'Past 1 Day', value: '1 day' },\n            { text: 'Past 2 Days', value: '2 days' },\n          ],\n        },\n      },\n    },\n    {\n      field: 'status',\n      name: 'Status',\n      type: 'string',\n      schema: { default_value: 'any' },\n      meta: {\n        width: 'half',\n        interface: 'select-dropdown',\n        options: {\n          choices: [\n            { text: 'Any', value: 'any' },\n            { text: 'Delivered', value: 'delivered' },\n            { text: 'Failed', value: 'failed' },\n          ],\n        },\n      },\n    },\n  ],\n  minWidth: 24,\n  minHeight: 18,\n};"
+        },
+        "useCases": [
+          "Service monitoring",
+          "Activity dashboards",
+          "API usage tracking"
+        ]
+      }
+    ],
+    "patterns": {
+      "apiUsage": {
+        "description": "Use useApi composable for authenticated requests",
+        "code": "import { useApi } from '@directus/extensions-sdk';\n\nconst api = useApi();\n\n// GET request\nconst response = await api.get('/items/collection');\n\n// POST request\nconst created = await api.post('/items/collection', data);",
+        "recommendation": "Always use useApi for Directus API calls to maintain authentication"
+      },
+      "storeAccess": {
+        "description": "Access Directus stores for collections, fields, permissions",
+        "code": "import { useStores } from '@directus/extensions-sdk';\n\nconst { useFieldsStore, usePermissionsStore } = useStores();\nconst fieldsStore = useFieldsStore();\nconst permissionsStore = usePermissionsStore();\n\nconst hasPermission = permissionsStore.hasPermission('collection', 'create');\nconst fields = fieldsStore.getFieldsForCollection('collection');",
+        "recommendation": "Check permissions before displaying forms or sensitive data"
+      },
+      "reactiveOptions": {
+        "description": "Watch props and refetch data when options change",
+        "code": "import { watch } from 'vue';\n\nwatch(\n  [() => props.longitude, () => props.latitude],\n  fetchData,\n  { immediate: true }\n);",
+        "recommendation": "Keep panel data in sync with user configuration"
+      }
+    },
+    "recommendations": [
+      {
+        "priority": "HIGH",
+        "title": "Set Appropriate Min Dimensions",
+        "description": "Set minWidth/minHeight to ensure content fits properly",
+        "timeSaved": "Better UX, prevents layout issues",
+        "example": "minWidth: 12, minHeight: 8"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Check Permissions",
+        "description": "Verify user permissions before showing sensitive data or forms",
+        "timeSaved": "Security compliance, better error messages",
+        "example": "const hasPermission = permissionsStore.hasPermission(collection, 'create');"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Handle Loading and Error States",
+        "description": "Show loading indicators and error messages",
+        "timeSaved": "Better UX, easier debugging",
+        "example": "v-if=\"loading\" / v-else-if=\"error\" / v-else"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Use System Interfaces",
+        "description": "Use system-collection, system-field for collection/field pickers",
+        "timeSaved": "Native UI, auto-updates with schema changes",
+        "example": "meta: { interface: 'system-collection' }"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Watch Prop Changes",
+        "description": "Refetch data when panel configuration changes",
+        "timeSaved": "Real-time updates, better UX",
+        "example": "watch([() => props.option], fetchData);"
+      },
+      {
+        "priority": "LOW",
+        "title": "Add skipUndefinedKeys",
+        "description": "Skip optional keys that may be undefined",
+        "timeSaved": "Prevents errors with optional configs",
+        "example": "skipUndefinedKeys: ['responseFormat']"
+      }
+    ],
+    "antiPatterns": [
+      {
+        "name": "Not Checking Permissions",
+        "bad": "// Show form without permission check",
+        "good": "const hasPermission = permissionsStore.hasPermission(collection, 'create');\nif (!hasPermission) return;",
+        "reason": "Users may see forms they can't submit"
+      },
+      {
+        "name": "Missing Loading States",
+        "bad": "<div>{{ data }}</div>",
+        "good": "<div v-if=\"loading\">Loading...</div>\n<div v-else-if=\"error\">Error</div>\n<div v-else>{{ data }}</div>",
+        "reason": "Poor UX, no feedback during API calls"
+      },
+      {
+        "name": "Direct Fetch Instead of useApi",
+        "bad": "const response = await fetch('/api/items/collection');",
+        "good": "const api = useApi();\nconst response = await api.get('/items/collection');",
+        "reason": "Loses authentication, session cookies"
+      },
+      {
+        "name": "Hardcoded Collection Names",
+        "bad": "options: [{ field: 'collection', type: 'string', meta: { interface: 'input' } }]",
+        "good": "options: [{ field: 'collection', type: 'string', meta: { interface: 'system-collection' } }]",
+        "reason": "Manual typing errors, no validation"
+      },
+      {
+        "name": "Not Watching Prop Changes",
+        "bad": "// Fetch data once in setup()\nfetchData();",
+        "good": "watch([() => props.option], fetchData, { immediate: true });",
+        "reason": "Panel doesn't update when user changes config"
+      }
+    ]
+  },
+  "metadata": {
+    "codeExamples": 10,
+    "useCases": 9,
+    "recommendationsCount": 6
+  }
+}

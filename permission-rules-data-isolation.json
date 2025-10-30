@@ -1,0 +1,358 @@
+{
+  "metadata": {
+    "task": "IMP-001-T2",
+    "created": "2025-10-29",
+    "purpose": "Data isolation permission rules for dealership-based access control",
+    "total_roles": 10,
+    "filtered_roles": 9,
+    "collections": 6,
+    "note": "workshop_tasks collection does not exist - removed from original requirement"
+  },
+  "roles": {
+    "nybilselger": {
+      "name": "Nybilselger",
+      "name_en": "New Car Seller",
+      "category": "sales",
+      "permissions_filter": "standard_dealership"
+    },
+    "bruktbilselger": {
+      "name": "Bruktbilselger",
+      "name_en": "Used Car Seller",
+      "category": "sales",
+      "permissions_filter": "standard_dealership",
+      "special_note": "May need cross-dealership car search in future"
+    },
+    "delelager": {
+      "name": "Delelager",
+      "name_en": "Parts Warehouse",
+      "category": "production",
+      "permissions_filter": "standard_dealership"
+    },
+    "mottakskontrollor": {
+      "name": "Mottakskontrollør",
+      "name_en": "Inspection Control",
+      "category": "production",
+      "permissions_filter": "standard_dealership"
+    },
+    "booking": {
+      "name": "Booking",
+      "name_en": "Workshop Scheduling",
+      "category": "production",
+      "permissions_filter": "standard_dealership"
+    },
+    "mekaniker": {
+      "name": "Mekaniker",
+      "name_en": "Mechanic",
+      "category": "production",
+      "permissions_filter": "standard_dealership"
+    },
+    "bilpleiespesialist": {
+      "name": "Bilpleiespesialist",
+      "name_en": "Detailer",
+      "category": "production",
+      "permissions_filter": "standard_dealership"
+    },
+    "daglig_leder": {
+      "name": "Daglig leder",
+      "name_en": "Daily Manager",
+      "category": "management",
+      "permissions_filter": "standard_dealership",
+      "access_level": "read_only"
+    },
+    "okonomiansvarlig": {
+      "name": "Økonomiansvarlig",
+      "name_en": "Finance Manager",
+      "category": "management",
+      "permissions_filter": "standard_dealership",
+      "access_level": "read_only"
+    },
+    "admin": {
+      "name": "Admin",
+      "name_en": "Administrator",
+      "category": "technical",
+      "permissions_filter": "none",
+      "access_level": "full_system",
+      "note": "permissions: null (unrestricted access to all dealerships)"
+    }
+  },
+  "filter_templates": {
+    "standard_dealership": {
+      "description": "Standard dealership isolation filter",
+      "filter": {
+        "dealership_id": {
+          "_eq": "$CURRENT_USER.dealership_id"
+        }
+      },
+      "applies_to": ["cars", "resource_capacities", "directus_users"]
+    },
+    "resource_bookings_or": {
+      "description": "Resource bookings with provider OR consumer dealership visibility",
+      "filter": {
+        "_or": [
+          {
+            "provider_dealership_id": {
+              "_eq": "$CURRENT_USER.dealership_id"
+            }
+          },
+          {
+            "consumer_dealership_id": {
+              "_eq": "$CURRENT_USER.dealership_id"
+            }
+          }
+        ]
+      },
+      "applies_to": ["resource_bookings"]
+    },
+    "dealership_own_and_parent": {
+      "description": "Dealership table: user sees own dealership + parent (franchise structure)",
+      "filter": {
+        "_or": [
+          {
+            "id": {
+              "_eq": "$CURRENT_USER.dealership_id"
+            }
+          },
+          {
+            "id": {
+              "_eq": "$CURRENT_USER.dealership.parent_dealership_id"
+            }
+          }
+        ]
+      },
+      "applies_to": ["dealership"]
+    },
+    "notifications_user": {
+      "description": "Notifications filtered by user_id (already user-specific)",
+      "filter": {
+        "user_id": {
+          "_eq": "$CURRENT_USER.id"
+        }
+      },
+      "applies_to": ["notifications"],
+      "note": "No dealership_id field - user-based filtering sufficient"
+    },
+    "admin_unrestricted": {
+      "description": "Admin role - no filtering",
+      "filter": null,
+      "applies_to": "all_collections",
+      "note": "permissions: null means unrestricted access"
+    }
+  },
+  "permission_rules": {
+    "cars": {
+      "collection": "cars",
+      "has_dealership_id": true,
+      "required_field": true,
+      "rules": [
+        {
+          "roles": ["nybilselger", "bruktbilselger", "delelager", "mottakskontrollor", "booking", "mekaniker", "bilpleiespesialist", "daglig_leder", "okonomiansvarlig"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": {
+            "dealership_id": {
+              "_eq": "$CURRENT_USER.dealership_id"
+            }
+          },
+          "validation": null,
+          "fields": ["*"],
+          "note": "All non-admin roles see only cars from their dealership"
+        },
+        {
+          "roles": ["admin"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": null,
+          "validation": null,
+          "fields": ["*"],
+          "note": "Admin sees all cars from all dealerships"
+        }
+      ]
+    },
+    "resource_bookings": {
+      "collection": "resource_bookings",
+      "has_dealership_id": true,
+      "required_field": true,
+      "special_case": "Uses provider_dealership_id AND consumer_dealership_id",
+      "rules": [
+        {
+          "roles": ["nybilselger", "bruktbilselger", "delelager", "mottakskontrollor", "booking", "mekaniker", "bilpleiespesialist", "daglig_leder", "okonomiansvarlig"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": {
+            "_or": [
+              {
+                "provider_dealership_id": {
+                  "_eq": "$CURRENT_USER.dealership_id"
+                }
+              },
+              {
+                "consumer_dealership_id": {
+                  "_eq": "$CURRENT_USER.dealership_id"
+                }
+              }
+            ]
+          },
+          "validation": null,
+          "fields": ["*"],
+          "note": "Users see bookings where their dealership provides OR consumes resources (cross-dealership sharing)"
+        },
+        {
+          "roles": ["admin"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": null,
+          "validation": null,
+          "fields": ["*"],
+          "note": "Admin sees all bookings from all dealerships"
+        }
+      ]
+    },
+    "resource_capacities": {
+      "collection": "resource_capacities",
+      "has_dealership_id": true,
+      "required_field": true,
+      "rules": [
+        {
+          "roles": ["nybilselger", "bruktbilselger", "delelager", "mottakskontrollor", "booking", "mekaniker", "bilpleiespesialist", "daglig_leder", "okonomiansvarlig"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": {
+            "dealership_id": {
+              "_eq": "$CURRENT_USER.dealership_id"
+            }
+          },
+          "validation": null,
+          "fields": ["*"],
+          "note": "Users see only resource capacities from their dealership"
+        },
+        {
+          "roles": ["admin"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": null,
+          "validation": null,
+          "fields": ["*"],
+          "note": "Admin sees all capacities from all dealerships"
+        }
+      ]
+    },
+    "dealership": {
+      "collection": "dealership",
+      "has_dealership_id": false,
+      "special_case": "IS the dealership table - users see own + parent",
+      "rules": [
+        {
+          "roles": ["nybilselger", "bruktbilselger", "delelager", "mottakskontrollor", "booking", "mekaniker", "bilpleiespesialist", "daglig_leder", "okonomiansvarlig"],
+          "actions": ["read"],
+          "permissions": {
+            "_or": [
+              {
+                "id": {
+                  "_eq": "$CURRENT_USER.dealership_id"
+                }
+              },
+              {
+                "id": {
+                  "_eq": "$CURRENT_USER.dealership.parent_dealership_id"
+                }
+              }
+            ]
+          },
+          "validation": null,
+          "fields": ["*"],
+          "note": "Users can view their own dealership + parent dealership (franchise structure). Most roles should be read-only."
+        },
+        {
+          "roles": ["admin"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": null,
+          "validation": null,
+          "fields": ["*"],
+          "note": "Admin can manage all dealerships"
+        }
+      ]
+    },
+    "notifications": {
+      "collection": "notifications",
+      "has_dealership_id": false,
+      "special_case": "User-specific, not dealership-specific",
+      "rules": [
+        {
+          "roles": ["nybilselger", "bruktbilselger", "delelager", "mottakskontrollor", "booking", "mekaniker", "bilpleiespesialist", "daglig_leder", "okonomiansvarlig"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": {
+            "user_id": {
+              "_eq": "$CURRENT_USER.id"
+            }
+          },
+          "validation": null,
+          "fields": ["*"],
+          "note": "Notifications are user-specific, not dealership-specific. Users see only their own notifications."
+        },
+        {
+          "roles": ["admin"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": null,
+          "validation": null,
+          "fields": ["*"],
+          "note": "Admin sees all notifications from all users"
+        }
+      ]
+    },
+    "directus_users": {
+      "collection": "directus_users",
+      "has_dealership_id": true,
+      "required_field": false,
+      "note": "dealership_id is optional in directus_users schema",
+      "rules": [
+        {
+          "roles": ["nybilselger", "bruktbilselger", "delelager", "mottakskontrollor", "booking", "mekaniker", "bilpleiespesialist", "daglig_leder", "okonomiansvarlig"],
+          "actions": ["read"],
+          "permissions": {
+            "dealership_id": {
+              "_eq": "$CURRENT_USER.dealership_id"
+            }
+          },
+          "validation": null,
+          "fields": ["*"],
+          "note": "Users can view other users from their dealership only. Most roles should be read-only."
+        },
+        {
+          "roles": ["admin"],
+          "actions": ["create", "read", "update", "delete"],
+          "permissions": null,
+          "validation": null,
+          "fields": ["*"],
+          "note": "Admin manages all users across all dealerships"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_collections": 6,
+    "collections": ["cars", "resource_bookings", "resource_capacities", "dealership", "notifications", "directus_users"],
+    "total_roles": 10,
+    "filtered_roles": 9,
+    "admin_roles": 1,
+    "permission_count_estimate": {
+      "per_role_per_collection": 4,
+      "filtered_roles_total": "9 roles × 6 collections × 4 CRUD = 216 permissions",
+      "admin_role_total": "1 role × 6 collections × 4 CRUD = 24 permissions (all null)",
+      "grand_total": 240
+    },
+    "notes": [
+      "workshop_tasks collection does not exist in database - removed from requirements",
+      "Admin role uses permissions: null for unrestricted access",
+      "resource_bookings uses OR filter for cross-dealership resource sharing",
+      "dealership table uses OR filter to show parent dealership (franchise structure)",
+      "notifications uses user_id filter, not dealership_id",
+      "Management roles (daglig_leder, okonomiansvarlig) should typically have read-only access",
+      "Field-level permissions will be defined in a separate implementation phase"
+    ]
+  },
+  "validation_notes": {
+    "schema_compatibility": "All filters use valid Directus filter syntax",
+    "circular_dependencies": "None - all filters reference user context only",
+    "hardcoded_values": "None - all filters use $CURRENT_USER context variables",
+    "empty_permissions": "Admin uses null (unrestricted), not {} (deny all)",
+    "current_user_context": [
+      "$CURRENT_USER.id",
+      "$CURRENT_USER.dealership_id",
+      "$CURRENT_USER.dealership.parent_dealership_id"
+    ]
+  }
+}
