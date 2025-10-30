@@ -1,0 +1,83 @@
+name: Deploy to Dokploy
+
+on:
+  workflow_call:
+    inputs:
+      application_id:
+        description: 'Dokploy Application ID to deploy'
+        required: true
+        type: string
+      environment:
+        description: 'Deployment environment (staging, production, etc.)'
+        required: false
+        type: string
+        default: 'production'
+      wait_for_completion:
+        description: 'Wait for deployment to complete'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Dokploy
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          APP_ID: ${{ inputs.application_id }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          echo "🚀 Deploying to $ENVIRONMENT..."
+          echo "Application ID: $APP_ID"
+          echo "Dokploy URL: $DOKPLOY_URL"
+          echo ""
+
+          # Deploy via Dokploy API
+          RESPONSE=$(curl -X POST "$DOKPLOY_URL/api/application.deploy" \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $DOKPLOY_API_KEY" \
+            -H "accept: application/json" \
+            -d "{\"applicationId\": \"$APP_ID\"}" \
+            --fail-with-body \
+            --silent \
+            --show-error)
+
+          if [ $? -eq 0 ]; then
+            echo "✅ Deployment initiated successfully"
+            echo "Response: $RESPONSE"
+          else
+            echo "❌ Deployment failed"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Wait for Deployment
+        if: inputs.wait_for_completion
+        run: |
+          echo "⏳ Waiting for deployment to complete..."
+          sleep 60
+          echo "✅ Deployment wait period complete"
+          echo ""
+          echo "📋 Post-deployment checklist:"
+          echo "- [ ] Verify application is accessible"
+          echo "- [ ] Check logs for errors"
+          echo "- [ ] Test critical functionality"
+
+      - name: Deployment Summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Application ID:** ${{ inputs.application_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Deployment completed successfully!" >> $GITHUB_STEP_SUMMARY

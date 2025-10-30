@@ -21,7 +21,7 @@ services:
   # Main Directus application
   directus:
     image: directus/directus:11.12.0  # PINNED for MCP support - update deliberately
-    container_name: directapp
+    container_name: directapp-production
     restart: unless-stopped
 
     # Dokploy network - REQUIRED for Traefik integration
@@ -182,20 +182,22 @@ services:
       TELEMETRY: "false"
 
     # Traefik Labels - Automatic HTTPS via Let's Encrypt
+    # Note: Router name must be unique across all services
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.directapp.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.directapp.entrypoints=websecure"
-      - "traefik.http.routers.directapp.tls.certresolver=letsencrypt"
-      - "traefik.http.services.directapp.loadbalancer.server.port=8055"
+      - "traefik.http.routers.directapp-prod.rule=Host(`gapp.coms.no`)"
+      - "traefik.http.routers.directapp-prod.entrypoints=websecure"
+      - "traefik.http.routers.directapp-prod.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.directapp-prod.service=directapp-prod-svc"
+      - "traefik.http.services.directapp-prod-svc.loadbalancer.server.port=8055"
       - "traefik.docker.network=dokploy-network"
 
       # Security headers
-      - "traefik.http.middlewares.directapp-headers.headers.sslredirect=true"
-      - "traefik.http.middlewares.directapp-headers.headers.stsSeconds=31536000"
-      - "traefik.http.middlewares.directapp-headers.headers.stsIncludeSubdomains=true"
-      - "traefik.http.middlewares.directapp-headers.headers.stsPreload=true"
-      - "traefik.http.routers.directapp.middlewares=directapp-headers"
+      - "traefik.http.middlewares.directapp-prod-headers.headers.sslredirect=true"
+      - "traefik.http.middlewares.directapp-prod-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.directapp-prod-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.directapp-prod-headers.headers.stsPreload=true"
+      - "traefik.http.routers.directapp-prod.middlewares=directapp-prod-headers"
 
     depends_on:
       postgres:
@@ -213,7 +215,7 @@ services:
   # PostgreSQL Database (Debian-based for locale support)
   postgres:
     image: postgres:15.6  # PINNED - Debian variant for nb_NO.UTF-8
-    container_name: directapp-postgres
+    container_name: directapp-production-postgres
     restart: unless-stopped
 
     networks:
@@ -249,7 +251,7 @@ services:
   # Redis Cache
   redis:
     image: redis:7.2.4-alpine  # PINNED
-    container_name: directapp-redis
+    container_name: directapp-production-redis
     restart: unless-stopped
 
     networks:
@@ -280,7 +282,7 @@ services:
   # Automated Database Backups
   backup:
     image: prodrigestivill/postgres-backup-local:15-alpine  # PINNED
-    container_name: directapp-backup
+    container_name: directapp-production-backup
     restart: unless-stopped
 
     networks:

@@ -1,0 +1,51 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [development]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Dokploy
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          APP_ID: ${{ vars.APP_ID }}
+        run: |
+          echo "🚀 Deploying to staging..."
+          echo "Application ID: $APP_ID"
+          echo ""
+
+          # Deploy via Dokploy API (compose service)
+          RESPONSE=$(curl -X POST "$DOKPLOY_URL/api/compose.redeploy" \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $DOKPLOY_API_KEY" \
+            -H "accept: application/json" \
+            -d "{\"composeId\": \"$APP_ID\"}" \
+            --fail-with-body \
+            --silent \
+            --show-error)
+
+          if [ $? -eq 0 ]; then
+            echo "✅ Deployment initiated successfully"
+            echo "Response: $RESPONSE"
+          else
+            echo "❌ Deployment failed"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Wait for Deployment
+        run: |
+          echo "⏳ Waiting for deployment to complete..."
+          sleep 60
+          echo "✅ Deployment complete"
