@@ -182,20 +182,22 @@ services:
       TELEMETRY: "false"
 
     # Traefik Labels - Automatic HTTPS via Let's Encrypt
+    # Note: Router name must be unique across all services
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.directapp.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.directapp.entrypoints=websecure"
-      - "traefik.http.routers.directapp.tls.certresolver=letsencrypt"
-      - "traefik.http.services.directapp.loadbalancer.server.port=8055"
+      - "traefik.http.routers.directapp-staging.rule=Host(`staging-gapp.coms.no`)"
+      - "traefik.http.routers.directapp-staging.entrypoints=websecure"
+      - "traefik.http.routers.directapp-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.directapp-staging.service=directapp-staging-svc"
+      - "traefik.http.services.directapp-staging-svc.loadbalancer.server.port=8055"
       - "traefik.docker.network=dokploy-network"
 
       # Security headers
-      - "traefik.http.middlewares.directapp-headers.headers.sslredirect=true"
-      - "traefik.http.middlewares.directapp-headers.headers.stsSeconds=31536000"
-      - "traefik.http.middlewares.directapp-headers.headers.stsIncludeSubdomains=true"
-      - "traefik.http.middlewares.directapp-headers.headers.stsPreload=true"
-      - "traefik.http.routers.directapp.middlewares=directapp-headers"
+      - "traefik.http.middlewares.directapp-staging-headers.headers.sslredirect=true"
+      - "traefik.http.middlewares.directapp-staging-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.directapp-staging-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.directapp-staging-headers.headers.stsPreload=true"
+      - "traefik.http.routers.directapp-staging.middlewares=directapp-staging-headers"
 
     depends_on:
       postgres:
