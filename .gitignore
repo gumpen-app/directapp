@@ -17,6 +17,8 @@ coverage/
 # Dotenv configs
 .env
 .env.*
+!.env.example
+!.env.*.example
 
 # Logs
 npm-debug.log

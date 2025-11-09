@@ -1,7 +1,7 @@
-# DirectApp - Production Docker Compose
+# DirectApp - Staging Docker Compose
 # Directus fork for Norwegian car dealership management
 #
-# PRODUCTION-GRADE CONFIGURATION
+# STAGING CONFIGURATION (Production-grade for testing)
 # - All versions pinned (no floating tags)
 # - No host port exposure (Traefik only)
 # - S3-compatible storage
@@ -117,7 +117,7 @@ services:
       # MONITORING (Sentry - Optional)
       # ========================================
       SENTRY_DSN: ${SENTRY_DSN:-}
-      SENTRY_ENVIRONMENT: production
+      SENTRY_ENVIRONMENT: staging
 
       # ========================================
       # EXTENSIONS
