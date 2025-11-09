@@ -55,14 +55,15 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
 
       # ========================================
-      # DATABASE
+      # DATABASE (Autobase PostgreSQL Cluster via Dokploy Network)
       # ========================================
+      # Uses internal dokploy-network to connect to 'autobase' service
       DB_CLIENT: pg
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST:-10.0.1.6}  # Autobase primary (internal IP in dokploy-network)
+      DB_PORT: ${DB_PORT:-6432}       # Autobase port
+      DB_DATABASE: ${DB_DATABASE:-directapp_production}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD}     # REQUIRED in Dokploy secrets
 
       # ========================================
       # PUBLIC URL (REQUIRED)
@@ -200,8 +201,6 @@ services:
       - "traefik.http.routers.directapp-prod.middlewares=directapp-prod-headers"
 
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
 
@@ -211,42 +210,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # PostgreSQL Database (Debian-based for locale support)
-  postgres:
-    image: postgres:15.6  # PINNED - Debian variant for nb_NO.UTF-8
-    container_name: directapp-production-postgres
-    restart: unless-stopped
-
-    networks:
-      - directapp-internal
-
-    # Persistent database
-    volumes:
-      - ../files/postgres-data:/var/lib/postgresql/data
-
-    environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      # Using C locale for maximum compatibility
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
-
-    # Performance tuning
-    command:
-      - "postgres"
-      - "-c"
-      - "shared_buffers=256MB"
-      - "-c"
-      - "max_connections=200"
-      - "-c"
-      - "work_mem=4MB"
-
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # Redis Cache
   redis:
@@ -279,43 +242,8 @@ services:
       timeout: 5s
       retries: 5
 
-  # Automated Database Backups
-  backup:
-    image: prodrigestivill/postgres-backup-local:15-alpine  # PINNED
-    container_name: directapp-production-backup
-    restart: unless-stopped
-
-    networks:
-      - directapp-internal
-
-    # Backup storage
-    volumes:
-      - ../files/backups:/backups
-
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_EXTRA_OPTS: "-Z9 --schema=public --blobs"
-
-      # Backup schedule
-      SCHEDULE: "@daily"  # midnight UTC
-      BACKUP_KEEP_DAYS: 30
-      BACKUP_KEEP_WEEKS: 8
-      BACKUP_KEEP_MONTHS: 12
-
-      # Health monitoring
-      HEALTHCHECK_PORT: 8080
-
-    depends_on:
-      - postgres
-
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
+  # NOTE: Database backups now handled by Autobase cluster
+  # Removed backup container - Autobase manages backups and replication
 
   # Optional: MinIO (S3-compatible storage for dev/self-hosted)
   # Uncomment if using self-hosted storage instead of AWS S3/R2

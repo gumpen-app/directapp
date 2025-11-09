@@ -1,802 +1,612 @@
-# DirectApp - Dokploy Deployment Guide
+# Dokploy Deployment Guide - DirectApp with Autobase
 
-> ⚠️ **LEGACY DOCUMENTATION**
->
-> This document has been superseded by the new comprehensive documentation:
-> - **Quick Start:** [`docs/ENVIRONMENT_SETUP.md`](docs/ENVIRONMENT_SETUP.md)
-> - **Complete Integration:** [`docs/DOKPLOY_INTEGRATION_SUMMARY.md`](docs/DOKPLOY_INTEGRATION_SUMMARY.md)
-> - **Development Workflow:** [`docs/DEVELOPMENT_WORKFLOW.md`](docs/DEVELOPMENT_WORKFLOW.md)
-> - **All Docs:** [`docs/README.md`](docs/README.md)
->
-> This file is kept for reference only. Use the new docs above.
+**Last Updated**: 2025-11-09
+
+Complete guide for deploying DirectApp to Dokploy with Autobase PostgreSQL cluster integration.
 
 ---
 
-Complete guide to deploy DirectApp (Directus fork) on Dokploy.
+## Architecture Overview
 
-**Last Updated:** 2025-10-18 (Superseded: 2025-10-21)
-**Dokploy Version:** Latest
-**DirectApp Version:** Based on Directus 11
+**Hetzner VPS**: 157.180.125.91
+- **Dokploy**: Container orchestration platform
+- **Traefik**: Reverse proxy for HTTPS
+- **Autobase**: PostgreSQL cluster (service name: `autobase`)
+- **DirectApp**: This application (staging + production)
 
----
+**Dokploy Network**:
+- All services run in `dokploy-network`
+- Internal service-to-service communication
+- Traefik handles external HTTPS traffic
 
-## Table of Contents
-
-- [What is Dokploy?](#what-is-dokploy)
-- [Prerequisites](#prerequisites)
-- [Option 1: Quick Deploy (Existing Dokploy)](#option-1-quick-deploy-existing-dokploy)
-- [Option 2: Install Dokploy First](#option-2-install-dokploy-first)
-- [Post-Deployment Setup](#post-deployment-setup)
-- [Environment Variables](#environment-variables)
-- [Custom Domain Setup](#custom-domain-setup)
-- [SSL/HTTPS Configuration](#sslhttps-configuration)
-- [Updating DirectApp](#updating-directapp)
-- [Backup & Restore](#backup--restore)
-- [Troubleshooting](#troubleshooting)
-- [Production Checklist](#production-checklist)
-
----
-
-## What is Dokploy?
-
-**Dokploy** is a free, open-source, self-hosted Platform-as-a-Service (PaaS) that simplifies application deployment using Docker and Traefik.
-
-**Think of it as:** Your own Heroku/Vercel/Netlify running on your server
-
-**Key Features:**
-- 🐳 Docker-based deployments
-- 🔒 Automatic HTTPS (Let's Encrypt)
-- 📊 Built-in monitoring
-- 🔄 Zero-downtime deployments
-- 🌐 Traefik reverse proxy
-- 📦 Database support (PostgreSQL, MySQL, Redis, MongoDB)
-
-**Official Docs:** https://docs.dokploy.com
+**Autobase Internal IPs** (within dokploy-network):
+- Primary: 10.0.1.6:6432
+- Replica: 10.0.1.7:6432
 
 ---
 
 ## Prerequisites
 
-### Server Requirements
+### 1. Autobase Service Running
 
-**Minimum:**
-- 2 GB RAM
-- 30 GB Disk space
-- 1 CPU core
-- Ubuntu 20.04+ or Debian 11+
+Verify Autobase is deployed in Dokploy:
 
-**Recommended (for production):**
-- 4 GB RAM
-- 50 GB SSD
-- 2 CPU cores
-- Ubuntu 22.04 LTS
+```bash
+# SSH into Hetzner VPS
+ssh root@157.180.125.91
 
-### Software Requirements
+# Check if Autobase is running
+docker ps | grep autobase
 
-- Docker 20.10+
-- Docker Compose 2.0+
-- Git (if deploying from repo)
+# Test connection to Autobase primary
+docker run --rm --network dokploy-network \
+  -e PGPASSWORD='v5Kry76iPdEFUXOfxUlnswH77m68fAvI' \
+  postgres:15.6 psql -h 10.0.1.6 -p 6432 -U postgres -c "SELECT version();"
+```
 
-### Domain & DNS
+**Expected**: Should show PostgreSQL version
 
-- A domain name pointing to your server
-- DNS A record configured
+### 2. Create Databases on Autobase
 
-### Accounts (for full features)
+```bash
+# Connect to Autobase
+docker run --rm -it --network dokploy-network \
+  -e PGPASSWORD='v5Kry76iPdEFUXOfxUlnswH77m68fAvI' \
+  postgres:15.6 psql -h 10.0.1.6 -p 6432 -U postgres
 
-- [ ] **Resend** - Email notifications (https://resend.com) - Free tier
-- [ ] **Maskinporten** - Norwegian vehicle API (https://www.vegvesen.no) - Test access
-- [ ] **Sentry** (optional) - Error monitoring (https://sentry.io) - Free tier
+# Create databases
+CREATE DATABASE directapp_dev;
+CREATE DATABASE directapp_staging;
+CREATE DATABASE directapp_production;
+
+# Verify
+\l
+
+# Exit
+\q
+```
+
+### 3. Generate Security Keys
+
+On your local machine:
+
+```bash
+# Generate Directus KEY (32 bytes)
+openssl rand -base64 32
+
+# Generate Directus SECRET (64 bytes)
+openssl rand -base64 64
+```
+
+**Important**: Generate different keys for staging and production!
 
 ---
 
-## Option 1: Quick Deploy (Existing Dokploy)
+## Staging Deployment
 
-If you already have Dokploy running, follow these steps:
+### Step 1: Create Service in Dokploy
 
-### Step 1: Clone DirectApp Repository
+1. Log in to Dokploy: https://dokploy.your-domain.com
+2. Navigate to your project
+3. Click **"Create Service"**
+4. Select **"Docker Compose"**
+5. Name: `directapp-staging`
 
-```bash
-# On your local machine or server
-git clone https://github.com/gumpen-app/directapp.git
-cd directapp
-```
+### Step 2: Configure Docker Compose
 
-### Step 2: Prepare Environment Variables
-
-```bash
-# Copy the example environment file
-cp .env.dokploy.example .env
-
-# Generate secure keys
-openssl rand -base64 32  # Use this for DIRECTUS_KEY
-openssl rand -base64 64  # Use this for DIRECTUS_SECRET
-
-# Edit the .env file
-nano .env
-```
-
-**Required variables to change:**
-```env
-DOMAIN=directapp.yourdomain.com
-PUBLIC_URL=https://directapp.yourdomain.com
-DIRECTUS_KEY=<generated-32-char-key>
-DIRECTUS_SECRET=<generated-64-char-secret>
-ADMIN_EMAIL=admin@yourdomain.com
-ADMIN_PASSWORD=<strong-password>
-DB_PASSWORD=<strong-password>
-EMAIL_FROM=DirectApp <noreply@yourdomain.com>
-RESEND_API_KEY=re_xxxxxxxxxxxx
-```
-
-### Step 3: Deploy via Dokploy UI
-
-1. **Login to Dokploy** dashboard (usually at https://dokploy.yourdomain.com)
-
-2. **Create New Project**
-   - Click "Create Project"
-   - Name: `directapp`
-   - Description: Car Dealership Management System
-
-3. **Create New Service**
-   - Click "Add Service"
-   - Select "Docker Compose"
-   - Name: `directapp`
-
-4. **Configure Service**
-   - **Source:** Choose one:
-     - **From Git:** Enter `https://github.com/gumpen-app/directapp.git`
-     - **Manual:** Paste contents of `docker-compose.dokploy.yml`
-
-5. **Set Environment Variables**
-   - Go to "Environment" tab
-   - Paste your `.env` contents
-   - Or add variables one by one
-
-6. **Configure Domain**
-   - Go to "Domains" tab
-   - Add domain: `directapp.yourdomain.com`
-   - Enable "Auto SSL" (Let's Encrypt)
-
-7. **Deploy**
-   - Click "Deploy" button
-   - Wait for build to complete (~5-10 minutes)
-
-8. **Check Logs**
-   - Go to "Logs" tab
-   - Verify Directus started successfully
-   - Look for: `Server started at port 8055`
-
-### Step 4: Access Your DirectApp
-
-```
-https://directapp.yourdomain.com/admin
-```
-
-**Default login:**
-- Email: (from ADMIN_EMAIL in .env)
-- Password: (from ADMIN_PASSWORD in .env)
-
-**⚠️ IMPORTANT:** Change the admin password immediately after first login!
-
----
-
-## Option 2: Install Dokploy First
-
-If you don't have Dokploy installed yet:
-
-### Step 1: Install Dokploy on Your Server
-
-```bash
-# SSH into your server
-ssh user@your-server-ip
-
-# Run Dokploy installer (one command!)
-curl -sSL https://dokploy.com/install.sh | sh
-
-# The installer will:
-# - Install Docker
-# - Install Docker Compose
-# - Set up Traefik
-# - Create Dokploy admin panel
-# - Configure firewall rules
-```
-
-**Installation takes ~5-10 minutes**
-
-### Step 2: Access Dokploy UI
-
-```
-http://your-server-ip:3000
-```
-
-**First-time setup:**
-1. Create admin account
-2. Set up your organization
-3. Configure domain (optional but recommended)
-
-### Step 3: Configure Domain for Dokploy
-
-**DNS Setup:**
-```
-A Record: dokploy.yourdomain.com → your-server-ip
-A Record: directapp.yourdomain.com → your-server-ip
-```
-
-**In Dokploy UI:**
-1. Go to Settings
-2. Add domain: `dokploy.yourdomain.com`
-3. Enable SSL
-4. Save
-
-Now Dokploy is accessible at: `https://dokploy.yourdomain.com`
-
-### Step 4: Deploy DirectApp
-
-Follow [Option 1: Quick Deploy](#option-1-quick-deploy-existing-dokploy) above
-
----
-
-## Post-Deployment Setup
-
-### 1. First Login & Security
-
-```bash
-# Access admin panel
-https://directapp.yourdomain.com/admin
-
-# Login with credentials from .env
-# Email: ADMIN_EMAIL
-# Password: ADMIN_PASSWORD
-
-# Immediately:
-1. Click your profile (top right)
-2. Change password
-3. Enable 2FA (Settings → Two-Factor Authentication)
-```
-
-### 2. Import Schema
-
-Upload your exported schema to restore data model:
-
-```bash
-# Via Directus UI
-Settings → Data Model → Import Schema → Upload schema-exported/*.json
-
-# Or via CLI (from server)
-docker exec directapp npx directus schema apply /directus/uploads/schema.json
-```
-
-### 3. Configure Dealerships
-
-```bash
-# Via Directus admin
-Content → Dealership → Create new
-
-# Add your dealerships:
-- Name, Code, Location
-- Set dealership type (self-sustained, prep center, sales-only)
-```
-
-### 4. Create Users
-
-```bash
-# Via Directus admin
-User Directory → Invite User
-
-# Assign to:
-- Role (Nybilselger, Bruktbilselger, Booking, etc.)
-- Dealership
-```
-
-### 5. Test Vehicle Lookup API
-
-Once Maskinporten token is configured:
-
-```bash
-# Test the vehicle lookup endpoint
-curl -X POST https://directapp.yourdomain.com/vehicle-lookup \
-  -H "Content-Type: application/json" \
-  -d '{"vin": "YV1CZ59H621234567"}'
-
-# Should return vehicle data
-```
-
-### 6. Test Email Notifications
-
-```bash
-# Via Directus Flows
-Settings → Flows → Create new flow
-
-# Trigger: Manual
-# Operation: Send Email
-# Test with your email
-
-# Verify Resend dashboard shows delivery
-```
-
----
-
-## Environment Variables
-
-### Critical Variables (MUST SET)
-
-```env
-DIRECTUS_KEY=             # 32+ characters
-DIRECTUS_SECRET=          # 64+ characters
-ADMIN_PASSWORD=           # Strong password
-DB_PASSWORD=              # Strong password
-DOMAIN=                   # Your domain
-PUBLIC_URL=               # https://your-domain
-```
-
-### Email Configuration
-
-```env
-EMAIL_FROM=DirectApp <noreply@yourdomain.com>
-RESEND_API_KEY=re_xxxx   # From resend.com
-```
-
-### API Integrations
-
-```env
-STATENS_VEGVESEN_TOKEN=  # Norwegian vehicle registry
-SENTRY_DSN=              # Error monitoring (optional)
-```
-
-### Security & Performance
-
-```env
-RATE_LIMITER_ENABLED=true
-RATE_LIMITER_POINTS=100
-RATE_LIMITER_DURATION=60
-ACCESS_TOKEN_TTL=15m
-REFRESH_TOKEN_TTL=7d
-LOG_LEVEL=warn
-```
-
-### Updating Variables
-
-**Via Dokploy UI:**
-1. Go to your service
-2. Click "Environment" tab
-3. Edit variables
-4. Click "Redeploy"
-
-**Changes require redeployment!**
-
----
-
-## Custom Domain Setup
-
-### DNS Configuration
-
-Add these DNS records:
-
-```dns
-Type    Name        Value           TTL
-A       @           <server-ip>     3600
-A       directapp   <server-ip>     3600
-CNAME   www         directapp       3600
-```
-
-### In Dokploy
-
-1. Go to Service → Domains
-2. Add domain: `directapp.yourdomain.com`
-3. Enable "Auto SSL"
-4. Wait ~2-5 minutes for Let's Encrypt
-
-### Verify
-
-```bash
-# Check DNS propagation
-nslookup directapp.yourdomain.com
-
-# Test HTTPS
-curl -I https://directapp.yourdomain.com
-```
-
----
-
-## SSL/HTTPS Configuration
-
-Dokploy uses **Let's Encrypt** automatically via Traefik.
-
-### Automatic SSL (Recommended)
-
-✅ **Already configured** in `docker-compose.dokploy.yml`
-
-Traefik labels:
-```yaml
-- "traefik.http.routers.directapp.tls.certresolver=letsencrypt"
-```
-
-### Troubleshooting SSL
-
-**Issue:** Certificate not issued
-
-**Solutions:**
-1. Verify DNS points to server: `nslookup yourdomain.com`
-2. Check ports 80/443 are open: `sudo netstat -tulpn | grep :80`
-3. Check Traefik logs: `docker logs traefik`
-4. Verify domain in Dokploy UI matches DNS
-
-**Issue:** Mixed content warnings
-
-**Solution:**
-```env
-# In .env
-PUBLIC_URL=https://directapp.yourdomain.com  # Must use https://
-REFRESH_TOKEN_COOKIE_SECURE=true
-```
-
-### Certificate Renewal
-
-Let's Encrypt certificates auto-renew via Traefik.
-- Certificates valid for 90 days
-- Auto-renewed at 60 days
-- No manual intervention needed
-
----
-
-## Updating DirectApp
-
-### Update from Git (Recommended)
-
-If deployed from GitHub:
-
-**Via Dokploy UI:**
-1. Go to your service
-2. Click "Deployments" tab
-3. Click "Redeploy"
-4. Dokploy pulls latest code and rebuilds
-
-**Manual Git Pull:**
-```bash
-# SSH to server
-cd /path/to/directapp
-
-# Pull latest
-git pull origin main
-
-# Redeploy via Dokploy UI
-```
-
-### Update Environment Variables
-
-```bash
-# Edit in Dokploy UI
-Service → Environment → Edit → Save → Redeploy
-```
-
-### Update Directus Version
+Paste `docker-compose.staging.yml` content into Dokploy:
 
 ```yaml
-# In docker-compose.dokploy.yml
-services:
-  directus:
-    image: directus/directus:11  # ← Change version here
+# Copy from docker-compose.staging.yml
+# Or upload the file directly
 ```
 
-Then redeploy via Dokploy UI.
+### Step 3: Set Environment Variables
 
-### Database Migrations
+In Dokploy UI, add these environment variables:
+
+**Database (Autobase)**:
+```bash
+DB_HOST=10.0.1.6
+DB_PORT=6432
+DB_DATABASE=directapp_staging
+DB_USER=postgres
+DB_PASSWORD=v5Kry76iPdEFUXOfxUlnswH77m68fAvI
+```
+
+**Directus Security** (use generated values):
+```bash
+DIRECTUS_KEY=<generated-32-byte-key>
+DIRECTUS_SECRET=<generated-64-byte-secret>
+```
+
+**Admin Account** (first-time bootstrap only):
+```bash
+ADMIN_EMAIL=admin@staging-gapp.coms.no
+ADMIN_PASSWORD=<your-secure-password>
+```
+
+**Application**:
+```bash
+PUBLIC_URL=https://staging-gapp.coms.no
+CORS_ORIGIN=https://staging-gapp.coms.no
+COOKIE_DOMAIN=.coms.no
+```
+
+**Email (Resend)**:
+```bash
+EMAIL_FROM=DirectApp Staging <noreply@coms.no>
+RESEND_API_KEY=<your-resend-api-key>
+```
+
+**Storage (S3/R2/MinIO)** - Choose one:
 
 ```bash
-# Automatic on startup
-# Directus runs migrations automatically
+# Option 1: AWS S3
+STORAGE_LOCATIONS=s3
+S3_ACCESS_KEY=<your-s3-key>
+S3_SECRET_KEY=<your-s3-secret>
+S3_BUCKET=directapp-staging
+S3_REGION=eu-north-1
 
-# Manual migration (if needed)
-docker exec directapp npx directus database migrate:latest
+# Option 2: Cloudflare R2
+STORAGE_LOCATIONS=s3
+S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+S3_ACCESS_KEY=<r2-access-key>
+S3_SECRET_KEY=<r2-secret-key>
+S3_BUCKET=directapp-staging
+S3_REGION=auto
+```
+
+**Norwegian Vehicle Registry**:
+```bash
+STATENS_VEGVESEN_TOKEN=<your-token>
+```
+
+**Optional (Monitoring)**:
+```bash
+SENTRY_DSN=<your-sentry-dsn>
+```
+
+### Step 4: Deploy
+
+1. Click **"Deploy"** in Dokploy
+2. Monitor logs for:
+   ```
+   Database connected successfully
+   Server started at http://0.0.0.0:8055
+   ```
+3. Access: https://staging-gapp.coms.no
+
+### Step 5: First-Time Setup
+
+1. Log in with admin credentials
+2. **IMPORTANT**: Change admin password immediately
+3. Remove `ADMIN_EMAIL` and `ADMIN_PASSWORD` from environment variables
+4. Redeploy service
+
+### Step 6: Verify Traefik Labels
+
+Ensure these labels are in docker-compose.staging.yml:
+
+```yaml
+labels:
+  - "traefik.enable=true"
+  - "traefik.http.routers.directapp-staging.rule=Host(`staging-gapp.coms.no`)"
+  - "traefik.http.routers.directapp-staging.entrypoints=websecure"
+  - "traefik.http.routers.directapp-staging.tls.certresolver=letsencrypt"
+  - "traefik.http.routers.directapp-staging.service=directapp-staging-svc"
+  - "traefik.http.services.directapp-staging-svc.loadbalancer.server.port=8055"
+  - "traefik.docker.network=dokploy-network"
+```
+
+---
+
+## Production Deployment
+
+**CRITICAL**: Production deployment requires extra care!
+
+### Pre-Deployment Checklist
+
+- [ ] Staging environment fully tested
+- [ ] All migrations tested on staging
+- [ ] Security keys generated (different from staging)
+- [ ] Backup strategy confirmed
+- [ ] Monitoring configured (Sentry recommended)
+- [ ] Admin password strong and unique
+- [ ] S3 bucket for production created
+- [ ] Email sending configured and tested
+- [ ] Norwegian Vehicle Registry token valid
+- [ ] Database `directapp_production` created on Autobase
+
+### Step 1: Create Production Service
+
+1. In Dokploy, create new service: `directapp-production`
+2. Use `docker-compose.production.yml`
+
+### Step 2: Set Environment Variables
+
+**Use different values from staging!**
+
+```bash
+# Database
+DB_HOST=10.0.1.6
+DB_PORT=6432
+DB_DATABASE=directapp_production
+DB_USER=postgres
+DB_PASSWORD=v5Kry76iPdEFUXOfxUlnswH77m68fAvI
+
+# Directus Security (DIFFERENT from staging)
+DIRECTUS_KEY=<new-generated-key>
+DIRECTUS_SECRET=<new-generated-secret>
+
+# Admin (remove after first deploy)
+ADMIN_EMAIL=admin@gapp.coms.no
+ADMIN_PASSWORD=<strong-unique-password>
+
+# Application
+PUBLIC_URL=https://gapp.coms.no
+CORS_ORIGIN=https://gapp.coms.no
+COOKIE_DOMAIN=.coms.no
+
+# Email
+EMAIL_FROM=DirectApp <noreply@coms.no>
+RESEND_API_KEY=<production-resend-key>
+
+# Storage
+S3_BUCKET=directapp-production
+# ... other S3 settings
+
+# Norwegian Vehicle Registry
+STATENS_VEGVESEN_TOKEN=<production-token>
+
+# Monitoring (REQUIRED for production)
+SENTRY_DSN=<production-sentry-dsn>
+```
+
+### Step 3: Deploy Production
+
+1. Double-check all environment variables
+2. Click **"Deploy"**
+3. Monitor logs carefully
+4. Test all critical functionality
+
+### Step 4: Post-Deployment
+
+1. Log in and change admin password
+2. Remove `ADMIN_EMAIL` and `ADMIN_PASSWORD`
+3. Create regular user accounts
+4. Configure RBAC roles
+5. Test all workflows
+6. Set up monitoring dashboards
+
+---
+
+## Local Development with SSH Tunnel
+
+For local development, create an SSH tunnel to access Autobase:
+
+### One-Time Setup
+
+```bash
+# Create SSH key if you don't have one
+ssh-keygen -t ed25519 -C "directapp-dev"
+
+# Copy public key to Hetzner VPS
+ssh-copy-id root@157.180.125.91
+```
+
+### Start Development Session
+
+```bash
+# 1. Create SSH tunnel (run in separate terminal)
+ssh -L 5432:10.0.1.6:6432 root@157.180.125.91 -N
+
+# 2. Copy .env.example to .env
+cp .env.example .env
+
+# 3. Verify .env has correct settings:
+#    DB_HOST=localhost
+#    DB_PORT=5432
+#    DB_DATABASE=directapp_dev
+
+# 4. Start DirectApp
+docker compose -f docker-compose.dev.yml up
+```
+
+**Access**: http://localhost:8055
+
+### Stop Development Session
+
+```bash
+# Stop DirectApp
+docker compose -f docker-compose.dev.yml down
+
+# Stop SSH tunnel (Ctrl+C in tunnel terminal)
+```
+
+---
+
+## Database Migrations
+
+### Export from Pilot Production
+
+If migrating from existing Directus instance (gumpen.coms.no):
+
+```bash
+# Export schema from pilot
+npx directus schema snapshot --host https://gumpen.coms.no --token <admin-token> ./schema-pilot.yaml
+
+# Apply to Autobase (via SSH tunnel)
+npx directus schema apply --host http://localhost:8055 --token <admin-token> ./schema-pilot.yaml
+```
+
+### Manual Migration
+
+```bash
+# Export from pilot
+pg_dump -h pilot-host -U pilot-user -d pilot-db \
+  --schema-only --no-owner --no-acl -f schema.sql
+
+# Import to Autobase (via SSH tunnel)
+psql -h localhost -p 5432 -U postgres -d directapp_dev < schema.sql
+```
+
+---
+
+## Monitoring & Debugging
+
+### Check Service Logs (Dokploy)
+
+1. Go to Dokploy UI
+2. Select `directapp-staging` or `directapp-production`
+3. Click **"Logs"** tab
+4. Filter for errors
+
+### Check Database Connection
+
+```bash
+# SSH into Hetzner VPS
+ssh root@157.180.125.91
+
+# Test Autobase connection from DirectApp container
+docker exec -it directapp-staging sh
+apk add postgresql-client
+psql -h 10.0.1.6 -p 6432 -U postgres -d directapp_staging
+```
+
+### Common Issues
+
+**Issue**: "Connection refused to 10.0.1.6:6432"
+
+**Solution**:
+- Check Autobase service is running: `docker ps | grep autobase`
+- Verify both services in `dokploy-network`
+- Check Autobase logs: `docker logs <autobase-container-id>`
+
+**Issue**: "Database does not exist"
+
+**Solution**:
+- Create database manually (see Prerequisites section)
+- Check `DB_DATABASE` environment variable matches
+
+**Issue**: "Password authentication failed"
+
+**Solution**:
+- Verify `DB_PASSWORD` matches Autobase cluster password
+- Check `DB_USER` is correct (likely `postgres`)
+
+---
+
+## Rollback Procedure
+
+If deployment fails:
+
+### Via Dokploy UI
+
+1. Go to service in Dokploy
+2. Click **"Deployments"** tab
+3. Find previous successful deployment
+4. Click **"Redeploy"**
+
+### Manual Rollback
+
+```bash
+# SSH into VPS
+ssh root@157.180.125.91
+
+# List containers
+docker ps -a | grep directapp
+
+# Stop current version
+docker stop directapp-staging
+
+# Start previous version (if still exists)
+docker start <previous-container-id>
 ```
 
 ---
 
 ## Backup & Restore
 
-### Automated Backups
+### Automated Backups (Recommended)
 
-**Already configured** via `backup` service in docker-compose.
-
-**Location:** `../files/backups/`
-
-**Schedule:**
-- Daily at midnight
-- Keeps 30 days
-- Keeps 4 weeks
-- Keeps 6 months
+Autobase cluster should handle automated backups. Verify with your administrator:
+- Backup frequency
+- Retention period
+- Restoration procedure
 
 ### Manual Backup
 
-**Database:**
 ```bash
-# Create backup
-docker exec directapp-postgres pg_dump -U directus directapp > backup-$(date +%Y%m%d).sql
-
-# Download from Dokploy
-# Files → backups → Download
-```
-
-**Uploads/Files:**
-```bash
-# Create archive
-cd ../files
-tar -czf uploads-backup-$(date +%Y%m%d).tar.gz uploads/
-
-# Download via Dokploy File Manager
+# From Hetzner VPS
+docker run --rm --network dokploy-network \
+  -e PGPASSWORD='v5Kry76iPdEFUXOfxUlnswH77m68fAvI' \
+  -v $(pwd):/backup \
+  postgres:15.6 pg_dump \
+    -h 10.0.1.6 -p 6432 -U postgres \
+    -d directapp_production \
+    -F c -f /backup/directapp_prod_$(date +%Y%m%d).dump
 ```
 
 ### Restore from Backup
 
-**Database:**
 ```bash
-# Stop Directus
-docker stop directapp
-
-# Restore database
-cat backup-20251018.sql | docker exec -i directapp-postgres psql -U directus -d directapp
-
-# Start Directus
-docker start directapp
+docker run --rm --network dokploy-network \
+  -e PGPASSWORD='v5Kry76iPdEFUXOfxUlnswH77m68fAvI' \
+  -v $(pwd):/backup \
+  postgres:15.6 pg_restore \
+    -h 10.0.1.6 -p 6432 -U postgres \
+    -d directapp_production \
+    -c /backup/directapp_prod_20251109.dump
 ```
-
-**Files:**
-```bash
-# Extract backup
-tar -xzf uploads-backup-20251018.tar.gz -C ../files/
-```
-
-### Disaster Recovery
-
-**Full system restore:**
-1. Install fresh Dokploy
-2. Deploy DirectApp via Dokploy
-3. Stop services
-4. Restore database backup
-5. Restore uploads backup
-6. Start services
-7. Verify data
-
-**Test restore monthly!**
 
 ---
 
-## Troubleshooting
+## Security Best Practices
 
-### Service Won't Start
+### Environment Variables
 
-**Check logs:**
-```bash
-# Via Dokploy UI
-Service → Logs → View
+- ✅ Store secrets in Dokploy secrets UI (not docker-compose.yml)
+- ✅ Use different keys for staging and production
+- ✅ Rotate keys periodically
+- ✅ Never commit secrets to git
 
-# Or via Docker
-docker logs directapp
-docker logs directapp-postgres
-```
+### Database Access
 
-**Common issues:**
-- Missing environment variables
-- Database connection failed
-- Ports already in use
+- ✅ Create dedicated database user (not `postgres`) for production
+- ✅ Use strong passwords (32+ characters)
+- ✅ Limit database access to dokploy-network only
+- ✅ Enable database audit logging
 
-**Solution:**
-```bash
-# Verify environment
-docker exec directapp env | grep DIRECTUS
+### Network Security
 
-# Check database connectivity
-docker exec directapp-postgres pg_isready
+- ✅ Autobase NOT exposed externally (dokploy-network only)
+- ✅ All HTTP traffic via Traefik with HTTPS
+- ✅ CORS configured for specific domains only
+- ✅ Rate limiting enabled in production
 
-# Restart service
-docker restart directapp
-```
+### Application Security
 
-### Can't Access Admin Panel
+- ✅ Strong admin password
+- ✅ Change default admin credentials immediately
+- ✅ Remove `ADMIN_EMAIL`/`ADMIN_PASSWORD` after first deploy
+- ✅ Implement RBAC with Norwegian roles
+- ✅ Enable 2FA for admin users (if Directus supports)
 
-**Check:**
-1. Domain DNS points to server
-2. SSL certificate issued (Traefik logs)
-3. Directus service running: `docker ps | grep directapp`
-4. Firewall allows 80/443
+---
 
-**Test locally:**
-```bash
-# SSH to server
-curl http://localhost:8055/server/health
+## Performance Tuning
 
-# Should return: {"status":"ok"}
-```
+### Database Connection Pooling
 
-### Vehicle Lookup Not Working
+For production, consider adding PgBouncer:
 
-**Check:**
-1. STATENS_VEGVESEN_TOKEN set in environment
-2. Extension installed: `ls ../files/extensions/`
-3. API reachable from server
-
-**Test:**
-```bash
-# Test API directly
-curl https://autosys-kjoretoy-api.atlas.vegvesen.no/api/...
-
-# Check Directus logs for errors
-docker logs directapp | grep vehicle
-```
-
-### Emails Not Sending
-
-**Check:**
-1. RESEND_API_KEY set correctly
-2. EMAIL_FROM domain verified in Resend
-3. Check Resend dashboard for errors
-
-**Test:**
-```bash
-# Via Directus Flows
-Settings → Flows → Create test flow → Send email
-
-# Check Resend logs
-https://resend.com/emails
-```
-
-### Upload Files Not Persisting
-
-**Issue:** Files disappear after redeploy
-
-**Cause:** Using `./uploads` instead of `../files/uploads`
-
-**Solution:**
 ```yaml
-# In docker-compose.dokploy.yml (already correct)
-volumes:
-  - ../files/uploads:/directus/uploads  # ✅ Correct
-  # NOT: ./uploads:/directus/uploads    # ❌ Wrong
+# Add to docker-compose.production.yml
+pgbouncer:
+  image: edoburu/pgbouncer:latest
+  container_name: directapp-pgbouncer
+  restart: unless-stopped
+  networks:
+    - dokploy-network
+  environment:
+    DB_HOST: 10.0.1.6
+    DB_PORT: 6432
+    DB_USER: postgres
+    DB_PASSWORD: ${DB_PASSWORD}
+    POOL_MODE: transaction
+    MAX_CLIENT_CONN: 1000
+    DEFAULT_POOL_SIZE: 20
 ```
 
-### Database Connection Errors
+Then update Directus to connect to PgBouncer instead of Autobase directly.
 
-**Check:**
+### Redis Memory Limits
+
+Adjust Redis memory based on usage:
+
+```yaml
+redis:
+  command:
+    - "redis-server"
+    - "--maxmemory"
+    - "512mb"  # Increase if needed
+```
+
+### Directus Workers
+
+For heavy workloads, add dedicated worker containers (future enhancement).
+
+---
+
+## Maintenance Windows
+
+### Scheduled Maintenance
+
+1. Announce maintenance window to users
+2. Put application in maintenance mode (if Directus supports)
+3. Stop accepting new requests
+4. Backup database
+5. Perform updates
+6. Test thoroughly
+7. Resume normal operations
+
+### Zero-Downtime Deployment
+
+For critical production systems:
+
+1. Deploy new version alongside old version
+2. Run health checks
+3. Switch Traefik routing to new version
+4. Monitor for errors
+5. Keep old version running for quick rollback
+6. Remove old version after confirmation
+
+---
+
+## Support & Troubleshooting
+
+### Logs Location
+
+**Dokploy UI**: Most convenient
+**Docker**: `docker logs <container-name>`
+**Sentry**: Production error tracking
+
+### Health Checks
+
+**Directus Health Endpoint**:
 ```bash
-# Verify PostgreSQL running
-docker exec directapp-postgres pg_isready
-
-# Check environment variables
-docker exec directapp env | grep DB_
-
-# Test connection
-docker exec directapp-postgres psql -U directus -d directapp -c "SELECT 1"
+curl https://staging-gapp.coms.no/server/health
 ```
 
-### High Memory Usage
-
-**Check resource usage:**
+**Database Connection**:
 ```bash
-# Via Dokploy
-Monitoring → Resources
-
-# Or via Docker
-docker stats directapp
+# From within DirectApp container
+curl http://localhost:8055/server/health
 ```
 
-**Optimize:**
-```env
-# In .env
-CACHE_ENABLED=true
-CACHE_STORE=redis
+### Performance Monitoring
+
+**Database Queries**:
+```sql
+-- Check slow queries
+SELECT
+  query,
+  mean_exec_time,
+  calls
+FROM pg_stat_statements
+ORDER BY mean_exec_time DESC
+LIMIT 10;
 ```
 
-### Slow Performance
-
-**Solutions:**
-1. Add database indexes (see PRODUCTION_ROADMAP.md)
-2. Enable Redis caching
-3. Optimize queries
-4. Scale server resources
+**Redis Stats**:
+```bash
+docker exec -it directapp-staging-redis redis-cli INFO stats
+```
 
 ---
 
-## Production Checklist
-
-Before going live:
-
-### Security
-- [ ] Changed DIRECTUS_KEY and DIRECTUS_SECRET
-- [ ] Changed ADMIN_PASSWORD (strong password)
-- [ ] Changed DB_PASSWORD
-- [ ] Enabled 2FA for admin
-- [ ] Set REFRESH_TOKEN_COOKIE_SECURE=true
-- [ ] Configured CORS if needed
-- [ ] Enabled rate limiting
-- [ ] Reviewed all user permissions
-
-### Database
-- [ ] Added unique constraints (VIN, order_number)
-- [ ] Fixed foreign key cascades
-- [ ] Added validation rules
-- [ ] Configured automated backups
-- [ ] Tested restore procedure
-
-### Configuration
-- [ ] Set correct PUBLIC_URL
-- [ ] Configured custom domain
-- [ ] SSL certificate issued
-- [ ] Email sending works (Resend)
-- [ ] Vehicle lookup works (Maskinporten)
-- [ ] Error monitoring (Sentry)
-
-### Data
-- [ ] Imported schema
-- [ ] Created dealerships
-- [ ] Created user roles
-- [ ] Tested workflows
-- [ ] Verified permissions
-
-### Monitoring
-- [ ] Set up Sentry alerts
-- [ ] Configure uptime monitoring
-- [ ] Set up backup notifications
-- [ ] Monitor disk space
-
-### Documentation
-- [ ] User training completed
-- [ ] Admin procedures documented
-- [ ] Incident response plan
-- [ ] Backup/restore tested
-
----
-
-## Support & Resources
-
-### Official Documentation
-- **Dokploy:** https://docs.dokploy.com
-- **Directus:** https://docs.directus.io
-- **DirectApp:** See `.claude/` directory
-
-### Community
-- **Dokploy GitHub:** https://github.com/Dokploy/dokploy
-- **Directus Discord:** https://directus.chat
-
-### Getting Help
-
-**For DirectApp issues:**
-1. Check `.claude/SCHEMA_ANALYSIS.md`
-2. Review `.claude/PRODUCTION_ROADMAP.md`
-3. Create issue: https://github.com/gumpen-app/directapp/issues
-
-**For Dokploy issues:**
-1. Check logs in Dokploy UI
-2. Review Dokploy docs
-3. Create issue: https://github.com/Dokploy/dokploy/issues
-
----
-
-## Next Steps
-
-After successful deployment:
-
-1. **Complete Phase 0** - Fix critical security issues
-   - See: `.claude/SCHEMA_ANALYSIS.md`
-   - See: `.claude/GITHUB_ISSUES_TEMPLATE.md`
-
-2. **Add vehicle lookup** - Integrate Statens Vegvesen API
-   - See: `.claude/PRODUCTION_ROADMAP.md` Phase 1
-
-3. **Configure workflows** - Role-based permissions
-   - See: `.claude/PRODUCTION_ROADMAP.md` Phase 2
-
-4. **Set up notifications** - Resend integration
-   - See: `.claude/PRODUCTION_ROADMAP.md` Phase 3
-
-5. **Add scheduling** - Workshop resource management
-   - See: `.claude/PRODUCTION_ROADMAP.md` Phase 5
-
----
-
-**Deployment Status:** ✅ Ready to deploy
-**Last Updated:** 2025-10-18
-**Maintainer:** gumpen-app
-
-**Questions?** Create an issue or check the roadmap documents in `.claude/`
-
+**Last Updated**: 2025-11-09
+**Maintained By**: DirectApp Team
+**Deployment Platform**: Dokploy on Hetzner VPS 157.180.125.91

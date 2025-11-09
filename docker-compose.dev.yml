@@ -8,7 +8,8 @@
 # Features:
 # - Hot reload for extensions (mounted directly)
 # - Exposed ports for easy access
-# - Local PostgreSQL and Redis
+# - Autobase PostgreSQL Cluster (10.0.1.6:6432)
+# - Local Redis cache
 # - Dev-friendly logging
 
 version: '3.8'
@@ -45,14 +46,17 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
 
       # ========================================
-      # DATABASE
+      # DATABASE (Autobase PostgreSQL Cluster)
       # ========================================
+      # For local dev: Use SSH tunnel or exposed endpoint
+      # For Dokploy: Use internal IPs (10.0.1.6:6432)
       DB_CLIENT: pg
-      DB_HOST: postgres
-      DB_PORT: 5432
+      DB_HOST: ${DB_HOST:-localhost}  # localhost via SSH tunnel (see AUTOBASE_CLUSTER_SETUP.md)
+      DB_PORT: ${DB_PORT:-5432}       # Local port for SSH tunnel
       DB_DATABASE: ${DB_DATABASE:-directapp_dev}
-      DB_USER: ${DB_USER:-directus}
-      DB_PASSWORD: ${DB_PASSWORD:-directus}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD}     # REQUIRED - no default for security
+      DB_SSL__REJECT_UNAUTHORIZED: "false"  # Accept self-signed certs
 
       # ========================================
       # PUBLIC URL
@@ -116,14 +120,17 @@ services:
       TELEMETRY: "false"
 
       # ========================================
+      # NODE.JS - Accept self-signed SSL certs
+      # ========================================
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+
+      # ========================================
       # EXTERNAL API TOKENS (Custom Extensions)
       # ========================================
       # Norwegian Vehicle Registry API (vehicle-lookup extension)
       STATENS_VEGVESEN_TOKEN: ${STATENS_VEGVESEN_TOKEN}
 
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
 
@@ -133,34 +140,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
-
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15.6
-    container_name: directapp-dev-postgres
-    restart: unless-stopped
-
-    networks:
-      - directapp-dev
-
-    # Expose for direct access (e.g., TablePlus, pgAdmin)
-    ports:
-      - "5433:5432"  # Use 5433 to avoid conflict with local postgres
-
-    volumes:
-      - dev-postgres-data:/var/lib/postgresql/data
-
-    environment:
-      POSTGRES_DB: ${DB_DATABASE:-directapp_dev}
-      POSTGRES_USER: ${DB_USER:-directus}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-directus}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
-
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-directus} -d ${DB_DATABASE:-directapp_dev}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # Redis Cache
   redis:
@@ -193,14 +172,20 @@ networks:
 
 # Volumes
 volumes:
-  dev-postgres-data:
-    driver: local
   dev-redis-data:
     driver: local
 
 # Development notes:
 # - Extensions are mounted from ./extensions/ for hot reload
-# - Database is persisted in named volume (survives container restart)
-# - Ports exposed: 8055 (Directus), 5432 (PostgreSQL), 6379 (Redis)
+# - Database: Autobase PostgreSQL Cluster (10.0.1.6:6432)
+#   - Database: directapp_dev (must be created manually on Autobase)
+#   - User: postgres
+# - Ports exposed: 8055 (Directus), 6379 (Redis)
 # - Logging is verbose (debug level)
 # - CORS and rate limiting disabled for easier testing
+#
+# First-time setup:
+# 1. Create database on Autobase: CREATE DATABASE directapp_dev;
+# 2. Copy .env.example to .env
+# 3. Set DB_PASSWORD in .env
+# 4. Run: docker compose -f docker-compose.dev.yml up
